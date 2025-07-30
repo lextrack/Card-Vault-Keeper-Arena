@@ -1,0 +1,338 @@
+[gd_scene load_steps=2 format=3 uid="uid://c3hgrjs4cxwtl"]
+
+[ext_resource type="Script" uid="uid://4e0sicpltlrf" path="res://scripts/CreditsScene.gd" id="1_h5n7g"]
+
+[node name="CreditsScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_h5n7g")
+
+[node name="Background" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BackgroundGradient" type="ColorRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.1, 0.2, 1)
+
+[node name="BackgroundPattern" type="ColorRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.08, 0.15, 0.25, 0.2)
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="HeaderContainer" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+
+[node name="TopSpacer" type="Control" parent="MainContainer/HeaderContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MainContainer/HeaderContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 42
+text = "CREDITS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CreditsContainer" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="LeftColumn" type="VBoxContainer" parent="MainContainer/CreditsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="DevelopmentSection" type="VBoxContainer" parent="MainContainer/CreditsContainer/LeftColumn"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="DevHeader" type="Label" parent="MainContainer/CreditsContainer/LeftColumn/DevelopmentSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "👨‍💻 DEVELOPMENT"
+horizontal_alignment = 1
+
+[node name="DevName" type="Label" parent="MainContainer/CreditsContainer/LeftColumn/DevelopmentSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "Ariel Alejandro Muñoz (Lextrack)"
+horizontal_alignment = 1
+
+[node name="DevRole" type="Label" parent="MainContainer/CreditsContainer/LeftColumn/DevelopmentSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 18
+text = "Programming • Game Design • Concept"
+horizontal_alignment = 1
+
+[node name="TechSection" type="VBoxContainer" parent="MainContainer/CreditsContainer/LeftColumn"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="TechHeader" type="Label" parent="MainContainer/CreditsContainer/LeftColumn/TechSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.4, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "🛠️ TECHNOLOGY"
+horizontal_alignment = 1
+
+[node name="EngineCredit" type="Label" parent="MainContainer/CreditsContainer/LeftColumn/TechSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• Engine: Godot 4.4.1"
+horizontal_alignment = 1
+
+[node name="LanguageCredit" type="Label" parent="MainContainer/CreditsContainer/LeftColumn/TechSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• Language: GDScript"
+horizontal_alignment = 1
+
+[node name="PlatformCredit" type="Label" parent="MainContainer/CreditsContainer/LeftColumn/TechSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• Platform: PC/Mobile"
+horizontal_alignment = 1
+
+[node name="MiddleColumn" type="VBoxContainer" parent="MainContainer/CreditsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="ArtSection" type="VBoxContainer" parent="MainContainer/CreditsContainer/MiddleColumn"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="ArtHeader" type="Label" parent="MainContainer/CreditsContainer/MiddleColumn/ArtSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.4, 1)
+theme_override_font_sizes/font_size = 24
+text = "🎨 ART & UI"
+horizontal_alignment = 1
+
+[node name="UICredit" type="Label" parent="MainContainer/CreditsContainer/MiddleColumn/ArtSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• Interface Design: Lextrack"
+horizontal_alignment = 1
+
+[node name="ThanksSection" type="VBoxContainer" parent="MainContainer/CreditsContainer/MiddleColumn"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="ThanksHeader" type="Label" parent="MainContainer/CreditsContainer/MiddleColumn/ThanksSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
+theme_override_font_sizes/font_size = 24
+text = "🙏 SPECIAL THANKS"
+horizontal_alignment = 1
+
+[node name="FreesoundCredit" type="Label" parent="MainContainer/CreditsContainer/MiddleColumn/ThanksSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• freesound.org Users"
+horizontal_alignment = 1
+
+[node name="FreesoundCredit3" type="Label" parent="MainContainer/CreditsContainer/MiddleColumn/ThanksSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• Prompts: Kenney"
+horizontal_alignment = 1
+
+[node name="RightColumn" type="VBoxContainer" parent="MainContainer/CreditsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="MusicSection" type="VBoxContainer" parent="MainContainer/CreditsContainer/RightColumn"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="MusicHeader" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 24
+text = "🎵 MUSIC"
+horizontal_alignment = 1
+
+[node name="MusicCredit1" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• thehorsevalse - Session Recall"
+horizontal_alignment = 1
+
+[node name="MusicCredit5" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• thehorsevalse - One Synth Challenge"
+horizontal_alignment = 1
+
+[node name="MusicCredit2" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• thehorsevalse - PATCH SKETCH 036 - 
+Relaxed Techno "
+horizontal_alignment = 1
+
+[node name="MusicCredit3" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• BloodPixelHero - Relaxing intellection"
+horizontal_alignment = 1
+
+[node name="MusicCredit4" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• kjartan_abel - Gonna be gone"
+horizontal_alignment = 1
+
+[node name="SFXSection" type="VBoxContainer" parent="MainContainer/CreditsContainer/RightColumn"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="SFXHeader" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 24
+text = "🔊 SOUND EFFECTS"
+horizontal_alignment = 1
+
+[node name="SFXCredit1" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• rhodesmas"
+horizontal_alignment = 1
+
+[node name="SFXCredit2" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "• TheBuilder15"
+horizontal_alignment = 1
+
+[node name="SFXCredit3" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "Joao_Janz"
+horizontal_alignment = 1
+
+[node name="SFXCredit4" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "Raclure"
+horizontal_alignment = 1
+
+[node name="SFXCredit5" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "Diasyl"
+horizontal_alignment = 1
+
+[node name="SFXCredit6" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "Loyalty_Freak_Music"
+horizontal_alignment = 1
+
+[node name="SFXCredit7" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "BeezleFM"
+horizontal_alignment = 1
+
+[node name="FooterContainer" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 2
+
+[node name="CopyrightLabel" type="Label" parent="MainContainer/FooterContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "© 2025 Lextrack Studios"
+horizontal_alignment = 1
+
+[node name="InstructionsLabel" type="Label" parent="MainContainer/FooterContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
+theme_override_font_sizes/font_size = 16
+text = "Press ESC or B (gamepad) to return"
+horizontal_alignment = 1
+
+[node name="BottomSpacer" type="Control" parent="MainContainer/FooterContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2

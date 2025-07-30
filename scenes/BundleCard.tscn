@@ -1,0 +1,276 @@
+[gd_scene load_steps=2 format=3 uid="uid://cf5akuku5sdni"]
+
+[ext_resource type="Script" uid="uid://br6bx6p242i17" path="res://scripts/BundleCard.gd" id="1_bundle_card"]
+
+[node name="BundleCard" type="Control"]
+custom_minimum_size = Vector2(270, 200)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 280.0
+offset_bottom = 200.0
+script = ExtResource("1_bundle_card")
+
+[node name="CardPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CardShadow" type="ColorRect" parent="CardPanel"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.4)
+
+[node name="BackgroundGradient" type="ColorRect" parent="CardPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.15, 0.15, 0.25, 0.9)
+
+[node name="BorderHighlight" type="ColorRect" parent="CardPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.3, 0.3, 0.4, 0.8)
+
+[node name="ContentArea" type="ColorRect" parent="CardPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.12, 0.2, 0.95)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CardPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HeaderContainer" type="HBoxContainer" parent="CardPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="BundleName" type="Label" parent="CardPanel/VBoxContainer/HeaderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "Bundle Name"
+autowrap_mode = 2
+
+[node name="PriceContainer" type="Panel" parent="CardPanel/VBoxContainer/HeaderContainer"]
+visible = false
+custom_minimum_size = Vector2(60, 24)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="PriceLabel" type="Label" parent="CardPanel/VBoxContainer/HeaderContainer/PriceContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 12
+text = "FREE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusContainer" type="HBoxContainer" parent="CardPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="StatusIcon" type="Label" parent="CardPanel/VBoxContainer/StatusContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 18
+text = "🔒"
+
+[node name="StatusLabel" type="Label" parent="CardPanel/VBoxContainer/StatusContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "LOCKED"
+vertical_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CardPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="PreviewContainer" type="Panel" parent="CardPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PreviewBG" type="ColorRect" parent="CardPanel/VBoxContainer/PreviewContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.15, 0.8)
+
+[node name="CardIconsContainer" type="HBoxContainer" parent="CardPanel/VBoxContainer/PreviewContainer"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -12.0
+offset_right = 60.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="MysteryText" type="Label" parent="CardPanel/VBoxContainer/PreviewContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -19.0
+offset_right = 80.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 0.8)
+theme_override_font_sizes/font_size = 10
+text = "??? Mystery Cards ???"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RarityInfo" type="Label" parent="CardPanel/VBoxContainer/PreviewContainer"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -25.0
+offset_right = 80.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.9, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "Contains: 2 Rare, 1 Epic"
+horizontal_alignment = 1
+
+[node name="HSeparator2" type="HSeparator" parent="CardPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="DescriptionContainer" type="Control" parent="CardPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DescriptionLabel" type="Label" parent="CardPanel/VBoxContainer/DescriptionContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 2.0
+offset_right = -4.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 13
+text = "Powerful cards for experienced fighters"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="HSeparator3" type="HSeparator" parent="CardPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="RequirementContainer" type="VBoxContainer" parent="CardPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="RequirementLabel" type="Label" parent="CardPanel/VBoxContainer/RequirementContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "Win 5 Normal difficulty games"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ProgressContainer" type="HBoxContainer" parent="CardPanel/VBoxContainer/RequirementContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="CardPanel/VBoxContainer/RequirementContainer/ProgressContainer"]
+custom_minimum_size = Vector2(120, 12)
+layout_mode = 2
+value = 40.0
+show_percentage = false
+
+[node name="ProgressLabel" type="Label" parent="CardPanel/VBoxContainer/RequirementContainer/ProgressContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "2/5"
+
+[node name="ActionContainer" type="Control" parent="CardPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="UnlockButton" type="Button" parent="CardPanel/VBoxContainer/ActionContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -12.0
+offset_right = 60.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 12
+text = "🎁 UNLOCK"

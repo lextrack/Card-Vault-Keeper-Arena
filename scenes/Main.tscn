@@ -1,0 +1,427 @@
+[gd_scene load_steps=14 format=3 uid="uid://cgocqq54tsr6v"]
+
+[ext_resource type="Script" uid="uid://dpwskmlvgg420" path="res://scripts/Main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://c4bcluymhr1ap" path="res://scripts/AudioManager.gd" id="2_vcsgt"]
+[ext_resource type="AudioStream" uid="uid://cfpivtf0scv5x" path="res://audio/sfx/CardHover.wav" id="3_q8u5g"]
+[ext_resource type="AudioStream" uid="uid://ckxka8g2wos1g" path="res://audio/sfx/AttackSound.wav" id="4_c01mt"]
+[ext_resource type="AudioStream" uid="uid://ctylue5xst8k8" path="res://audio/sfx/HybridCard.wav" id="4_wp0k4"]
+[ext_resource type="AudioStream" uid="uid://cnsi1ofavhclr" path="res://audio/sfx/HealPlayer.wav" id="7_lhr70"]
+[ext_resource type="AudioStream" uid="uid://bto1wej75tun2" path="res://audio/sfx/TurnChange.wav" id="8_jlsqs"]
+[ext_resource type="AudioStream" uid="uid://djgi8tn5xmkh" path="res://audio/sfx/IAttack.wav" id="8_q8u5g"]
+[ext_resource type="AudioStream" uid="uid://d171x6u7t5m8" path="res://audio/sfx/ShieldPlayer.wav" id="8_wp0k4"]
+[ext_resource type="AudioStream" uid="uid://dhgmauy3jabs2" path="res://audio/sfx/DamagePlayer.wav" id="9_bjd11"]
+[ext_resource type="AudioStream" uid="uid://b53xy34r812au" path="res://audio/ui/button_click.wav" id="10_bjd11"]
+[ext_resource type="AudioStream" uid="uid://b3ch0pe3scns8" path="res://audio/sfx/Bonus.wav" id="11_qmy6f"]
+[ext_resource type="AudioStream" uid="uid://dp42l3ltdf36v" path="res://audio/sfx/CardSound1.wav" id="14_mwfav"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="AudioManager" type="Node" parent="."]
+script = ExtResource("2_vcsgt")
+
+[node name="CardSounds" type="Node" parent="AudioManager"]
+
+[node name="CardPlayPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
+
+[node name="CardDrawPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
+
+[node name="CardPlaySound" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
+
+[node name="CardHoverPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
+stream = ExtResource("3_q8u5g")
+
+[node name="HybridPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
+stream = ExtResource("4_wp0k4")
+volume_db = 2.0
+
+[node name="CombatSounds" type="Node" parent="AudioManager"]
+
+[node name="AttackPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
+stream = ExtResource("4_c01mt")
+volume_db = 5.0
+
+[node name="HealPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
+stream = ExtResource("7_lhr70")
+volume_db = -4.0
+
+[node name="ShieldPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
+stream = ExtResource("8_wp0k4")
+volume_db = -12.0
+
+[node name="DamagePlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
+stream = ExtResource("9_bjd11")
+volume_db = -10.0
+
+[node name="GameSounds" type="Node" parent="AudioManager"]
+
+[node name="TurnChangePlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+stream = ExtResource("8_jlsqs")
+volume_db = 6.0
+
+[node name="WinPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+stream = ExtResource("14_mwfav")
+
+[node name="LosePlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+
+[node name="DeckShufflePlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+
+[node name="NotificationPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+
+[node name="BonusPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+stream = ExtResource("11_qmy6f")
+volume_db = 2.0
+pitch_scale = 1.1
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+volume_db = -5.0
+autoplay = true
+
+[node name="AISounds" type="Node" parent="AudioManager"]
+
+[node name="AIAttackPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
+stream = ExtResource("8_q8u5g")
+volume_db = -8.0
+
+[node name="AIHealPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
+stream = ExtResource("7_lhr70")
+volume_db = -4.0
+pitch_scale = 1.1
+
+[node name="AIShieldPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
+stream = ExtResource("8_wp0k4")
+volume_db = -12.0
+pitch_scale = 1.1
+
+[node name="AICardPlayPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
+volume_db = 5.0
+
+[node name="UISounds" type="Node" parent="AudioManager"]
+
+[node name="UIClickPlayer" type="AudioStreamPlayer" parent="AudioManager/UISounds"]
+stream = ExtResource("10_bjd11")
+
+[node name="UIHoverPlayer" type="AudioStreamPlayer" parent="AudioManager/UISounds"]
+
+[node name="BackgroundLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Overlay" type="ColorRect" parent="BackgroundLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.1, 0.2, 0.7)
+
+[node name="UILayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopPanel" type="Panel" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 120.0
+grow_horizontal = 2
+
+[node name="TopPanelBG" type="ColorRect" parent="UILayer/TopPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.15, 0.25, 0.9)
+
+[node name="StatsContainer" type="HBoxContainer" parent="UILayer/TopPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = 15.0
+offset_right = -25.0
+offset_bottom = -15.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PlayerStatsPanel" type="Panel" parent="UILayer/TopPanel/StatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerStatsBG" type="ColorRect" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.301961, 0.501961, 0.784314)
+
+[node name="PlayerStatsContainer" type="HBoxContainer" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HPStat" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="HPLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/HPStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 23
+text = "0"
+horizontal_alignment = 1
+
+[node name="HPTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/HPStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "❤️ HEALTH"
+horizontal_alignment = 1
+
+[node name="ManaStat" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ManaLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/ManaStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 23
+text = "10"
+horizontal_alignment = 1
+
+[node name="ManaTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/ManaStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "⚡ MANA"
+horizontal_alignment = 1
+
+[node name="ShieldStat" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ShieldLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/ShieldStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 23
+text = "0"
+horizontal_alignment = 1
+
+[node name="ShieldTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/ShieldStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🛡️ SHIELD"
+horizontal_alignment = 1
+
+[node name="CenterInfo" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="TurnLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/CenterInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 20
+text = "Your turn"
+horizontal_alignment = 1
+
+[node name="GameInfoLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/CenterInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Play your cards"
+horizontal_alignment = 1
+
+[node name="DamageBonusLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/CenterInfo"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 20
+text = "⚔️ +1 DMG"
+horizontal_alignment = 1
+
+[node name="AIStatsPanel" type="Panel" parent="UILayer/TopPanel/StatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AIStatsBG" type="ColorRect" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.501961, 0.2, 0.301961, 0.784314)
+
+[node name="AIStatsContainer" type="HBoxContainer" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HPStat" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="HPLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/HPStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 23
+text = "0"
+horizontal_alignment = 1
+
+[node name="HPTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/HPStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "❤️ AI HEALTH"
+horizontal_alignment = 1
+
+[node name="ManaStat" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ManaLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/ManaStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 23
+text = "10"
+horizontal_alignment = 1
+
+[node name="ManaTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/ManaStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "⚡ AI MANA"
+horizontal_alignment = 1
+
+[node name="ShieldStat" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ShieldLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/ShieldStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 23
+text = "0"
+horizontal_alignment = 1
+
+[node name="ShieldTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/ShieldStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🛡️ AI SHIELD"
+horizontal_alignment = 1
+
+[node name="CenterArea" type="Control" parent="UILayer"]
+layout_mode = 1
+anchor_top = 0.156
+anchor_right = 1.0
+anchor_bottom = 0.935
+offset_top = 0.192001
+offset_bottom = -0.0800781
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HandContainer" type="HBoxContainer" parent="UILayer/CenterArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 23
+alignment = 1
+
+[node name="BottomPanel" type="Panel" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -47.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="BottomPanelBG" type="ColorRect" parent="UILayer/BottomPanel"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.1, 0.15, 0.25, 0.9)
+
+[node name="TurnButtonsContainer" type="HBoxContainer" parent="UILayer/BottomPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -20.0
+offset_right = 80.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="EndTurnButton" type="Button" parent="UILayer/BottomPanel/TurnButtonsContainer"]
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 18
+text = "End Turn"
+
+[node name="GameOverLabel" type="Label" parent="UILayer"]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.348
+anchor_top = 0.187
+anchor_right = 0.656
+anchor_bottom = 0.265
+offset_left = -5.44003
+offset_top = 6.36
+offset_right = 0.319946
+offset_bottom = 0.199982
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "Game Over!"
+horizontal_alignment = 1

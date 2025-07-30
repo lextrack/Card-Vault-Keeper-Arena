@@ -1,0 +1,418 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvq8vn2wu7eh8"]
+
+[ext_resource type="Script" uid="uid://bdyxe6g72tfji" path="res://scripts/StatisticsMenu.gd" id="1_hri28"]
+
+[node name="StatisticsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hri28")
+
+[node name="BackgroundLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BackgroundGradient" type="ColorRect" parent="BackgroundLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.1, 0.2, 1)
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 20.0
+offset_right = -40.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HeaderContainer" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+
+[node name="Title" type="Label" parent="MainContainer/HeaderContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 36
+text = "📊 STATISTICS"
+horizontal_alignment = 1
+
+[node name="SessionInfo" type="Label" parent="MainContainer/HeaderContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "Current session: 0 games played"
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="MainContainer"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="ContentContainer" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftPanel" type="Panel" parent="MainContainer/ContentContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LeftPanelBG" type="ColorRect" parent="MainContainer/ContentContainer/LeftPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.15, 0.25, 0.9)
+
+[node name="LeftScrollContainer" type="ScrollContainer" parent="MainContainer/ContentContainer/LeftPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LeftContent" type="VBoxContainer" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BasicStatsTitle" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 20
+text = "🎮 GENERAL STATS"
+
+[node name="BasicStatsSeparator" type="HSeparator" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+layout_mode = 2
+
+[node name="BasicStatsContainer" type="VBoxContainer" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+layout_mode = 2
+
+[node name="GamesPlayedLabel" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/BasicStatsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Games Played: 0"
+
+[node name="WinRateLabel" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/BasicStatsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Win Rate: 0.0%"
+
+[node name="TotalTimeLabel" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/BasicStatsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Total Play Time: 0:00"
+
+[node name="AvgGameTimeLabel" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/BasicStatsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Average Game: 0:00"
+
+[node name="Spacer2" type="Control" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="DifficultyTitle" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 20
+text = "⚖️ BY DIFFICULTY"
+
+[node name="DifficultySeparator" type="HSeparator" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+layout_mode = 2
+
+[node name="DifficultyContainer" type="VBoxContainer" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+layout_mode = 2
+
+[node name="NormalStats" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/DifficultyContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "🟢 NORMAL: 0 games (0% win rate)"
+
+[node name="HardStats" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/DifficultyContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "🟠 HARD: 0 games (0% win rate)"
+
+[node name="ExpertStats" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/DifficultyContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 16
+text = "🔴 EXPERT: 0 games (0% win rate)"
+
+[node name="Spacer3" type="Control" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="StreaksTitle" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 20
+text = "🔥 STREAKS & RECORDS"
+
+[node name="StreaksSeparator" type="HSeparator" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+layout_mode = 2
+
+[node name="StreaksContainer" type="VBoxContainer" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
+layout_mode = 2
+
+[node name="CurrentStreakLabel" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/StreaksContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Current Streak: 0 wins"
+
+[node name="BestStreakLabel" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/StreaksContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Best Win Streak: 0"
+
+[node name="ShortestGameLabel" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/StreaksContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Fastest Win: --"
+
+[node name="LongestGameLabel" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/StreaksContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Longest Game: --"
+
+[node name="Spacer4" type="Control" parent="MainContainer/ContentContainer"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="RightPanel" type="Panel" parent="MainContainer/ContentContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="RightPanelBG" type="ColorRect" parent="MainContainer/ContentContainer/RightPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.15, 0.15, 0.25, 0.9)
+
+[node name="RightScrollContainer" type="ScrollContainer" parent="MainContainer/ContentContainer/RightPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RightContent" type="VBoxContainer" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CardsTitle" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 20
+text = "🃏 CARD STATISTICS"
+
+[node name="CardsSeparator" type="HSeparator" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+layout_mode = 2
+
+[node name="CardsOverview" type="VBoxContainer" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+layout_mode = 2
+
+[node name="TotalCardsLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Total Cards Played: 0"
+
+[node name="FavoriteTypeLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Favorite Type: Attack"
+
+[node name="TypeBreakdown" type="VBoxContainer" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview"]
+layout_mode = 2
+
+[node name="AttackTypeLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview/TypeBreakdown"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "  ⚔️ Attack: 0 (0%)"
+
+[node name="HealTypeLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview/TypeBreakdown"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "  💚 Heal: 0 (0%)"
+
+[node name="ShieldTypeLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview/TypeBreakdown"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.4, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "  🛡️ Shield: 0 (0%)"
+
+[node name="HybridTypeLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview/TypeBreakdown"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "  🌟 Hybrid: 0 (0%)"
+
+[node name="Spacer5" type="Control" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="MostUsedTitle" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 18
+text = "📈 MOST USED CARDS"
+
+[node name="MostUsedSeparator" type="HSeparator" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+layout_mode = 2
+
+[node name="MostUsedContainer" type="VBoxContainer" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+layout_mode = 2
+
+[node name="Spacer6" type="Control" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="MostEffectiveTitle" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 18
+text = "🏆 MOST EFFECTIVE CARDS"
+
+[node name="MostEffectiveSeparator" type="HSeparator" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+visible = false
+layout_mode = 2
+
+[node name="MostEffectiveContainer" type="VBoxContainer" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+visible = false
+layout_mode = 2
+
+[node name="Spacer7" type="Control" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+visible = false
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="CombatTitle" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 18
+text = "⚔️ COMBAT EFFICIENCY"
+
+[node name="CombatSeparator" type="HSeparator" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+layout_mode = 2
+
+[node name="CombatContainer" type="VBoxContainer" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
+layout_mode = 2
+
+[node name="DamagePerGameLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CombatContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Damage per Game: 0"
+
+[node name="HealingPerGameLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CombatContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Healing per Game: 0"
+
+[node name="ShieldPerGameLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CombatContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Shield per Game: 0"
+
+[node name="ManaEfficiencyLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CombatContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Mana Efficiency: 0.0"
+
+[node name="Spacer8" type="Control" parent="MainContainer"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+
+[node name="BackButton" type="Button" parent="MainContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(150, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "⬅️ BACK"
+
+[node name="Spacer9" type="Control" parent="MainContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+
+[node name="RefreshButton" type="Button" parent="MainContainer/ButtonsContainer"]
+visible = false
+custom_minimum_size = Vector2(150, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "REFRESH"
+
+[node name="Spacer10" type="Control" parent="MainContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+
+[node name="ResetButton" type="Button" parent="MainContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(150, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "RESET"
+
+[node name="AudioManager" type="Node" parent="."]
+
+[node name="UIPlayer" type="AudioStreamPlayer" parent="AudioManager"]
+volume_db = -5.0
+
+[node name="HoverPlayer" type="AudioStreamPlayer" parent="AudioManager"]
+volume_db = -12.0

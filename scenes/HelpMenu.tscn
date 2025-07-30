@@ -1,0 +1,168 @@
+[gd_scene load_steps=2 format=3 uid="uid://c1ejnsrjlokjm"]
+
+[ext_resource type="Script" uid="uid://cxiev32ucvdht" path="res://scripts/HelpMenu.gd" id="1_6vayk"]
+
+[node name="HelpMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_6vayk")
+
+[node name="BackgroundLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BackgroundGradient" type="ColorRect" parent="BackgroundLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.1, 0.2, 1)
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = 20.0
+offset_right = -30.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HeaderContainer" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+
+[node name="Title" type="Label" parent="MainContainer/HeaderContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 36
+text = "📚 HELP"
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="MainContainer"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="ContentContainer" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TopicsPanel" type="Panel" parent="MainContainer/ContentContainer"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+
+[node name="TopicsPanelBG" type="ColorRect" parent="MainContainer/ContentContainer/TopicsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.15, 0.25, 0.9)
+
+[node name="TopicsContainer" type="VBoxContainer" parent="MainContainer/ContentContainer/TopicsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopicsTitle" type="Label" parent="MainContainer/ContentContainer/TopicsPanel/TopicsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "📑 TOPICS:"
+
+[node name="TopicsSeparator" type="HSeparator" parent="MainContainer/ContentContainer/TopicsPanel/TopicsContainer"]
+layout_mode = 2
+
+[node name="TopicsButtonsContainer" type="VBoxContainer" parent="MainContainer/ContentContainer/TopicsPanel/TopicsContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Spacer2" type="Control" parent="MainContainer/ContentContainer"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+
+[node name="ContentPanel" type="Panel" parent="MainContainer/ContentContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ContentPanelBG" type="ColorRect" parent="MainContainer/ContentContainer/ContentPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.15, 0.15, 0.25, 0.9)
+
+[node name="ContentScrollContainer" type="ScrollContainer" parent="MainContainer/ContentContainer/ContentPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = 25.0
+offset_right = -25.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ContentLabel" type="RichTextLabel" parent="MainContainer/ContentContainer/ContentPanel/ContentScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/normal_font_size = 18
+bbcode_enabled = true
+text = "Select a topic from the left to view its contents here.
+
+This is Card Master's interactive help system. Here you will find all the information you need to master the game."
+fit_content = true
+
+[node name="Spacer3" type="Control" parent="MainContainer"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+
+[node name="BackButton" type="Button" parent="MainContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "⬅️ BACK"
+
+[node name="AudioManager" type="Node" parent="."]
+
+[node name="UIPlayer" type="AudioStreamPlayer" parent="AudioManager"]
+volume_db = -5.0
+
+[node name="HoverPlayer" type="AudioStreamPlayer" parent="AudioManager"]
+volume_db = -12.0

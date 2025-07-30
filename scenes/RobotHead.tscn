@@ -1,0 +1,194 @@
+[gd_scene load_steps=2 format=3 uid="uid://d0gl742f1iiak"]
+
+[ext_resource type="Script" uid="uid://cty4noycn5slb" path="res://scripts/RobotHead.gd" id="1_0ak65"]
+
+[node name="RobotHead" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_0ak65")
+
+[node name="HeadContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Antennas" type="Control" parent="HeadContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LeftAntenna" type="ColorRect" parent="HeadContainer/Antennas"]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 30.0
+offset_right = 43.0
+offset_bottom = 50.0
+
+[node name="LeftAntennaLight" type="ColorRect" parent="HeadContainer/Antennas/LeftAntenna"]
+layout_mode = 1
+offset_left = -2.5
+offset_top = -8.0
+offset_right = 5.5
+
+[node name="RightAntenna" type="ColorRect" parent="HeadContainer/Antennas"]
+layout_mode = 1
+offset_left = 157.0
+offset_top = 30.0
+offset_right = 160.0
+offset_bottom = 50.0
+
+[node name="RightAntennaLight" type="ColorRect" parent="HeadContainer/Antennas/RightAntenna"]
+layout_mode = 1
+offset_left = -2.5
+offset_top = -8.0
+offset_right = 5.5
+
+[node name="Head" type="ColorRect" parent="HeadContainer"]
+layout_mode = 1
+offset_left = 30.0
+offset_top = 40.0
+offset_right = 170.0
+offset_bottom = 150.0
+
+[node name="StatusLight" type="ColorRect" parent="HeadContainer/Head"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -27.5
+offset_right = 27.5
+offset_bottom = 10.0
+grow_horizontal = 2
+
+[node name="Eyes" type="Control" parent="HeadContainer/Head"]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 140.0
+offset_bottom = 40.0
+
+[node name="LeftEye" type="ColorRect" parent="HeadContainer/Head/Eyes"]
+layout_mode = 1
+offset_left = 25.0
+offset_top = 30.0
+offset_right = 53.0
+offset_bottom = 58.0
+
+[node name="LeftPupil" type="ColorRect" parent="HeadContainer/Head/Eyes/LeftEye"]
+layout_mode = 1
+offset_left = 9.0
+offset_top = 9.0
+offset_right = 19.0
+offset_bottom = 19.0
+
+[node name="RightEye" type="ColorRect" parent="HeadContainer/Head/Eyes"]
+layout_mode = 1
+offset_left = 87.0
+offset_top = 30.0
+offset_right = 115.0
+offset_bottom = 58.0
+
+[node name="RightPupil" type="ColorRect" parent="HeadContainer/Head/Eyes/RightEye"]
+layout_mode = 1
+offset_left = 9.0
+offset_top = 9.0
+offset_right = 19.0
+offset_bottom = 19.0
+
+[node name="Mouth" type="ColorRect" parent="HeadContainer/Head"]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 75.0
+offset_right = 100.0
+offset_bottom = 100.0
+
+[node name="LED1" type="ColorRect" parent="HeadContainer/Head/Mouth"]
+layout_mode = 1
+offset_left = 9.0
+offset_top = 7.5
+offset_right = 13.0
+offset_bottom = 17.5
+
+[node name="LED2" type="ColorRect" parent="HeadContainer/Head/Mouth"]
+layout_mode = 1
+offset_left = 19.0
+offset_top = 7.5
+offset_right = 23.0
+offset_bottom = 17.5
+
+[node name="LED3" type="ColorRect" parent="HeadContainer/Head/Mouth"]
+layout_mode = 1
+offset_left = 29.0
+offset_top = 7.5
+offset_right = 33.0
+offset_bottom = 17.5
+
+[node name="LED4" type="ColorRect" parent="HeadContainer/Head/Mouth"]
+layout_mode = 1
+offset_left = 39.0
+offset_top = 7.5
+offset_right = 43.0
+offset_bottom = 17.5
+
+[node name="LED5" type="ColorRect" parent="HeadContainer/Head/Mouth"]
+layout_mode = 1
+offset_left = 49.0
+offset_top = 7.5
+offset_right = 53.0
+offset_bottom = 17.5
+
+[node name="Neck" type="ColorRect" parent="HeadContainer"]
+layout_mode = 1
+offset_left = 75.0
+offset_top = 150.0
+offset_right = 125.0
+offset_bottom = 180.0
+
+[node name="NeckLights" type="Control" parent="HeadContainer/Neck"]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 50.0
+offset_bottom = 30.0
+
+[node name="Light1" type="ColorRect" parent="HeadContainer/Neck/NeckLights"]
+layout_mode = 1
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 14.0
+offset_bottom = 14.0
+
+[node name="Light2" type="ColorRect" parent="HeadContainer/Neck/NeckLights"]
+layout_mode = 1
+offset_left = 36.0
+offset_top = 8.0
+offset_right = 42.0
+offset_bottom = 14.0
+
+[node name="Light3" type="ColorRect" parent="HeadContainer/Neck/NeckLights"]
+layout_mode = 1
+offset_left = 8.0
+offset_top = 16.0
+offset_right = 14.0
+offset_bottom = 22.0
+
+[node name="Light4" type="ColorRect" parent="HeadContainer/Neck/NeckLights"]
+layout_mode = 1
+offset_left = 36.0
+offset_top = 16.0
+offset_right = 42.0
+offset_bottom = 22.0

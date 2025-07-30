@@ -1,0 +1,172 @@
+[gd_scene load_steps=2 format=3 uid="uid://cn42klqk17psn"]
+
+[ext_resource type="Script" uid="uid://c134k4mkdr6fj" path="res://scripts/ControlsPanel.gd" id="1_38ays"]
+
+[node name="ControlsPanel" type="Control"]
+z_index = 100
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -175.0
+offset_top = -309.0
+offset_right = 175.0
+offset_bottom = -59.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_38ays")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelBG" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.12, 0.18, 0.92)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 6.0
+offset_right = -12.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 15
+text = "CONTROLS"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="GameplaySection" type="VBoxContainer" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PlayHint" type="HBoxContainer" parent="Panel/VBoxContainer/GameplaySection"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PlayIcon" type="TextureRect" parent="Panel/VBoxContainer/GameplaySection/PlayHint"]
+custom_minimum_size = Vector2(35, 30)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayLabel" type="Label" parent="Panel/VBoxContainer/GameplaySection/PlayHint"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+vertical_alignment = 1
+
+[node name="EndHint" type="HBoxContainer" parent="Panel/VBoxContainer/GameplaySection"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EndIcon" type="TextureRect" parent="Panel/VBoxContainer/GameplaySection/EndHint"]
+custom_minimum_size = Vector2(35, 30)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EndLabel" type="Label" parent="Panel/VBoxContainer/GameplaySection/EndHint"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+vertical_alignment = 1
+
+[node name="MenuSection" type="VBoxContainer" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="RestartHint" type="HBoxContainer" parent="Panel/VBoxContainer/MenuSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RestartIcon" type="TextureRect" parent="Panel/VBoxContainer/MenuSection/RestartHint"]
+custom_minimum_size = Vector2(35, 30)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RestartLabel" type="Label" parent="Panel/VBoxContainer/MenuSection/RestartHint"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+vertical_alignment = 1
+
+[node name="ChallengeHint" type="HBoxContainer" parent="Panel/VBoxContainer/MenuSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ChallengeIcon" type="TextureRect" parent="Panel/VBoxContainer/MenuSection/ChallengeHint"]
+custom_minimum_size = Vector2(35, 30)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ChallengeLabel" type="Label" parent="Panel/VBoxContainer/MenuSection/ChallengeHint"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+vertical_alignment = 1
+
+[node name="OptionsHint" type="HBoxContainer" parent="Panel/VBoxContainer/MenuSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="OptionsIcon" type="TextureRect" parent="Panel/VBoxContainer/MenuSection/OptionsHint"]
+custom_minimum_size = Vector2(35, 30)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="OptionsLabel" type="Label" parent="Panel/VBoxContainer/MenuSection/OptionsHint"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+vertical_alignment = 1
+
+[node name="MainMenuHint" type="HBoxContainer" parent="Panel/VBoxContainer/MenuSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MainMenuIcon" type="TextureRect" parent="Panel/VBoxContainer/MenuSection/MainMenuHint"]
+custom_minimum_size = Vector2(35, 30)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MainMenuLabel" type="Label" parent="Panel/VBoxContainer/MenuSection/MainMenuHint"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+vertical_alignment = 1

@@ -1,0 +1,349 @@
+[gd_scene load_steps=5 format=3 uid="uid://b8nan7q5r3t1u"]
+
+[ext_resource type="Script" uid="uid://0t6wmxfiixiq" path="res://scripts/DifficultyMenu.gd" id="1_difficulty_menu"]
+[ext_resource type="Texture2D" uid="uid://5psmu2u6jx7n" path="res://assets/ui/difficulty_normal.png" id="2_normal"]
+[ext_resource type="Texture2D" uid="uid://c52lhdd2akltu" path="res://assets/ui/difficulty_hard.png" id="3_hard"]
+[ext_resource type="Texture2D" uid="uid://ppujy2081nxr" path="res://assets/ui/difficulty_expert.png" id="4_expert"]
+
+[node name="DifficultyMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_difficulty_menu")
+
+[node name="BackgroundLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BackgroundGradient" type="ColorRect" parent="BackgroundLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.1, 0.2, 1)
+
+[node name="MenuContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TitleContainer" type="VBoxContainer" parent="MenuContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+
+[node name="Title" type="Label" parent="MenuContainer/TitleContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.8, 1)
+theme_override_font_sizes/font_size = 36
+text = "SELECT DIFFICULTY"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="MenuContainer/TitleContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Choose your challenge level"
+horizontal_alignment = 1
+
+[node name="DifficultyContainer" type="HBoxContainer" parent="MenuContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+alignment = 1
+
+[node name="NormalContainer" type="VBoxContainer" parent="MenuContainer/DifficultyContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NormalCard" type="Panel" parent="MenuContainer/DifficultyContainer/NormalContainer"]
+custom_minimum_size = Vector2(240, 350)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 2
+
+[node name="NormalCardBG" type="ColorRect" parent="MenuContainer/DifficultyContainer/NormalContainer/NormalCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.15, 0.2, 0.3, 0.9)
+
+[node name="NormalContent" type="VBoxContainer" parent="MenuContainer/DifficultyContainer/NormalContainer/NormalCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 15.0
+offset_top = -1.0
+offset_right = -15.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NormalHeader" type="Label" parent="MenuContainer/DifficultyContainer/NormalContainer/NormalCard/NormalContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "NORMAL"
+horizontal_alignment = 1
+
+[node name="NormalImage" type="TextureRect" parent="MenuContainer/DifficultyContainer/NormalContainer/NormalCard/NormalContent"]
+custom_minimum_size = Vector2(180, 180)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("2_normal")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NormalStats" type="VBoxContainer" parent="MenuContainer/DifficultyContainer/NormalContainer/NormalCard/NormalContent"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerStats" type="Label" parent="MenuContainer/DifficultyContainer/NormalContainer/NormalCard/NormalContent/NormalStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "👤 PLAYER:"
+horizontal_alignment = 1
+
+[node name="PlayerDetails" type="Label" parent="MenuContainer/DifficultyContainer/NormalContainer/NormalCard/NormalContent/NormalStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "45 HP | 10 Mana
+2 cards per turn | 5 in hand"
+horizontal_alignment = 1
+
+[node name="AIStats" type="Label" parent="MenuContainer/DifficultyContainer/NormalContainer/NormalCard/NormalContent/NormalStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "🤖 AI:"
+horizontal_alignment = 1
+
+[node name="AIDetails" type="Label" parent="MenuContainer/DifficultyContainer/NormalContainer/NormalCard/NormalContent/NormalStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "35 HP | 10 Mana
+2 cards per turn | Balanced"
+horizontal_alignment = 1
+
+[node name="Spacer2" type="Control" parent="MenuContainer/DifficultyContainer"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="HardContainer" type="VBoxContainer" parent="MenuContainer/DifficultyContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HardCard" type="Panel" parent="MenuContainer/DifficultyContainer/HardContainer"]
+custom_minimum_size = Vector2(240, 350)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 2
+
+[node name="HardCardBG" type="ColorRect" parent="MenuContainer/DifficultyContainer/HardContainer/HardCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.25, 0.15, 0.1, 0.9)
+
+[node name="HardContent" type="VBoxContainer" parent="MenuContainer/DifficultyContainer/HardContainer/HardCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 15.0
+offset_top = -1.0
+offset_right = -15.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HardHeader" type="Label" parent="MenuContainer/DifficultyContainer/HardContainer/HardCard/HardContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.2, 1)
+theme_override_font_sizes/font_size = 24
+text = "HARD"
+horizontal_alignment = 1
+
+[node name="HardImage" type="TextureRect" parent="MenuContainer/DifficultyContainer/HardContainer/HardCard/HardContent"]
+custom_minimum_size = Vector2(180, 180)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("3_hard")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HardStats" type="VBoxContainer" parent="MenuContainer/DifficultyContainer/HardContainer/HardCard/HardContent"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerStats" type="Label" parent="MenuContainer/DifficultyContainer/HardContainer/HardCard/HardContent/HardStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "👤 PLAYER:"
+horizontal_alignment = 1
+
+[node name="PlayerDetails" type="Label" parent="MenuContainer/DifficultyContainer/HardContainer/HardCard/HardContent/HardStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "45 HP | 10 Mana
+1 card per turn | 5 in hand"
+horizontal_alignment = 1
+
+[node name="AIStats" type="Label" parent="MenuContainer/DifficultyContainer/HardContainer/HardCard/HardContent/HardStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "🤖 AI:"
+horizontal_alignment = 1
+
+[node name="AIDetails" type="Label" parent="MenuContainer/DifficultyContainer/HardContainer/HardCard/HardContent/HardStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "40 HP | 10 Mana
+2 cards per turn | Aggressive"
+horizontal_alignment = 1
+
+[node name="Spacer3" type="Control" parent="MenuContainer/DifficultyContainer"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="ExpertContainer" type="VBoxContainer" parent="MenuContainer/DifficultyContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ExpertCard" type="Panel" parent="MenuContainer/DifficultyContainer/ExpertContainer"]
+custom_minimum_size = Vector2(240, 350)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 2
+
+[node name="ExpertCardBG" type="ColorRect" parent="MenuContainer/DifficultyContainer/ExpertContainer/ExpertCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.3, 0.1, 0.1, 0.9)
+
+[node name="ExpertContent" type="VBoxContainer" parent="MenuContainer/DifficultyContainer/ExpertContainer/ExpertCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 15.0
+offset_top = -1.0
+offset_right = -15.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ExpertHeader" type="Label" parent="MenuContainer/DifficultyContainer/ExpertContainer/ExpertCard/ExpertContent"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 24
+text = "EXPERT"
+horizontal_alignment = 1
+
+[node name="ExpertImage" type="TextureRect" parent="MenuContainer/DifficultyContainer/ExpertContainer/ExpertCard/ExpertContent"]
+custom_minimum_size = Vector2(180, 180)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("4_expert")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ExpertStats" type="VBoxContainer" parent="MenuContainer/DifficultyContainer/ExpertContainer/ExpertCard/ExpertContent"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerStats" type="Label" parent="MenuContainer/DifficultyContainer/ExpertContainer/ExpertCard/ExpertContent/ExpertStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "👤 PLAYER:"
+horizontal_alignment = 1
+
+[node name="PlayerDetails" type="Label" parent="MenuContainer/DifficultyContainer/ExpertContainer/ExpertCard/ExpertContent/ExpertStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "55 HP | 9 Mana
+1 card per turn | 6 in hand"
+horizontal_alignment = 1
+
+[node name="AIStats" type="Label" parent="MenuContainer/DifficultyContainer/ExpertContainer/ExpertCard/ExpertContent/ExpertStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "🤖 AI:"
+horizontal_alignment = 1
+
+[node name="AIDetails" type="Label" parent="MenuContainer/DifficultyContainer/ExpertContainer/ExpertCard/ExpertContent/ExpertStats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "42 HP | 11 Mana
+3 cards per turn | Brutal"
+horizontal_alignment = 1
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="MenuContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+alignment = 1
+
+[node name="BackButton" type="Button" parent="MenuContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(150, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "⬅️ BACK"
+
+[node name="Spacer5" type="Control" parent="MenuContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="MenuContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "START"
+
+[node name="AudioManager" type="Node" parent="."]
+
+[node name="UIPlayer" type="AudioStreamPlayer" parent="AudioManager"]
+volume_db = -5.0
+
+[node name="HoverPlayer" type="AudioStreamPlayer" parent="AudioManager"]
+volume_db = -12.0

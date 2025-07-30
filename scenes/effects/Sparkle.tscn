@@ -1,0 +1,54 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbj75tgcrkpw"]
+
+[ext_resource type="Script" uid="uid://bt1m4f8r0txr4" path="res://scripts/Sparkle.gd" id="1_qt8n2"]
+
+[node name="Sparkle" type="Control"]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 8.0
+offset_bottom = 8.0
+script = ExtResource("1_qt8n2")
+
+[node name="SparkleCore" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.39, 1, 0.85, 1)
+
+[node name="SparkleGlow" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.39, 1, 0.85, 0.3)
+
+[node name="SparkleOuter" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.1)
+
+[node name="LifeTimer" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true

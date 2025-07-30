@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3 uid="uid://csnda2rthjsq1"]
+
+[ext_resource type="Script" uid="uid://crg82860gl7s1" path="res://scripts/AICardNotification.gd" id="1_notification"]
+
+[node name="AICardNotification" type="Control"]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 7.0
+offset_top = -152.0
+offset_right = 247.0
+offset_bottom = -72.0
+grow_vertical = 0
+script = ExtResource("1_notification")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.1, 0.1, 0.9)
+
+[node name="VBox" type="VBoxContainer" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 1.0
+offset_right = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CardName" type="Label" parent="Background/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "IA jugó: Usó"
+horizontal_alignment = 1
+
+[node name="CardEffect" type="Label" parent="Background/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "💥 Efecto"
+horizontal_alignment = 1
+
+[node name="CardCost" type="Label" parent="Background/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Costo: X maná"
+horizontal_alignment = 1
