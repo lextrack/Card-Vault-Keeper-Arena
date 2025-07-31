@@ -50,9 +50,6 @@ func start_player_turn():
 	gamepad_mode = last_input_was_gamepad
 	var end_turn_button = main_scene.end_turn_button
 	
-	if end_turn_button and gamepad_mode:
-		end_turn_button.grab_focus()
-	
 	_update_controls_panel()
 	main_scene.ui_manager.selected_card_index = 0
 	main_scene.ui_manager.update_card_selection(gamepad_mode, main_scene.player)
@@ -146,10 +143,12 @@ func _handle_gamepad_navigation(event: InputEvent):
 	elif event.is_action_pressed("game_select"):
 		var selected_card = main_scene.ui_manager.get_selected_card()
 		if selected_card:
+			selected_card.play_selection_animation()
 			main_scene._on_card_clicked(selected_card)
 	elif event.is_action_pressed("game_back"):
 		var end_turn_button = main_scene.end_turn_button
 		if end_turn_button and not end_turn_button.disabled:
+			end_turn_button.release_focus()
 			main_scene._on_end_turn_pressed()
 
 func _on_button_focus(button: Button):

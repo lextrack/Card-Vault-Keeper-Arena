@@ -38,6 +38,7 @@ var playable_tween: Tween
 var shadow_tween: Tween
 var idle_shadow_tween: Tween
 var play_tween: Tween
+var selection_tween: Tween
 var has_played_epic_animation: bool = false
 var has_played_entrance: bool = false
 
@@ -225,21 +226,42 @@ func play_selection_animation():
 	
 	animate_shadow_on_click()
 	
-	if hover_tween:
-		hover_tween.kill()
+	if selection_tween:
+		selection_tween.kill()
 	
-	var select_tween = create_tween()
-	select_tween.set_parallel(true)
+	# Primera fase: sacar rápido hacia arriba como con la mano
+	selection_tween = create_tween()
+	selection_tween.set_parallel(true)
+	selection_tween.set_ease(Tween.EASE_OUT)
+	selection_tween.set_trans(Tween.TRANS_BACK)
 	
-	select_tween.tween_property(self, "scale", original_scale * 1.15, 0.06)
-	select_tween.tween_property(self, "rotation", 0.04, 0.06)
+	selection_tween.tween_property(self, "position:y", original_position.y - 40, 0.05)
+	selection_tween.tween_property(self, "scale", original_scale * 1.2, 0.05)
+	selection_tween.tween_property(self, "rotation", -0.08, 0.05)
 	
-	await select_tween.finished
+	await selection_tween.finished
 	
+	# Segunda fase: rebote hacia abajo
 	var return_tween = create_tween()
 	return_tween.set_parallel(true)
-	return_tween.tween_property(self, "scale", original_scale, 0.12)
-	return_tween.tween_property(self, "rotation", 0.0, 0.12)
+	return_tween.set_ease(Tween.EASE_IN_OUT)
+	return_tween.set_trans(Tween.TRANS_CUBIC)
+	
+	return_tween.tween_property(self, "position:y", original_position.y + 4, 0.08)
+	return_tween.tween_property(self, "scale", original_scale * 0.95, 0.08)
+	return_tween.tween_property(self, "rotation", 0.03, 0.08)
+	
+	await return_tween.finished
+	
+	# Tercera fase: asentamiento final
+	var settle_tween = create_tween()
+	settle_tween.set_parallel(true)
+	settle_tween.set_ease(Tween.EASE_OUT)
+	settle_tween.set_trans(Tween.TRANS_ELASTIC)
+	
+	settle_tween.tween_property(self, "position:y", original_position.y, 0.1)
+	settle_tween.tween_property(self, "scale", original_scale, 0.1)
+	settle_tween.tween_property(self, "rotation", 0.0, 0.1)
 
 func play_disabled_animation():
 	var shake_tween = create_tween()
@@ -251,159 +273,18 @@ func play_disabled_animation():
 	shake_tween.tween_property(self, "position:x", original_position.x, 0.05)
 
 func play_card_animation():
-	if not card_data:
-		_fallback_play_animation()
-		return
-	
-	var rarity = CardProbability.calculate_card_rarity(card_data.damage, card_data.heal, card_data.shield)
-	
-	match rarity:
-		"common":
-			_play_common_animation()
-		"uncommon":
-			_play_uncommon_animation()
-		"rare":
-			_play_rare_animation()
-		"epic":
-			_play_epic_animation()
-		_:
-			_fallback_play_animation()
-
-func _play_common_animation():
 	card_played.emit(self)
 	_cleanup_tweens()
 	
 	play_tween = create_tween()
 	play_tween.set_parallel(true)
 	
-	play_tween.tween_property(self, "position", position + Vector2(0, -40), 0.4)
-	play_tween.tween_property(self, "scale", Vector2(0.8, 0.8), 0.4)
-	play_tween.tween_property(self, "modulate:a", 0.0, 0.4)
-	
-	if card_shadow:
-		play_tween.tween_property(card_shadow, "modulate:a", 0.0, 0.3)
-	
-	await play_tween.finished
-	queue_free()
-
-func _play_uncommon_animation():
-	card_played.emit(self)
-	_cleanup_tweens()
-	
-	var flash_effect = create_tween()
-	flash_effect.tween_property(self, "modulate", Color(1.4, 1.4, 1.4, 1.0), 0.1)
-	flash_effect.tween_property(self, "modulate", Color.WHITE, 0.1)
-	
-	await flash_effect.finished
-	
-	play_tween = create_tween()
-	play_tween.set_parallel(true)
-	
-	play_tween.tween_property(self, "position", position + Vector2(0, -50), 0.5)
-	play_tween.tween_property(self, "scale", Vector2(1.1, 1.1), 0.15)
-	play_tween.tween_property(self, "scale", Vector2(0.7, 0.7), 0.35)
-	
-	play_tween.tween_method(_animate_uncommon_fade, 1.0, 0.0, 0.5)
-	
-	if card_shadow:
-		play_tween.tween_property(card_shadow, "modulate:a", 0.0, 0.4)
-	
-	await play_tween.finished
-	queue_free()
-
-func _animate_uncommon_fade(alpha: float):
-	modulate.a = alpha
-	var green_tint = 0.3 * (1.0 - alpha)
-	modulate = Color(1.0 - green_tint, 1.0 + green_tint, 1.0 - green_tint, alpha)
-
-func _play_rare_animation():
-	card_played.emit(self)
-	_cleanup_tweens()
-	
-	var pulse_tween = create_tween()
-	pulse_tween.set_loops(2)
-	pulse_tween.tween_property(self, "scale", original_scale * 1.2, 0.15)
-	pulse_tween.tween_property(self, "scale", original_scale, 0.15)
-	pulse_tween.tween_property(self, "modulate", Color(1.3, 1.3, 1.8, 1.0), 0.15)
-	pulse_tween.tween_property(self, "modulate", Color.WHITE, 0.15)
-	
-	await pulse_tween.finished
-	
-	play_tween = create_tween()
-	play_tween.set_parallel(true)
-	
-	play_tween.tween_property(self, "position", position + Vector2(0, -60), 0.6)
-	play_tween.tween_method(_animate_rare_effects, 0.0, 1.0, 0.6)
-	
-	if card_shadow:
-		play_tween.tween_property(card_shadow, "modulate:a", 0.0, 0.5)
-	
-	await play_tween.finished
-	queue_free()
-
-func _animate_rare_effects(progress: float):
-	var pulse_scale = 1.0 + sin(progress * PI * 4) * 0.15
-	scale = original_scale * pulse_scale * (1.0 - progress * 0.4)
-	
-	var blue_intensity = sin(progress * PI * 3) * 0.4 + 0.6
-	var alpha = 1.0 - progress
-	modulate = Color(1.0 - blue_intensity * 0.2, 1.0 - blue_intensity * 0.1, 1.0 + blue_intensity * 0.6, alpha)
-
-func _play_epic_animation():
-	card_played.emit(self)
-	_cleanup_tweens()
-	
-	var epic_start = create_tween()
-	epic_start.set_loops(3)
-	epic_start.tween_property(self, "scale", original_scale * 1.3, 0.1)
-	epic_start.tween_property(self, "scale", original_scale * 1.1, 0.1)
-	epic_start.tween_property(self, "modulate", Color(1.8, 1.4, 2.0, 1.0), 0.1)
-	epic_start.tween_property(self, "modulate", Color(1.4, 1.2, 1.6, 1.0), 0.1)
-	
-	await epic_start.finished
-	
-	play_tween = create_tween()
-	play_tween.set_parallel(true)
-	
-	play_tween.tween_property(self, "position", position + Vector2(0, -80), 0.8)
-	play_tween.tween_method(_animate_epic_effects, 0.0, 1.0, 0.8)
-	
-	if card_shadow:
-		play_tween.tween_property(card_shadow, "modulate", Color(0.6, 0.3, 0.9, 0.0), 0.7)
-	
-	await play_tween.finished
-	queue_free()
-
-func _animate_epic_effects(progress: float):
-	var pulse_intensity = sin(progress * PI * 6) * 0.25 + 1.0
-	scale = original_scale * pulse_intensity * (1.0 - progress * 0.3)
-	
-	rotation = sin(progress * PI * 2) * 0.2
-	
-	var purple_wave = sin(progress * PI * 4) * 0.5 + 0.5
-	var alpha = 1.0 - pow(progress, 0.6)
-	
-	modulate = Color(
-		1.0 + purple_wave * 0.8,
-		1.0 + purple_wave * 0.4,
-		1.0 + purple_wave * 1.2,
-		alpha
-	)
-
-func _fallback_play_animation():
-	card_played.emit(self)
-	_cleanup_tweens()
-	
-	play_tween = create_tween()
-	play_tween.set_parallel(true)
-	
-	play_tween.tween_property(self, "position", position + Vector2(0, -25), 0.2)
-	play_tween.tween_property(self, "scale", Vector2(1.15, 1.15), 0.12)
-	play_tween.tween_property(self, "modulate:a", 0.0, 0.25)
+	play_tween.tween_property(self, "position", position + Vector2(0, -80), 0.2)
+	play_tween.tween_property(self, "scale", Vector2(0.8, 0.8), 0.2)
+	play_tween.tween_property(self, "modulate:a", 0.0, 0.2)
 	
 	if card_shadow:
 		play_tween.tween_property(card_shadow, "modulate:a", 0.0, 0.2)
-		play_tween.tween_property(card_shadow, "scale", Vector2(0.8, 0.8), 0.2)
 	
 	await play_tween.finished
 	queue_free()
@@ -411,7 +292,7 @@ func _fallback_play_animation():
 func _cleanup_tweens():
 	stop_idle_shadow_animation()
 	
-	var tweens_to_kill = [hover_tween, entrance_tween, epic_border_tween, playable_tween, shadow_tween]
+	var tweens_to_kill = [hover_tween, entrance_tween, epic_border_tween, playable_tween, shadow_tween, selection_tween]
 	for tween in tweens_to_kill:
 		if tween:
 			tween.kill()
@@ -692,3 +573,5 @@ func _notification(what):
 			playable_tween.kill()
 		if play_tween:
 			play_tween.kill()
+		if selection_tween:
+			selection_tween.kill()

@@ -157,7 +157,7 @@ func start_player_turn(player: Player, difficulty: String):
 	animate_turn_transition(true)
 	
 	var tween = main_scene.create_tween()
-	tween.tween_property(top_panel_bg, "color", player_turn_color, transition_time)
+	tween.tween_property(top_panel_bg, "color", player_turn_color, 0.4)
 
 	var max_cards = player.get_max_cards_per_turn()
 	var cards_played = player.get_cards_played()
@@ -173,7 +173,7 @@ func start_ai_turn(ai: Player):
 	animate_turn_transition(false)
 	
 	var tween = main_scene.create_tween()
-	tween.tween_property(top_panel_bg, "color", ai_turn_color, transition_time)
+	tween.tween_property(top_panel_bg, "color", ai_turn_color, 0.4)
 	
 	game_info_label.text = "AI is playing..."
 	
@@ -187,26 +187,26 @@ func animate_turn_transition(is_player_turn: bool):
 	var color = Color(0.3, 1.0, 0.8, 1.0) if is_player_turn else Color(1.0, 0.4, 0.4, 1.0)
 	
 	turn_label.text = text
-	turn_label.modulate = Color.WHITE
-	turn_label.scale = Vector2(0.5, 0.5)
+	turn_label.modulate = color
+	turn_label.scale = Vector2(0.7, 0.7)
 	
 	var tween = main_scene.create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(turn_label, "scale", Vector2(1.3, 1.3), 0.3)
-	tween.tween_property(turn_label, "modulate", color, 0.3)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_BACK)
+	
+	tween.tween_property(turn_label, "scale", Vector2(1.1, 1.1), 0.15)
+	tween.tween_property(turn_label, "modulate", color * 1.2, 0.15)
 	
 	await tween.finished
 	
-	var bounce_tween = main_scene.create_tween()
-	bounce_tween.tween_property(turn_label, "scale", Vector2(1.0, 1.0), 0.2)
+	var settle_tween = main_scene.create_tween()
+	settle_tween.set_parallel(true)
+	settle_tween.set_ease(Tween.EASE_OUT)
+	settle_tween.set_trans(Tween.TRANS_ELASTIC)
 	
-	await bounce_tween.finished
-	
-	if is_player_turn:
-		var glow_tween = main_scene.create_tween()
-		glow_tween.set_loops(3)
-		glow_tween.tween_property(turn_label, "modulate", Color(0.5, 1.2, 1.0, 1.0), 0.4)
-		glow_tween.tween_property(turn_label, "modulate", color, 0.4)
+	settle_tween.tween_property(turn_label, "scale", Vector2(1.0, 1.0), 0.15)
+	settle_tween.tween_property(turn_label, "modulate", color, 0.15)
 
 func update_hand_display(player: Player, card_scene: PackedScene, hand_container: Container):
 	for child in hand_container.get_children():
@@ -352,21 +352,29 @@ func screen_shake(intensity: float, duration: float):
 
 func update_card_selection(gamepad_mode: bool, player: Player):
 	if not gamepad_mode or not main_scene.is_player_turn:
+		for i in range(card_instances.size()):
+			var card = card_instances[i]
+			card.z_index = 0
+			if player.can_play_card(player.hand[i]):
+				card.modulate = Color.WHITE
+			else:
+				card.modulate = Color(0.4, 0.4, 0.4, 0.7)
 		return
 		
 	for i in range(card_instances.size()):
 		var card = card_instances[i]
 		if i == selected_card_index:
-			card.modulate = Color(1.3, 1.3, 1.0, 1.0)
 			card.z_index = 15
-			card.scale = card.original_scale * 1.1
+			if player.can_play_card(player.hand[i]):
+				card.modulate = Color(1.5, 1.5, 1.2, 1.0)
+			else:
+				card.modulate = Color(0.8, 0.8, 0.6, 0.8)
 		else:
+			card.z_index = 0
 			if player.can_play_card(player.hand[i]):
 				card.modulate = Color.WHITE
 			else:
 				card.modulate = Color(0.4, 0.4, 0.4, 0.7)
-			card.z_index = 0
-			card.scale = card.original_scale
 
 func navigate_cards(direction: int, player: Player):
 	if card_instances.size() == 0:
