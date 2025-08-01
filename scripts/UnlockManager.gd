@@ -34,9 +34,9 @@ var bundles: Dictionary = {
 	"mystic_defense": {
 		"name": "Mystic Defense",
 		"description": "Advanced protective magic",
-		"requirement_text": "Survive 15+ turns in any game",
+		"requirement_text": "Survive 10+ turns in any game",
 		"requirement_type": "survive_turns",
-		"requirement_value": 15,
+		"requirement_value": 10,
 		"cards": ["Iron Defense", "Armored Strike", "Battle Healer"],
 		"rarity_info": "1 Uncommon Shield, 1 Uncommon Hybrid, 1 Rare Hybrid"
 	},
@@ -121,99 +121,31 @@ var bundles: Dictionary = {
 	}
 }
 
+var _starter_cards: Array[String] = [
+	"Basic Strike",
+	"Quick Strike", 
+	"Slash",
+	"Sword",
+	"Blade Strike",
+	"Swift Cut",
+	"Bandage",
+	"Minor Potion",
+	"Herb Salve",
+	"First Aid",
+	"Block",
+	"Parry",
+	"Guard",
+	"Quick Recovery",
+	"Defensive Jab",
+	"Healing Ward",
+	"Shield Strike"
+]
+
 func _ready():
-	print("UnlockManager autoload initializing...")
 	load_progress()
-	var integrity = verify_system_integrity()
-	if not integrity.card_validation.valid:
-		push_error("Bundle cards validation failed: " + str(integrity.card_validation.missing_cards))
-	_validate_unlocks()
-	debug_validate_all_bundles()
-	debug_full_card_diagnosis()
+	_initialize_unlocks()
 	
-func fix_missing_starter_cards():
-	var starter_cards = _get_starter_cards()
-	var available_cards = get_available_cards()
-	var fixed_count = 0
-	
-	for card_name in starter_cards:
-		if not card_name in available_cards:
-			print("Adding missing starter card: ", card_name)
-			fixed_count += 1
-	if not is_bundle_unlocked("starter_pack"):
-		unlock_bundle("starter_pack", false)
-		fixed_count += 1
-		print("Re-unlocked starter_pack")
-	
-	if fixed_count > 0:
-		save_progress()
-		print("Fixed ", fixed_count, " starter card issues")
-	
-	return fixed_count
-
-func debug_full_card_diagnosis():
-	print("\n=== FULL CARD DIAGNOSIS ===")
-	
-	var stats = get_unlock_stats()
-	print("Unlocked bundles: ", stats.unlocked_bundles, "/", stats.total_bundles)
-	print("Completion: ", "%.1f" % stats.completion_percentage, "%")
-	
-	var available = get_available_cards()
-	print("Available cards: ", available.size())
-	
-	var starter = _get_starter_cards()
-	print("Starter cards defined: ", starter.size())
-	
-	var missing_starters = []
-	for card in starter:
-		if not card in available:
-			missing_starters.append(card)
-	
-	if missing_starters.size() > 0:
-		print("Missing starter cards: ", missing_starters)
-	else:
-		print("All starter cards available")
-	
-	var all_db_cards = []
-	for template in CardDatabase.get_all_card_templates():
-		all_db_cards.append(template.get("name", ""))
-	
-	print("Total cards in database: ", all_db_cards.size())
-	print("Cards available to player: ", available.size())
-	print("Cards locked: ", all_db_cards.size() - available.size())
-	
-	print("============================\n")
-	
-func debug_validate_all_bundles():
-	print("=== VALIDATING ALL BUNDLES ===")
-	var validation = validate_bundle_cards()
-	
-	if validation.valid:
-		print("All bundle cards exist in database")
-	else:
-		print("Missing cards found:")
-		for missing in validation.missing_cards:
-			print("  Bundle '", missing.bundle, "' references missing card: ", missing.card)
-	
-	if validation.duplicate_cards.size() > 0:
-		print("Duplicate cards found:")
-		for card_name in validation.duplicate_cards.keys():
-			print("  '", card_name, "' appears in bundles: ", validation.duplicate_cards[card_name])
-	else:
-		print("No duplicate cards between bundles")
-	
-func debug_print_status():
-	print("=== UNLOCK MANAGER STATUS ===")
-	print("Unlocked bundles: ", unlocked_bundles)
-	print("Available cards: ", get_available_cards().size())
-	var stats = get_unlock_stats()
-	print("Completion: ", "%.1f" % stats.completion_percentage, "%")
-
-func _notification(what):
-	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		save_progress()
-
-func _validate_unlocks():
+func _initialize_unlocks():
 	if not "starter_pack" in unlocked_bundles:
 		unlock_bundle("starter_pack", false)
 	
@@ -223,15 +155,20 @@ func _validate_unlocks():
 
 	var available_cards = get_available_cards()
 	if available_cards.size() < 15:
-		push_error("Too few starter cards available: " + str(available_cards.size()))
-		debug_unlock_all()
+		_emergency_unlock_starter_cards()
+
+func _emergency_unlock_starter_cards():
+	unlock_bundle("starter_pack", false)
+	if not "learning_fighter" in unlocked_bundles:
+		unlock_bundle("learning_fighter", false)
+
+func get_starter_cards() -> Array[String]:
+	return _starter_cards.duplicate()
 
 func get_available_cards() -> Array[String]:
 	var available: Array[String] = []
 	
-	var starter_cards = _get_starter_cards()
-	for card in starter_cards:
-		available.append(card as String)
+	available.append_array(_starter_cards)
 	
 	for bundle_id in unlocked_bundles:
 		if bundles.has(bundle_id):
@@ -240,80 +177,6 @@ func get_available_cards() -> Array[String]:
 				available.append(card as String)
 	
 	return available
-	
-func debug_validate_starter_system():
-	print("=== STARTER SYSTEM VALIDATION ===")
-	
-	var starter_cards = _get_starter_cards()
-	var available_cards = get_available_cards()
-	var all_card_names = []
-	
-	for template in CardDatabase.get_all_card_templates():
-		all_card_names.append(template.get("name", ""))
-	
-	print("Starter cards defined: ", starter_cards.size())
-	print("Available cards total: ", available_cards.size())
-
-	var missing_from_db = []
-	for card_name in starter_cards:
-		if not card_name in all_card_names:
-			missing_from_db.append(card_name)
-	
-	if missing_from_db.size() > 0:
-		print("Starter cards NOT in database: ", missing_from_db)
-	else:
-		print("All starter cards exist in database")
-	
-	var missing_from_available = []
-	for card_name in starter_cards:
-		if not card_name in available_cards:
-			missing_from_available.append(card_name)
-	
-	if missing_from_available.size() > 0:
-		print("Starter cards NOT available: ", missing_from_available)
-	else:
-		print("All starter cards are available")
-	
-	var starter_distribution = {"attack": 0, "heal": 0, "shield": 0, "hybrid": 0}
-	for card_name in starter_cards:
-		var template = CardDatabase.find_card_by_name(card_name)
-		if not template.is_empty():
-			var type = template.get("type", "unknown")
-			if starter_distribution.has(type):
-				starter_distribution[type] += 1
-	
-	print("Starter distribution: ", starter_distribution)
-	
-	var total_starter = starter_cards.size()
-	if total_starter < 15:
-		print("WARNING: Only ", total_starter, " starter cards (need at least 15 for viable deck)")
-	else:
-		print("Sufficient starter cards: ", total_starter)
-	
-	print("================================")
-
-func _get_starter_cards() -> Array[String]:
-	var starter_cards: Array[String] = [
-		"Basic Strike",
-		"Quick Strike",
-		"Slash",
-		"Sword",
-		"Blade Strike",
-		"Swift Cut",
-		"Bandage",
-		"Minor Potion",
-		"Herb Salve",
-		"First Aid",
-		"Block",
-		"Parry",
-		"Guard",
-		"Quick Recovery",
-		"Defensive Jab",
-		"Healing Ward",
-		"Shield Strike"
-	]
-	
-	return starter_cards
 
 func is_card_available(card_name: String) -> bool:
 	return card_name in get_available_cards()
@@ -385,8 +248,6 @@ func unlock_bundle(bundle_id: String, should_save: bool = true) -> Array[String]
 	for card_name in new_cards:
 		card_unlocked.emit(card_name)
 	
-	print("Bundle unlocked: ", bundle_id, " | Cards: ", new_cards)
-	
 	_check_cascade_unlocks()
 	
 	return new_cards
@@ -407,78 +268,11 @@ func track_progress(progress_type: String, value: int = 1, extra_data: Dictionar
 			
 		var bundle = bundles[bundle_id]
 		var old_progress = bundle_progress.get(bundle_id, 0)
+		var new_progress = _calculate_progress(bundle, progress_type, value, extra_data, old_progress)
 		
-		match bundle.requirement_type:
-			"wins_normal":
-				if progress_type == "game_won" and extra_data.get("difficulty") == "normal":
-					bundle_progress[bundle_id] = min(old_progress + value, bundle.requirement_value)
-					progress_made = true
-			
-			"wins_hard":
-				if progress_type == "game_won" and extra_data.get("difficulty") == "hard":
-					bundle_progress[bundle_id] = min(old_progress + value, bundle.requirement_value)
-					progress_made = true
-			
-			"wins_expert":
-				if progress_type == "game_won" and extra_data.get("difficulty") == "expert":
-					bundle_progress[bundle_id] = min(old_progress + value, bundle.requirement_value)
-					progress_made = true
-			
-			"survive_turns":
-				if progress_type == "game_ended":
-					var turns = extra_data.get("turns", 0)
-					if turns >= bundle.requirement_value:
-						bundle_progress[bundle_id] = bundle.requirement_value
-						progress_made = true
-			
-			"speed_win_hard":
-				if progress_type == "game_won" and extra_data.get("difficulty") == "hard":
-					var game_time = extra_data.get("time", 999)
-					if game_time <= bundle.requirement_value:
-						bundle_progress[bundle_id] = 1
-						progress_made = true
-			
-			"hybrid_cards_played":
-				if progress_type == "card_played" and extra_data.get("card_type") == "hybrid":
-					bundle_progress[bundle_id] = min(old_progress + value, bundle.requirement_value)
-					progress_made = true
-			
-			"high_hp_victories":
-				if progress_type == "game_won":
-					var final_hp = extra_data.get("final_hp", 0)
-					if final_hp >= 10:
-						bundle_progress[bundle_id] = min(old_progress + 1, bundle.requirement_value)
-						progress_made = true
-					
-			"games_completed":
-				if progress_type == "game_ended":
-					bundle_progress[bundle_id] = min(old_progress + 1, bundle.requirement_value)
-					progress_made = true
-			
-			"low_hp_recoveries":
-				if progress_type == "game_won":
-					var was_low_hp = extra_data.get("was_at_low_hp", false)
-					if was_low_hp:
-						bundle_progress[bundle_id] = min(old_progress + 1, bundle.requirement_value)
-						progress_made = true
-			
-			"total_wins":
-				if progress_type == "game_won":
-					bundle_progress[bundle_id] = min(old_progress + 1, bundle.requirement_value)
-					progress_made = true
-					
-			"total_damage_dealt":
-				if progress_type == "damage_dealt":
-					bundle_progress[bundle_id] = min(old_progress + value, bundle.requirement_value)
-					progress_made = true
-
-			"total_damage_blocked":
-				if progress_type == "damage_blocked":
-					bundle_progress[bundle_id] = min(old_progress + value, bundle.requirement_value)
-					progress_made = true
-		
-		var new_progress = bundle_progress.get(bundle_id, 0)
 		if new_progress != old_progress:
+			bundle_progress[bundle_id] = new_progress
+			progress_made = true
 			progress_updated.emit(bundle_id, new_progress, bundle.requirement_value)
 			
 			if can_unlock_bundle(bundle_id):
@@ -486,6 +280,66 @@ func track_progress(progress_type: String, value: int = 1, extra_data: Dictionar
 	
 	if progress_made:
 		save_progress()
+
+func _calculate_progress(bundle: Dictionary, progress_type: String, value: int, extra_data: Dictionary, old_progress: int) -> int:
+	match bundle.requirement_type:
+		"wins_normal":
+			if progress_type == "game_won" and extra_data.get("difficulty") == "normal":
+				return min(old_progress + value, bundle.requirement_value)
+		
+		"wins_hard":
+			if progress_type == "game_won" and extra_data.get("difficulty") == "hard":
+				return min(old_progress + value, bundle.requirement_value)
+		
+		"wins_expert":
+			if progress_type == "game_won" and extra_data.get("difficulty") == "expert":
+				return min(old_progress + value, bundle.requirement_value)
+		
+		"survive_turns":
+			if progress_type == "game_ended":
+				var turns = extra_data.get("turns", 0)
+				if turns >= bundle.requirement_value:
+					return bundle.requirement_value
+		
+		"speed_win_hard":
+			if progress_type == "game_won" and extra_data.get("difficulty") == "hard":
+				var game_time = extra_data.get("time", 999)
+				if game_time <= bundle.requirement_value:
+					return 1
+		
+		"hybrid_cards_played":
+			if progress_type == "card_played" and extra_data.get("card_type") == "hybrid":
+				return min(old_progress + value, bundle.requirement_value)
+		
+		"high_hp_victories":
+			if progress_type == "game_won":
+				var final_hp = extra_data.get("final_hp", 0)
+				if final_hp >= 10:
+					return min(old_progress + 1, bundle.requirement_value)
+				
+		"games_completed":
+			if progress_type == "game_ended":
+				return min(old_progress + 1, bundle.requirement_value)
+		
+		"low_hp_recoveries":
+			if progress_type == "game_won":
+				var was_low_hp = extra_data.get("was_at_low_hp", false)
+				if was_low_hp:
+					return min(old_progress + 1, bundle.requirement_value)
+		
+		"total_wins":
+			if progress_type == "game_won":
+				return min(old_progress + 1, bundle.requirement_value)
+				
+		"total_damage_dealt":
+			if progress_type == "damage_dealt":
+				return min(old_progress + value, bundle.requirement_value)
+
+		"total_damage_blocked":
+			if progress_type == "damage_blocked":
+				return min(old_progress + value, bundle.requirement_value)
+	
+	return old_progress
 
 func get_progress_text(bundle_id: String) -> String:
 	if is_bundle_unlocked(bundle_id):
@@ -534,7 +388,6 @@ func get_progress_text(bundle_id: String) -> String:
 			return str(displayed_current) + "/" + str(required) + " total wins"
 		"total_damage_dealt":
 			return str(displayed_current) + "/" + str(required) + " damage dealt"
-
 		"total_damage_blocked":
 			return str(displayed_current) + "/" + str(required) + " damage blocked"
 		_:
@@ -551,13 +404,11 @@ func save_progress():
 	if file:
 		file.store_string(JSON.stringify(save_data))
 		file.close()
-		print("Card unlocks saved")
 	else:
 		push_error("Failed to save card unlocks")
 
 func load_progress():
 	if not FileAccess.file_exists(save_file_path):
-		print("No unlock save found, starting fresh")
 		return
 	
 	var file = FileAccess.open(save_file_path, FileAccess.READ)
@@ -579,8 +430,6 @@ func load_progress():
 	
 	unlocked_bundles = data.get("unlocked_bundles", [])
 	bundle_progress = data.get("bundle_progress", {})
-	
-	print("Card unlocks loaded - Bundles: ", unlocked_bundles.size())
 
 func reset_all_progress():
 	unlocked_bundles.clear()
@@ -590,24 +439,7 @@ func reset_all_progress():
 		bundle_progress[bundle_id] = 0
 
 	unlock_bundle("starter_pack", false)
-	
 	save_progress()
-	print("All unlock progress reset - only starter pack remains")
-
-func debug_unlock_all():
-	print("DEBUG: Unlocking all bundles...")
-	
-	var unlocked_count = 0
-	for bundle_id in bundles.keys():
-		if not is_bundle_unlocked(bundle_id):
-			unlocked_bundles.append(bundle_id)
-			unlocked_count += 1
-
-			var bundle = bundles[bundle_id]
-			bundle_progress[bundle_id] = bundle.requirement_value
-	
-	save_progress()
-	print("DEBUG: ", unlocked_count, " bundles unlocked")
 
 func get_unlock_stats() -> Dictionary:
 	return {
@@ -650,64 +482,7 @@ func validate_bundle_cards() -> Dictionary:
 			validation.duplicate_cards[card_name] = card_sources[card_name]
 	
 	return validation
-	
-func debug_print_progress():
-	print("=== UNLOCK PROGRESS DEBUG ===")
-	for bundle_id in bundles.keys():
-		var bundle = bundles[bundle_id]
-		var progress = bundle_progress.get(bundle_id, 0)
-		var required = bundle.requirement_value
-		var can_unlock = can_unlock_bundle(bundle_id)
-		var is_unlocked = is_bundle_unlocked(bundle_id)
-		
-		var status = "LOCKED"
-		if is_unlocked:
-			status = "UNLOCKED"
-		elif can_unlock:
-			status = "READY"
-		
-		print("  ", bundle["name"], ": ", status)
-		print("    Progress: ", progress, "/", required, " (", bundle.requirement_type, ")")
-		print("    Can unlock: ", can_unlock)
-		
-func _count_unlocked_non_special_bundles() -> int:
-	var special_bundles = ["starter_pack", "card_master", "legendary_fighter"]
-	var count = 0
-	
-	for bundle_id in unlocked_bundles:
-		if not bundle_id in special_bundles:
-			count += 1
-	
-	return count
-		
-func verify_system_integrity() -> Dictionary:
-	var report = {
-		"card_validation": validate_bundle_cards(),
-		"progress_validation": {},
-		"unlock_validation": {}
-	}
-	
-	for bundle_id in bundles.keys():
-		if not bundle_progress.has(bundle_id):
-			if not report.progress_validation.has("missing_progress"):
-				report.progress_validation["missing_progress"] = []
-			report.progress_validation["missing_progress"].append(bundle_id)
-	
-	var starter_cards = _get_starter_cards()
-	var available_cards = get_available_cards()
-	var missing_starters = []
-	
-	for card in starter_cards:
-		if not card in available_cards:
-			missing_starters.append(card)
-	
-	if missing_starters.size() > 0:
-		report.unlock_validation["missing_starter_cards"] = missing_starters
-	
-	return report
 
-func reset_bundle_progress(bundle_id: String):
-	if bundle_progress.has(bundle_id):
-		bundle_progress[bundle_id] = 0
+func _notification(what):
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		save_progress()
-		print("Reset progress for bundle: ", bundle_id)

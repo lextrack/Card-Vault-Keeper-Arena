@@ -3,7 +3,6 @@ extends RefCounted
 
 static func get_attack_cards() -> Array[Dictionary]:
 	return [
-		# COMMON ATTACKS
 		{
 			"name": "Basic Strike",
 			"cost": 1,
@@ -52,8 +51,6 @@ static func get_attack_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.COMMON,
 			"weight": 75
 		},
-		
-		# UNCOMMON ATTACKS
 		{
 			"name": "Sharp Sword",
 			"cost": 3,
@@ -94,8 +91,6 @@ static func get_attack_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.UNCOMMON,
 			"weight": 32
 		},
-		
-		# RARE ATTACKS
 		{
 			"name": "Deep Cut",
 			"cost": 4,
@@ -120,8 +115,6 @@ static func get_attack_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.RARE,
 			"weight": 18
 		},
-		
-		# EPIC ATTACKS
 		{
 			"name": "Devastating Blow",
 			"cost": 5,
@@ -158,7 +151,6 @@ static func get_attack_cards() -> Array[Dictionary]:
 
 static func get_heal_cards() -> Array[Dictionary]:
 	return [
-		# COMMON HEALS
 		{
 			"name": "Bandage",
 			"cost": 1,
@@ -191,8 +183,6 @@ static func get_heal_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.COMMON,
 			"weight": 35
 		},
-		
-		# UNCOMMON HEALS
 		{
 			"name": "Potion",
 			"cost": 2,
@@ -217,8 +207,6 @@ static func get_heal_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.UNCOMMON,
 			"weight": 22
 		},
-		
-		# RARE HEALS
 		{
 			"name": "Major Healing",
 			"cost": 4,
@@ -235,8 +223,6 @@ static func get_heal_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.RARE,
 			"weight": 10
 		},
-		
-		# EPIC HEALS
 		{
 			"name": "Regeneration",
 			"cost": 5,
@@ -249,7 +235,6 @@ static func get_heal_cards() -> Array[Dictionary]:
 
 static func get_shield_cards() -> Array[Dictionary]:
 	return [
-		# COMMON SHIELDS
 		{
 			"name": "Block",
 			"cost": 1,
@@ -274,8 +259,6 @@ static func get_shield_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.COMMON,
 			"weight": 38
 		},
-		
-		# UNCOMMON SHIELDS
 		{
 			"name": "Basic Shield",
 			"cost": 2,
@@ -286,8 +269,8 @@ static func get_shield_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Shield",
-			"cost": 2,
-			"shield": 4,
+			"cost": 3,
+			"shield": 5,
 			"type": "shield",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
 			"weight": 20
@@ -300,8 +283,6 @@ static func get_shield_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.UNCOMMON,
 			"weight": 18
 		},
-		
-		# RARE SHIELDS
 		{
 			"name": "Reinforced Shield",
 			"cost": 3,
@@ -318,8 +299,6 @@ static func get_shield_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.RARE,
 			"weight": 8
 		},
-		
-		# EPIC SHIELDS
 		{
 			"name": "Fortress",
 			"cost": 4,
@@ -332,7 +311,6 @@ static func get_shield_cards() -> Array[Dictionary]:
 
 static func get_hybrid_cards() -> Array[Dictionary]:
 	return [
-		# COMMON HYBRIDS
 		{
 			"name": "Quick Recovery",
 			"cost": 2,
@@ -378,8 +356,6 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.COMMON,
 			"weight": 38
 		},
-		
-		# UNCOMMON HYBRIDS
 		{
 			"name": "Life Strike",
 			"cost": 4,
@@ -434,8 +410,6 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.UNCOMMON,
 			"weight": 19
 		},
-		
-		# RARE HYBRIDS
 		{
 			"name": "Paladin's Resolve",
 			"cost": 4,
@@ -472,8 +446,6 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 			"rarity": RaritySystem.Rarity.RARE,
 			"weight": 11
 		},
-		
-		# EPIC HYBRIDS
 		{
 			"name": "Warrior Saint",
 			"cost": 6,
@@ -524,14 +496,9 @@ static func get_available_card_templates() -> Array[Dictionary]:
 		var card_name = template.get("name", "")
 		if card_name in available_cards:
 			available_templates.append(template)
-		else:
-			if OS.is_debug_build():
-				print("CardDatabase: Filtering out locked card: ", card_name)
 	
 	if available_templates.size() == 0:
 		push_error("No available card templates found! Check unlock system.")
-		push_error("Available cards count: " + str(available_cards.size()))
-		push_error("All templates count: " + str(all_templates.size()))
 		return get_starter_fallback_templates()
 	
 	return available_templates
@@ -570,7 +537,7 @@ static func get_cards_by_type(card_type: String) -> Array[Dictionary]:
 		"hybrid":
 			return get_hybrid_cards()
 		_:
-			push_error("Tipo de carta desconocido: " + card_type)
+			push_error("Unknown card type: " + card_type)
 			return []
 
 static func get_available_cards_by_type(card_type: String) -> Array[Dictionary]:
@@ -600,16 +567,6 @@ static func get_available_cards_by_rarity(rarity: RaritySystem.Rarity) -> Array[
 	for template in available_templates:
 		if template.get("rarity", RaritySystem.Rarity.COMMON) == rarity:
 			filtered_cards.append(template)
-	
-	return filtered_cards
-
-static func get_cards_by_type_and_rarity(card_type: String, rarity: RaritySystem.Rarity) -> Array[Dictionary]:
-	var type_cards = get_cards_by_type(card_type)
-	var filtered_cards: Array[Dictionary] = []
-	
-	for card in type_cards:
-		if card.get("rarity", RaritySystem.Rarity.COMMON) == rarity:
-			filtered_cards.append(card)
 	
 	return filtered_cards
 
@@ -706,45 +663,5 @@ static func validate_database() -> Dictionary:
 			validation.warnings.append("Card with no effect: " + name)
 		elif power > 25:
 			validation.warnings.append("Card possibly too powerful: " + name + " (power: " + str(power) + ")")
-	
-	return validation
-
-static func validate_availability() -> Dictionary:
-	var validation = {
-		"valid": true,
-		"errors": [],
-		"warnings": [],
-		"availability_issues": []
-	}
-	
-	if not UnlockManagers:
-		validation.warnings.append("UnlockManagers not available - cannot validate availability")
-		return validation
-	
-	var stats = get_availability_stats()
-
-	if stats.available_cards < 15:
-		validation.availability_issues.append("Too few starter cards available (" + str(stats.available_cards) + "/15)")
-		validation.valid = false
-
-	for type in stats.by_type.keys():
-		var type_info = stats.by_type[type]
-		if type_info.available == 0:
-			validation.availability_issues.append("No " + type + " cards available")
-			validation.valid = false
-		elif type_info.available < 2:
-			validation.warnings.append("Very few " + type + " cards available (" + str(type_info.available) + ")")
-	
-	var starter_cards = UnlockManagers._get_starter_cards()
-	var available_cards = UnlockManagers.get_available_cards()
-	var missing_starters = []
-	
-	for starter_card in starter_cards:
-		if not starter_card in available_cards:
-			missing_starters.append(starter_card)
-	
-	if missing_starters.size() > 0:
-		validation.errors.append("Missing starter cards: " + str(missing_starters))
-		validation.valid = false
 	
 	return validation

@@ -703,7 +703,7 @@ func verify_and_startup_deck():
 	if not UnlockManagers:
 		return
 	
-	var starter_cards = UnlockManagers._get_starter_cards()
+	var starter_cards = UnlockManagers.get_starter_cards()
 	var available_cards = UnlockManagers.get_available_cards()
 	
 	var missing_starters = []
@@ -751,7 +751,7 @@ func emergency_deck_reset():
 		player.hand.clear()
 		player.discard_pile.clear()
 		
-		var safe_deck = DeckGenerator._create_safe_starter_deck()
+		var safe_deck = DeckGenerator._create_emergency_deck()
 		player.deck = safe_deck
 		player.draw_initial_hand()
 		
@@ -1062,6 +1062,8 @@ func _on_player_died():
 
 	game_manager.finalize_game_end()
 	
+	await _wait_for_celebrations_to_complete()
+	
 	cleanup_notifications()
 	
 	if audio_manager and audio_manager.lose_player:
@@ -1089,6 +1091,8 @@ func _on_ai_died():
 
 	game_manager.finalize_game_end()
 	
+	await _wait_for_celebrations_to_complete()
+	
 	cleanup_notifications()
 
 	if audio_manager and audio_manager.win_player:
@@ -1104,6 +1108,17 @@ func _on_ai_died():
 	
 	await game_manager.handle_game_over("YOU WON! Restarting...", end_turn_button)
 	restart_game()
+	
+func _wait_for_celebrations_to_complete():
+	var max_wait = 5.0
+	var wait_time = 0.0
+	
+	while is_showing_bundle_celebration and wait_time < max_wait:
+		await get_tree().create_timer(0.1).timeout
+		wait_time += 0.1
+	
+	if bundle_celebration_queue.size() > 0:
+		await get_tree().create_timer(0.5).timeout
 
 func _wait_for_actions_to_complete():
 	var max_wait_time = 10.0
@@ -1283,10 +1298,9 @@ func debug_comprehensive_check():
 	print("\n === COMPREHENSIVE SYSTEM CHECK ===")
 	
 	debug_unlock_system()
-	debug_deck_composition()
 	
 	var deck_valid = validate_deck_generation()
-	var db_validation = CardDatabase.validate_availability()
+	var db_validation = CardDatabase.validate_database()
 	
 	print("\n SUMMARY:")
 	print("Deck generation valid: ", deck_valid)
@@ -1354,33 +1368,6 @@ func debug_unlock_system():
 			print("  ", bundle.name, ": ", status, " (", progress, ")")
 	else:
 		print("UnlockManager not available")
-
-func debug_deck_composition():
-	print("\n=== DECK COMPOSITION DEBUG ===")
-	if player:
-		var all_cards = player.get_all_cards()
-		var card_names = {}
-		var locked_cards = []
-		
-		for card in all_cards:
-			if card is CardData:
-				var name = card.card_name
-				if not UnlockManagers.is_card_available(name):
-					locked_cards.append(name)
-				
-				if not card_names.has(name):
-					card_names[name] = 0
-				card_names[name] += 1
-		
-		print("Total cards in deck: ", all_cards.size())
-		print("Locked cards found: ", locked_cards.size())
-		if locked_cards.size() > 0:
-			print("WARNING: Deck contains locked cards: ", locked_cards)
-		
-		print("Card distribution:")
-		for name in card_names.keys():
-			var available = "✅" if UnlockManagers.is_card_available(name) else "❌"
-			print("   ", available, " ", name, ": ", card_names[name])
 	
 func open_challengehub():
 	if not is_player_turn or confirmation_dialog.is_showing:

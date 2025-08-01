@@ -1,26 +1,6 @@
 class_name CardProbability
 extends RefCounted
 
-static func get_all_card_templates() -> Array:
-	var templates = CardDatabase.get_all_card_templates()
-	var old_format = []
-	
-	for template in templates:
-		var old_template = CardTemplate.new(
-			template.get("name", ""),
-			template.get("cost", 1),
-			template.get("damage", 0),
-			template.get("heal", 0),
-			template.get("shield", 0),
-			template.get("type", "attack"),
-			_generate_old_description(template),
-			RaritySystem.get_rarity_string(template.get("rarity", RaritySystem.Rarity.COMMON)),
-			template.get("weight", 50)
-		)
-		old_format.append(old_template)
-	
-	return old_format
-
 static func create_weighted_deck(deck_size: int = 30) -> Array:
 	return DeckGenerator.create_random_deck(deck_size)
 
@@ -156,104 +136,6 @@ static func simulate_deck_draws(deck: Array, draws: int = 1000) -> Dictionary:
 	
 	return simulation
 
-# Clase de compatibilidad
-class CardTemplate:
-	var name: String
-	var cost: int
-	var damage: int
-	var heal: int
-	var shield: int
-	var type: String
-	var description: String
-	var rarity: String
-	var weight: int
-	
-	func _init(n: String, c: int, dmg: int, h: int, s: int, t: String, desc: String, r: String, w: int):
-		name = n
-		cost = c
-		damage = dmg
-		heal = h
-		shield = s
-		type = t
-		description = desc
-		rarity = r
-		weight = w
-
-# Métodos privados para compatibilidad
-static func _generate_old_description(template: Dictionary) -> String:
-	var effects = []
-	
-	if template.get("damage", 0) > 0:
-		effects.append("Damage: " + str(template.damage))
-	
-	if template.get("heal", 0) > 0:
-		effects.append("Heal: " + str(template.heal))
-	
-	if template.get("shield", 0) > 0:
-		effects.append("Shield: " + str(template.shield))
-	
-	return " | ".join(effects) if effects.size() > 0 else "No effect"
-
-static func _generate_cards_from_templates(templates: Array, count: int) -> Array:
-	var pool = WeightedCardPool.new()
-	
-	for template in templates:
-		if template is CardTemplate:
-			var dict_template = {
-				"name": template.name,
-				"cost": template.cost,
-				"damage": template.damage,
-				"heal": template.heal,
-				"shield": template.shield,
-				"type": template.type,
-				"rarity": RaritySystem.string_to_rarity(template.rarity),
-				"weight": template.weight
-			}
-			pool.add_template(dict_template)
-	
-	return pool.generate_cards(count)
-
-static func benchmark_deck_generation(iterations: int = 100) -> Dictionary:
-	var start_time = Time.get_ticks_msec()
-	
-	for i in range(iterations):
-		DeckGenerator.create_random_deck()
-	
-	var end_time = Time.get_ticks_msec()
-	var total_time = end_time - start_time
-	
-	return {
-		"iterations": iterations,
-		"total_time_ms": total_time,
-		"average_time_ms": float(total_time) / iterations,
-		"decks_per_second": float(iterations) / (total_time / 1000.0)
-	}
-
-static func find_optimal_deck_config(target_winrate: float = 0.6) -> DeckConfig:
-	var best_config = DeckConfig.new()
-	var best_score = 0.0
-	
-	var test_configs = [
-		DeckConfig.new(30, 0.70, 0.20, 0.10),  # Balanceado
-		DeckConfig.new(30, 0.80, 0.15, 0.05),  # Agresivo
-		DeckConfig.new(30, 0.60, 0.25, 0.15),  # Controlador
-		DeckConfig.new(30, 0.75, 0.15, 0.10),  # Híbrido
-	]
-	
-	for config in test_configs:
-		var test_deck = DeckGenerator.create_deck(config)
-		var analysis = DeckGenerator.analyze_deck(test_deck)
-		
-		var score = analysis.balance_score
-		if analysis.balance_score >= target_winrate * 10:
-			score += 2.0
-		
-		if score > best_score:
-			best_score = score
-			best_config = config
-	
-	return best_config
-
 static func export_deck_to_json(deck: Array) -> String:
 	var deck_data = []
 	
@@ -290,49 +172,6 @@ static func import_deck_from_json(json_string: String) -> Array:
 					deck.append(card)
 	
 	return deck
-
-static func get_meta_analysis() -> Dictionary:
-	var all_templates = CardDatabase.get_all_card_templates()
-	var meta = {
-		"most_efficient_cards": [],
-		"power_creep_analysis": {},
-		"cost_efficiency_by_type": {},
-		"rarity_value_analysis": {}
-	}
-	
-	var efficiency_list = []
-	for template in all_templates:
-		var power = template.get("damage", 0) + template.get("heal", 0) + template.get("shield", 0)
-		var cost = template.get("cost", 1)
-		var efficiency = float(power) / cost
-		
-		efficiency_list.append({
-			"name": template.get("name", ""),
-			"efficiency": efficiency,
-			"power": power,
-			"cost": cost,
-			"type": template.get("type", ""),
-			"rarity": RaritySystem.get_rarity_string(template.get("rarity", RaritySystem.Rarity.COMMON))
-		})
-	
-	efficiency_list.sort_custom(func(a, b): return a.efficiency > b.efficiency)
-	meta.most_efficient_cards = efficiency_list.slice(0, 10)  # Top 10
-	
-	var types = ["attack", "heal", "shield"]
-	for type in types:
-		var type_cards = CardDatabase.get_cards_by_type(type)
-		var total_efficiency = 0.0
-		var count = 0
-		
-		for template in type_cards:
-			var power = template.get("damage", 0) + template.get("heal", 0) + template.get("shield", 0)
-			var cost = template.get("cost", 1)
-			total_efficiency += float(power) / cost
-			count += 1
-		
-		meta.cost_efficiency_by_type[type] = total_efficiency / count if count > 0 else 0.0
-	
-	return meta
 
 static func create_counter_deck(opponent_deck: Array) -> Array:
 	var analysis = DeckGenerator.analyze_deck(opponent_deck)
@@ -415,28 +254,6 @@ static func test_deck_consistency(deck: Array, simulations: int = 1000) -> Dicti
 	
 	return results
 
-static func debug_print_deck_info(deck: Array):
-	print("=== DECK INFORMATION ===")
-	var analysis = DeckGenerator.analyze_deck(deck)
-	
-	print("Size: ", analysis.total_cards)
-	print("Average cost: ", "%.2f" % analysis.average_cost)
-	print("Total power: ", analysis.power_level)
-	print("Balance score: ", "%.2f" % analysis.balance_score)
-	
-	print("\nType distribution:")
-	for type in analysis.type_distribution:
-		print("  ", type, ": ", analysis.type_distribution[type])
-	
-	print("\nRarity distribution:")
-	for rarity in analysis.rarity_distribution:
-		print("  ", rarity, ": ", analysis.rarity_distribution[rarity])
-	
-	print("\nSuggestions:")
-	var suggestions = DeckGenerator.suggest_deck_improvements(deck)
-	for suggestion in suggestions:
-		print("  - ", suggestion)
-
 static func run_full_validation() -> Dictionary:
 	var validation = {
 		"database_valid": true,
@@ -457,3 +274,39 @@ static func run_full_validation() -> Dictionary:
 		validation.errors.append("Deck generation not producing cards")
 	
 	return validation
+
+class CardTemplate:
+	var name: String
+	var cost: int
+	var damage: int
+	var heal: int
+	var shield: int
+	var type: String
+	var description: String
+	var rarity: String
+	var weight: int
+	
+	func _init(n: String, c: int, dmg: int, h: int, s: int, t: String, desc: String, r: String, w: int):
+		name = n
+		cost = c
+		damage = dmg
+		heal = h
+		shield = s
+		type = t
+		description = desc
+		rarity = r
+		weight = w
+
+static func _generate_old_description(template: Dictionary) -> String:
+	var effects = []
+	
+	if template.get("damage", 0) > 0:
+		effects.append("Damage: " + str(template.damage))
+	
+	if template.get("heal", 0) > 0:
+		effects.append("Heal: " + str(template.heal))
+	
+	if template.get("shield", 0) > 0:
+		effects.append("Shield: " + str(template.shield))
+	
+	return " | ".join(effects) if effects.size() > 0 else "No effect"

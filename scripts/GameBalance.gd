@@ -144,7 +144,6 @@ static func get_damage_bonus(turn_number: int) -> int:
 	elif turn_number >= BONUS_TURN_1:
 		bonus = BONUS_VALUE_1
 	
-	print("GameBalance: Turn ", turn_number, " → Bonus +", bonus, " (thresholds: ", BONUS_TURN_1, ",", BONUS_TURN_2, ",", BONUS_TURN_3, ",", BONUS_TURN_4, ")")
 	return bonus
 	
 static func is_damage_bonus_turn(turn_number: int) -> bool:
@@ -168,18 +167,6 @@ static func get_damage_bonus_description(turn_number: int) -> String:
 			return "Damage increased by +4"
 		_:
 			return "Bonus: +" + str(bonus) + " damage"
-			
-static func debug_bonus_system():
-	print("   BONUS SYSTEM DEBUG:")
-	print("   Turn ", BONUS_TURN_1, " = +", BONUS_VALUE_1, " damage")
-	print("   Turn ", BONUS_TURN_2, " = +", BONUS_VALUE_2, " damage") 
-	print("   Turn ", BONUS_TURN_3, " = +", BONUS_VALUE_3, " damage")
-	print("   Turn ", BONUS_TURN_4, " = +", BONUS_VALUE_4, " damage")
-	
-	for test_turn in range(1, 8):
-		var bonus = get_damage_bonus(test_turn)
-		var is_new_bonus = is_damage_bonus_turn(test_turn)
-		print("   Test Turn ", test_turn, ": bonus=", bonus, ", new_bonus=", is_new_bonus)
 
 static func get_available_difficulties() -> Array:
 	return ["normal", "hard", "expert"]
@@ -194,106 +181,6 @@ static func get_difficulty_description(difficulty: String) -> String:
 			return "Brutal"
 		_:
 			return "Unknown difficulty"
-
-static func setup_player(player: Player, difficulty: String, is_ai: bool = false):
-	var config = get_ai_config(difficulty) if is_ai else get_player_config(difficulty)
-   
-	player.max_hp = config.hp
-	player.current_hp = config.hp
-	player.max_mana = config.mana
-	player.current_mana = config.mana
-	player.max_hand_size = config.hand_size
-	player.difficulty = difficulty
-
-static func create_balanced_deck_guaranteed(difficulty: String, deck_size: int = 30) -> Array:
-	var distribution = get_card_distribution(difficulty)
-	var templates = CardProbability.get_all_card_templates()
-	var deck = []
-   
-	var attack_templates = []
-	var heal_templates = []
-	var shield_templates = []
-	var hybrid_templates = []
-   
-	for template in templates:
-		match template.type:
-			"attack":
-				attack_templates.append(template)
-			"heal":
-				heal_templates.append(template)
-			"shield":
-				shield_templates.append(template)
-			"hybrid":
-				hybrid_templates.append(template)
-   
-	var min_heals = max(2, int(deck_size * MIN_HEAL_RATIO))
-	var min_shields = max(2, int(deck_size * MIN_SHIELD_RATIO))
-	var min_attacks = max(15, int(deck_size * MIN_ATTACK_RATIO))
-	var min_hybrids = max(1, int(deck_size * MIN_HYBRID_RATIO))
-   
-	var target_attacks = max(min_attacks, int(deck_size * distribution.attack_ratio))
-	var target_heals = max(min_heals, int(deck_size * distribution.heal_ratio))
-	var target_shields = max(min_shields, int(deck_size * distribution.shield_ratio))
-	var target_hybrids = max(min_hybrids, int(deck_size * distribution.hybrid_ratio))
-   
-	var total_target = target_attacks + target_heals + target_shields + target_hybrids
-	if total_target != deck_size:
-		var diff = deck_size - total_target
-		target_attacks += diff
-   
-	deck.append_array(_generate_cards_from_templates_weighted(attack_templates, target_attacks))
-	deck.append_array(_generate_cards_from_templates_weighted(heal_templates, target_heals))
-	deck.append_array(_generate_cards_from_templates_weighted(shield_templates, target_shields))
-	deck.append_array(_generate_cards_from_templates_weighted(hybrid_templates, target_hybrids))
-   
-	deck.shuffle()
-	return deck
-
-static func _generate_cards_from_templates_weighted(templates: Array, count: int) -> Array:
-	var cards = []
-	var pool = []
-   
-	for template in templates:
-		for i in range(template.weight):
-			pool.append(template)
-   
-	var rarity_guaranteed = {}
-	for template in templates:
-		if not rarity_guaranteed.has(template.rarity):
-			rarity_guaranteed[template.rarity] = template
-   
-	for rarity in rarity_guaranteed.keys():
-		if cards.size() < count:
-			var template = rarity_guaranteed[rarity]
-			var card = CardData.new(
-				template.name,
-				template.cost,
-				template.damage,
-				template.heal,
-				template.shield,
-				template.type,
-				template.description
-			)
-			cards.append(card)
-   
-	for i in range(cards.size(), count):
-		if pool.size() > 0:
-			var random_index = randi() % pool.size()
-			var selected_template = pool[random_index]
-   		
-			var card = CardData.new(
-				selected_template.name,
-				selected_template.cost,
-				selected_template.damage,
-				selected_template.heal,
-				selected_template.shield,
-				selected_template.type,
-				selected_template.description
-			)
-   		
-			cards.append(card)
-   
-	return cards
 
 static func get_balance_stats(difficulty: String) -> Dictionary:
 	var player_config = get_player_config(difficulty)
@@ -431,6 +318,16 @@ static func validate_difficulty_config(difficulty: String) -> Dictionary:
 		validation.warnings.append("Extreme balance ratio: " + str(balance_stats.balance_ratio))
 	
 	return validation
+
+static func setup_player(player: Player, difficulty: String, is_ai: bool = false):
+	var config = get_ai_config(difficulty) if is_ai else get_player_config(difficulty)
+   
+	player.max_hp = config.hp
+	player.current_hp = config.hp
+	player.max_mana = config.mana
+	player.current_mana = config.mana
+	player.max_hand_size = config.hand_size
+	player.difficulty = difficulty
 
 static func get_difficulty_balance_score(difficulty: String) -> float:
 	var stats = get_balance_stats(difficulty)

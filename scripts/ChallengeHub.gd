@@ -657,7 +657,15 @@ func _on_debug_pressed():
 		return
 	
 	if debug_mode_unlock:
-		UnlockManagers.debug_unlock_all()
+		var all_bundles = UnlockManagers.get_all_bundles_info()
+		for bundle in all_bundles:
+			if not bundle.unlocked:
+				var bundle_info = UnlockManagers.bundles.get(bundle.id, {})
+				var required = bundle_info.get("requirement_value", 0)
+				UnlockManagers.bundle_progress[bundle.id] = required
+				UnlockManagers.unlock_bundle(bundle.id, false)
+		
+		UnlockManagers.save_progress()
 		
 		load_shop_data()
 		queue_dialog_sequence(["*winks* Everything's unlocked now!"])

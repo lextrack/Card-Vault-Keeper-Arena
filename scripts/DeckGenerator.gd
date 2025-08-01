@@ -45,9 +45,7 @@ static func create_balanced_deck(
 
 static func create_starter_deck() -> Array:
 	if not UnlockManagers:
-		return _create_safe_starter_deck()
-	
-	UnlockManagers.debug_validate_starter_system()
+		return _create_emergency_deck()
 	
 	var config = DeckConfig.new()
 	config.deck_size = 30
@@ -57,65 +55,34 @@ static func create_starter_deck() -> Array:
 	config.hybrid_ratio = 0.05
 	
 	var pool = WeightedCardPool.new()
-	var all_available_templates: Array[Dictionary] = []
+	var available_templates = CardDatabase.get_available_card_templates()
 	
-	var available_cards = UnlockManagers.get_available_cards()
-	var all_templates = CardDatabase.get_all_card_templates()
+	if available_templates.size() < 15:
+		push_error("Insufficient available templates! Using emergency deck")
+		return _create_emergency_deck()
 	
-	print("Available cards for deck generation: ", available_cards.size())
-	print("Cards: ", available_cards)
-	
-	for template in all_templates:
-		var card_name = template.get("name", "")
-		if card_name in available_cards:
-			all_available_templates.append(template)
-	
-	if all_available_templates.size() < 15:
-		push_error("Insufficient available templates! Fallback to safe deck")
-		return _create_safe_starter_deck()
-	
-	print("Creating deck from ", all_available_templates.size(), " available templates")
-	
-	for template in all_available_templates:
-		var weight = _get_balanced_weight(template, available_cards)
+	for template in available_templates:
+		var weight = _calculate_starter_weight(template)
 		pool.add_template(template, weight)
 	
-	var deck = pool.generate_deck(30, config)
-	
-	print("Full deck generated: ", deck.size(), " cards")
-	
-	var deck_composition = {}
-	for card in deck:
-		if card is CardData:
-			if not deck_composition.has(card.card_name):
-				deck_composition[card.card_name] = 0
-			deck_composition[card.card_name] += 1
-	
-	print("Complete deck composition:")
-	for card_name in deck_composition.keys():
-		var is_starter = card_name in UnlockManagers._get_starter_cards()
-		var source = "STARTER" if is_starter else "BUNDLE"
-		print("   ", card_name, ": ", deck_composition[card_name], " (", source, ")")
-	
-	return deck
+	return pool.generate_deck(30, config)
 
-static func _get_balanced_weight(template: Dictionary, available_cards: Array) -> int:
+static func _calculate_starter_weight(template: Dictionary) -> int:
 	var card_name = template.get("name", "")
 	var rarity = template.get("rarity", RaritySystem.Rarity.COMMON)
-	var is_starter = card_name in UnlockManagers._get_starter_cards()
-	
 	var base_weight = RaritySystem.get_weight(rarity)
-
-	if is_starter:
+	
+	var starter_cards = UnlockManagers.get_starter_cards()
+	if card_name in starter_cards:
 		base_weight = int(base_weight * 1.5)
 	
 	return base_weight
 
-static func _create_safe_starter_deck() -> Array:
-	var safe_templates = [
-		{"name": "Basic Strike", "cost": 1, "damage": 1, "type": "attack"},
-		{"name": "Basic Strike", "cost": 1, "damage": 1, "type": "attack"},
-		{"name": "Basic Strike", "cost": 1, "damage": 1, "type": "attack"},
+static func _create_emergency_deck() -> Array:
+	var emergency_templates = [
+		{"name": "Basic Strike", "cost": 1, "damage": 2, "type": "attack"},
+		{"name": "Basic Strike", "cost": 1, "damage": 2, "type": "attack"},
+		{"name": "Basic Strike", "cost": 1, "damage": 2, "type": "attack"},
 		{"name": "Quick Strike", "cost": 1, "damage": 2, "type": "attack"},
 		{"name": "Quick Strike", "cost": 1, "damage": 2, "type": "attack"},
 		{"name": "Slash", "cost": 2, "damage": 3, "type": "attack"},
@@ -132,11 +99,11 @@ static func _create_safe_starter_deck() -> Array:
 		{"name": "Major Healing", "cost": 4, "heal": 8, "type": "heal"},
 		{"name": "Block", "cost": 1, "shield": 2, "type": "shield"},
 		{"name": "Block", "cost": 1, "shield": 2, "type": "shield"},
-		{"name": "Shield", "cost": 2, "shield": 4, "type": "shield"},
-		{"name": "Quick Recovery", "cost": 2, "damage": 1, "heal": 1, "type": "hybrid"},
-		{"name": "Defensive Jab", "cost": 2, "damage": 1, "shield": 2, "type": "hybrid"},
+		{"name": "Shield", "cost": 3, "shield": 5, "type": "shield"},
+		{"name": "Quick Recovery", "cost": 2, "damage": 2, "heal": 3, "type": "hybrid"},
+		{"name": "Defensive Jab", "cost": 2, "damage": 3, "shield": 2, "type": "hybrid"},
 		{"name": "Healing Ward", "cost": 3, "heal": 2, "shield": 1, "type": "hybrid"},
-		{"name": "Basic Strike", "cost": 1, "damage": 1, "type": "attack"},
+		{"name": "Basic Strike", "cost": 1, "damage": 2, "type": "attack"},
 		{"name": "Quick Strike", "cost": 1, "damage": 2, "type": "attack"},
 		{"name": "Slash", "cost": 2, "damage": 3, "type": "attack"},
 		{"name": "Bandage", "cost": 1, "heal": 2, "type": "heal"},
@@ -145,58 +112,7 @@ static func _create_safe_starter_deck() -> Array:
 		{"name": "Sword", "cost": 2, "damage": 4, "type": "attack"}
 	]
 	
-	return create_custom_deck(safe_templates.filter(func(t): return not t.is_empty()))
-
-static func _get_starter_weight(template: Dictionary) -> int:
-	var rarity = template.get("rarity", RaritySystem.Rarity.COMMON)
-	
-	match rarity:
-		RaritySystem.Rarity.COMMON:
-			return 80
-		RaritySystem.Rarity.UNCOMMON:
-			return 40
-		RaritySystem.Rarity.RARE:
-			return 15
-		RaritySystem.Rarity.EPIC:
-			return 5
-		_:
-			return 50
-
-static func _create_original_starter_deck() -> Array:
-	var templates = [
-		CardDatabase.find_card_by_name("Basic Strike"),
-		CardDatabase.find_card_by_name("Basic Strike"),
-		CardDatabase.find_card_by_name("Basic Strike"),
-		CardDatabase.find_card_by_name("Quick Strike"),
-		CardDatabase.find_card_by_name("Quick Strike"),
-		CardDatabase.find_card_by_name("Slash"),
-		CardDatabase.find_card_by_name("Slash"),
-		CardDatabase.find_card_by_name("Sword"),
-		CardDatabase.find_card_by_name("Sword"),
-		CardDatabase.find_card_by_name("Sharp Sword"),
-		CardDatabase.find_card_by_name("War Axe"),
-		CardDatabase.find_card_by_name("Fierce Attack"),
-		CardDatabase.find_card_by_name("Deep Cut"),
-		CardDatabase.find_card_by_name("Critical Strike"),
-		CardDatabase.find_card_by_name("Devastating Blow"),
-		CardDatabase.find_card_by_name("Bandage"),
-		CardDatabase.find_card_by_name("Bandage"),
-		CardDatabase.find_card_by_name("Minor Potion"),
-		CardDatabase.find_card_by_name("Minor Potion"),
-		CardDatabase.find_card_by_name("Potion"),
-		CardDatabase.find_card_by_name("Healing"),
-		CardDatabase.find_card_by_name("Major Healing"),
-		CardDatabase.find_card_by_name("Regeneration"),
-		CardDatabase.find_card_by_name("Block"),
-		CardDatabase.find_card_by_name("Block"),
-		CardDatabase.find_card_by_name("Basic Shield"),
-		CardDatabase.find_card_by_name("Shield"),
-		CardDatabase.find_card_by_name("Shield"),
-		CardDatabase.find_card_by_name("Reinforced Shield"),
-		CardDatabase.find_card_by_name("Fortress")
-	]
-	
-	return create_custom_deck(templates.filter(func(t): return not t.is_empty()))
+	return create_custom_deck(emergency_templates)
 
 static func create_arena_deck() -> Array:
 	var config = DeckConfig.new()
@@ -415,7 +331,7 @@ static func find_card_bundle_source(card_name: String) -> String:
 	if not UnlockManagers:
 		return "unknown"
 	
-	var starter_cards = UnlockManagers._get_starter_cards()
+	var starter_cards = UnlockManagers.get_starter_cards()
 	if card_name in starter_cards:
 		return "starter"
 	
