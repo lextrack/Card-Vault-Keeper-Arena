@@ -298,7 +298,7 @@ func update_display():
 			if card_data.damage > 0:
 				effects.append("Deals " + str(card_data.damage) + " damage")
 			if card_data.heal > 0:
-				effects.append("Heals " + str(card_data.heal) + " HP")
+				effects.append("Restores " + str(card_data.heal) + " health")
 			if card_data.shield > 0:
 				effects.append("Grants " + str(card_data.shield) + " shield")
 			description_label.text = " | ".join(effects)

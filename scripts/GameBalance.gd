@@ -7,8 +7,8 @@ const STARTER_DECK_SIZE: int = 30
 
 const BONUS_TURN_1: int = 5
 const BONUS_TURN_2: int = 8
-const BONUS_TURN_3: int = 12 
-const BONUS_TURN_4: int = 16 
+const BONUS_TURN_3: int = 12
+const BONUS_TURN_4: int = 16
 
 const BONUS_VALUE_1: int = 1
 const BONUS_VALUE_2: int = 2
@@ -26,9 +26,9 @@ const BASE_AI_CARD_PLAY_DELAY: float = 0.8
 
 const AI_CARD_POPUP_DURATION: float = 1.2
 const GAME_NOTIFICATION_DRAW_DURATION: float = 1.2
-const GAME_NOTIFICATION_RESHUFFLE_DURATION: float = 1.8
-const GAME_NOTIFICATION_BONUS_DURATION: float = 2.5
-const GAME_NOTIFICATION_END_DURATION: float = 2.5
+const GAME_NOTIFICATION_RESHUFFLE_DURATION: float = 1.5
+const GAME_NOTIFICATION_BONUS_DURATION: float = 2.0
+const GAME_NOTIFICATION_END_DURATION: float = 2.0
 const GAME_NOTIFICATION_AUTO_TURN_DURATION: float = 1.5
 
 const MIN_HEAL_RATIO: float = 0.10
@@ -46,27 +46,27 @@ static func get_player_config(difficulty: String) -> Dictionary:
 	match difficulty:
 		"normal":
 			return {
-				"hp": 45,
+				"hp": 48,
 				"mana": DEFAULT_MANA,
 				"cards_per_turn": 2,
-				"hand_size": 5,
+				"hand_size": 6,
 				"deck_size": STARTER_DECK_SIZE
 			}
 		"hard":
 			return {
 				"hp": 45,
 				"mana": DEFAULT_MANA,
-				"cards_per_turn": 1,
+				"cards_per_turn": 2,
 				"hand_size": 5,
 				"deck_size": STARTER_DECK_SIZE
 			}
 		"expert":
 			return {
-				"hp": 55,
+				"hp": 50,
 				"mana": 9,
-				"cards_per_turn": 1,
-				"hand_size": 6,
-				"deck_size": 28
+				"cards_per_turn": 2,
+				"hand_size": 5,
+				"deck_size": STARTER_DECK_SIZE
 			}
 		_:
 			return get_player_config("normal")
@@ -75,13 +75,13 @@ static func get_ai_config(difficulty: String) -> Dictionary:
 	match difficulty:
 		"normal":
 			return {
-				"hp": 35,
+				"hp": 30,
 				"mana": DEFAULT_MANA,
 				"cards_per_turn": 2,
 				"hand_size": DEFAULT_HAND_SIZE,
 				"deck_size": STARTER_DECK_SIZE,
-				"aggression": 0.5,
-				"heal_threshold": 0.4
+				"aggression": 0.7,
+				"heal_threshold": 0.25
 			}
 		"hard":
 			return {
@@ -90,18 +90,18 @@ static func get_ai_config(difficulty: String) -> Dictionary:
 				"cards_per_turn": 2,
 				"hand_size": DEFAULT_HAND_SIZE,
 				"deck_size": STARTER_DECK_SIZE,
-				"aggression": 0.6,
-				"heal_threshold": 0.3
+				"aggression": 0.5,
+				"heal_threshold": 0.35
 			}
 		"expert":
 			return {
 				"hp": 42,
-				"mana": 11,
+				"mana": 11, 
 				"cards_per_turn": 2,
 				"hand_size": 6,
 				"deck_size": STARTER_DECK_SIZE,
-				"aggression": 0.7,
-				"heal_threshold": 0.6
+				"aggression": 0.6,
+				"heal_threshold": 0.45
 			}
 		_:
 			return get_ai_config("normal")
@@ -135,7 +135,7 @@ static func get_card_distribution(difficulty: String) -> Dictionary:
 static func get_damage_bonus(turn_number: int) -> int:
 	var bonus = 0
 	
-	if turn_number >= BONUS_TURN_4: 
+	if turn_number >= BONUS_TURN_4:
 		bonus = BONUS_VALUE_4
 	elif turn_number >= BONUS_TURN_3:
 		bonus = BONUS_VALUE_3
@@ -147,10 +147,10 @@ static func get_damage_bonus(turn_number: int) -> int:
 	return bonus
 	
 static func is_damage_bonus_turn(turn_number: int) -> bool:
-	return (turn_number == BONUS_TURN_1 or 
-			turn_number == BONUS_TURN_2 or 
-			turn_number == BONUS_TURN_3 or 
-			turn_number == BONUS_TURN_4)
+	return (turn_number == BONUS_TURN_1 or
+		turn_number == BONUS_TURN_2 or
+		turn_number == BONUS_TURN_3 or
+		turn_number == BONUS_TURN_4)
 
 static func get_damage_bonus_description(turn_number: int) -> String:
 	var bonus = get_damage_bonus(turn_number)

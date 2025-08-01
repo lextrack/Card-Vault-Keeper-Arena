@@ -346,10 +346,6 @@ func show_bundle_unlock_celebration(bundle_info: Dictionary, cards: Array):
 	overlay.add_child(timer)
 	timer.start()
 	
-	var continue_button = panel.get_node("VBoxContainer/ContinueButton")
-	if continue_button:
-		continue_button.pressed.connect(close_celebration)
-	
 	while not celebration_finished and is_instance_valid(overlay):
 		await get_tree().process_frame
 
@@ -407,13 +403,6 @@ func _populate_celebration_content(panel: Panel, bundle_info: Dictionary, cards:
 	var cards_label = _create_celebration_label("New Cards: " + ", ".join(cards), 16, Color(0.7, 1, 0.9, 1))
 	cards_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(cards_label)
-	
-	var continue_button = Button.new()
-	continue_button.name = "ContinueButton"
-	continue_button.text = "Accept"
-	continue_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	continue_button.add_theme_font_size_override("font_size", 15)
-	vbox.add_child(continue_button)
 
 func _create_celebration_label(text: String, font_size: int, color: Color) -> Label:
 	var label = Label.new()

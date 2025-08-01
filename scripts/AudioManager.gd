@@ -4,12 +4,12 @@ extends Node
 @onready var card_play_player = $CardSounds/CardPlayPlayer
 @onready var card_draw_player = $CardSounds/CardDrawPlayer
 @onready var card_hover_player = $CardSounds/CardHoverPlayer
-@onready var hybrid_player = $CardSounds/HybridPlayer
 
 @onready var attack_player = $CombatSounds/AttackPlayer
 @onready var heal_player = $CombatSounds/HealPlayer
 @onready var shield_player = $CombatSounds/ShieldPlayer
 @onready var damage_player = $CombatSounds/DamagePlayer
+@onready var hybrid_player = $CombatSounds/HybridPlayer
 
 @onready var ai_attack_player = $AISounds/AIAttackPlayer
 @onready var ai_heal_player = $AISounds/AIHealPlayer

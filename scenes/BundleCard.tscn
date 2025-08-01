@@ -3,11 +3,13 @@
 [ext_resource type="Script" uid="uid://br6bx6p242i17" path="res://scripts/BundleCard.gd" id="1_bundle_card"]
 
 [node name="BundleCard" type="Control"]
-custom_minimum_size = Vector2(270, 200)
+custom_minimum_size = Vector2(320, 360)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 280.0
-offset_bottom = 200.0
+offset_right = 320.0
+offset_bottom = 360.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
 script = ExtResource("1_bundle_card")
 
 [node name="CardPanel" type="Panel" parent="."]
@@ -15,7 +17,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -73,12 +74,13 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = 8.0
-offset_right = -12.0
-offset_bottom = -8.0
+offset_left = 18.0
+offset_top = 15.0
+offset_right = -18.0
+offset_bottom = -15.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 8
 
 [node name="HeaderContainer" type="HBoxContainer" parent="CardPanel/VBoxContainer"]
 layout_mode = 2
@@ -88,7 +90,7 @@ size_flags_vertical = 0
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 1, 0.8, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "Bundle Name"
 autowrap_mode = 2
 
@@ -118,14 +120,14 @@ size_flags_vertical = 0
 [node name="StatusIcon" type="Label" parent="CardPanel/VBoxContainer/StatusContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "🔒"
 
 [node name="StatusLabel" type="Label" parent="CardPanel/VBoxContainer/StatusContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "LOCKED"
 vertical_alignment = 1
 
@@ -133,6 +135,7 @@ vertical_alignment = 1
 layout_mode = 2
 
 [node name="PreviewContainer" type="Panel" parent="CardPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 160)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -145,20 +148,16 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.08, 0.08, 0.15, 0.8)
 
-[node name="CardIconsContainer" type="HBoxContainer" parent="CardPanel/VBoxContainer/PreviewContainer"]
+[node name="CardIconsContainer" type="VBoxContainer" parent="CardPanel/VBoxContainer/PreviewContainer"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -60.0
-offset_top = -12.0
-offset_right = 60.0
-offset_bottom = 12.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 6.0
+offset_right = -66.0
+offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-alignment = 1
 
 [node name="MysteryText" type="Label" parent="CardPanel/VBoxContainer/PreviewContainer"]
 visible = false
@@ -175,7 +174,7 @@ offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 0.8)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 14
 text = "??? Mystery Cards ???"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -187,14 +186,14 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -80.0
-offset_top = -25.0
-offset_right = 80.0
+offset_left = -120.0
+offset_top = -28.0
+offset_right = 120.0
 offset_bottom = -5.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.9, 0.7, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "Contains: 2 Rare, 1 Epic"
 horizontal_alignment = 1
 
@@ -202,8 +201,9 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="DescriptionContainer" type="Control" parent="CardPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 0
 
 [node name="DescriptionLabel" type="Label" parent="CardPanel/VBoxContainer/DescriptionContainer"]
 layout_mode = 1
@@ -217,7 +217,7 @@ offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 14
 text = "Powerful cards for experienced fighters"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -229,6 +229,7 @@ layout_mode = 2
 [node name="RequirementContainer" type="VBoxContainer" parent="CardPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 0
+theme_override_constants/separation = 8
 
 [node name="RequirementLabel" type="Label" parent="CardPanel/VBoxContainer/RequirementContainer"]
 layout_mode = 2
@@ -243,7 +244,7 @@ layout_mode = 2
 alignment = 1
 
 [node name="ProgressBar" type="ProgressBar" parent="CardPanel/VBoxContainer/RequirementContainer/ProgressContainer"]
-custom_minimum_size = Vector2(120, 12)
+custom_minimum_size = Vector2(150, 13)
 layout_mode = 2
 value = 40.0
 show_percentage = false
@@ -251,10 +252,12 @@ show_percentage = false
 [node name="ProgressLabel" type="Label" parent="CardPanel/VBoxContainer/RequirementContainer/ProgressContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "2/5"
 
 [node name="ActionContainer" type="Control" parent="CardPanel/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 size_flags_vertical = 0
 
@@ -266,11 +269,11 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -60.0
-offset_top = -12.0
-offset_right = 60.0
-offset_bottom = 12.0
+offset_left = -70.0
+offset_top = -16.0
+offset_right = 70.0
+offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 15
 text = "🎁 UNLOCK"

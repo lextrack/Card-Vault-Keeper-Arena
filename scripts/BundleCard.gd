@@ -208,6 +208,157 @@ func _generate_rarity_text_from_cards(card_names: Array) -> String:
 	
 	return result_text
 
+func update_card_preview():
+	if not card_icons_container:
+		return
+	
+	for child in card_icons_container.get_children():
+		child.queue_free()
+	
+	var is_unlocked = bundle_info.get("unlocked", false)
+	
+	if mystery_text:
+		mystery_text.visible = not is_unlocked
+	
+	if is_unlocked:
+		var bundle_cards = bundle_info.get("cards", [])
+		
+		if bundle_cards.size() > 0:
+			var cards_list = create_cards_list(bundle_cards)
+			card_icons_container.add_child(cards_list)
+		else:
+			var placeholder = Label.new()
+			placeholder.text = "Cards unlocked!"
+			placeholder.modulate = Color(0.7, 1.0, 0.7, 1.0)
+			placeholder.add_theme_font_size_override("font_size", 12)
+			placeholder.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			card_icons_container.add_child(placeholder)
+
+func create_cards_list(card_names: Array) -> Control:
+	var scroll_container = ScrollContainer.new()
+	scroll_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll_container.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	
+	var vbox = VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 3)
+	
+	var max_cards_to_show = min(card_names.size(), 3)
+	
+	for i in range(max_cards_to_show):
+		var card_name = card_names[i]
+		var card_template = CardDatabase.find_card_by_name(card_name)
+		
+		if not card_template.is_empty():
+			var card_item = create_card_list_item(card_template)
+			vbox.add_child(card_item)
+	
+	if card_names.size() > max_cards_to_show:
+		var more_item = Label.new()
+		more_item.text = "+" + str(card_names.size() - max_cards_to_show) + " more cards..."
+		more_item.modulate = Color(0.7, 0.7, 0.8, 0.8)
+		more_item.add_theme_font_size_override("font_size", 12)
+		more_item.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		more_item.custom_minimum_size = Vector2(0, 20)
+		vbox.add_child(more_item)
+	
+	scroll_container.add_child(vbox)
+	return scroll_container
+
+func create_card_list_item(card_template: Dictionary) -> Control:
+	var item_container = HBoxContainer.new()
+	item_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	item_container.add_theme_constant_override("separation", 6)
+	item_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	var type_icon = Label.new()
+	type_icon.custom_minimum_size = Vector2(20, 20)
+	type_icon.add_theme_font_size_override("font_size", 16)
+	
+	var card_type = card_template.get("type", "attack")
+	match card_type:
+		"attack":
+			type_icon.text = "⚔️"
+			type_icon.modulate = Color(1.1, 0.4, 0.4, 1.0)
+		"heal":
+			type_icon.text = "💚"
+			type_icon.modulate = Color(0.4, 1.1, 0.4, 1.0)
+		"shield":
+			type_icon.text = "🛡️"
+			type_icon.modulate = Color(0.4, 0.6, 1.1, 1.0)
+		"hybrid":
+			type_icon.text = "✨"
+			type_icon.modulate = Color(1.1, 0.8, 0.3, 1.0)
+		_:
+			type_icon.text = "❓"
+			type_icon.modulate = Color(0.7, 0.7, 0.7, 1.0)
+	
+	type_icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	type_icon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	var name_label = Label.new()
+	name_label.text = card_template.get("name", "Unknown")
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.add_theme_font_size_override("font_size", 12)
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	
+	var rarity = card_template.get("rarity", RaritySystem.Rarity.COMMON)
+	match rarity:
+		RaritySystem.Rarity.COMMON:
+			name_label.modulate = Color(0.95, 0.95, 0.95, 1.0)
+		RaritySystem.Rarity.UNCOMMON:
+			name_label.modulate = Color(0.7, 1.2, 0.9, 1.0)
+		RaritySystem.Rarity.RARE:
+			name_label.modulate = Color(0.8, 0.9, 1.4, 1.0)
+		RaritySystem.Rarity.EPIC:
+			name_label.modulate = Color(1.4, 1.0, 1.6, 1.0)
+	
+	var stats_label = Label.new()
+	var stats_text = ""
+	var stats_color = Color.WHITE
+	
+	match card_type:
+		"attack":
+			stats_text = str(card_template.get("damage", 0))
+			stats_color = Color(1.1, 0.5, 0.5, 1.0)
+		"heal":
+			stats_text = str(card_template.get("heal", 0))
+			stats_color = Color(0.5, 1.1, 0.5, 1.0)
+		"shield":
+			stats_text = str(card_template.get("shield", 0))
+			stats_color = Color(0.5, 0.7, 1.1, 1.0)
+		"hybrid":
+			var parts = []
+			if card_template.get("damage", 0) > 0:
+				parts.append(str(card_template.get("damage", 0)))
+			if card_template.get("heal", 0) > 0:
+				parts.append(str(card_template.get("heal", 0)))
+			if card_template.get("shield", 0) > 0:
+				parts.append(str(card_template.get("shield", 0)))
+			stats_text = "/".join(parts)
+			stats_color = Color(0.9, 0.8, 0.6, 1.0)
+	
+	stats_label.text = stats_text
+	stats_label.add_theme_font_size_override("font_size", 12)
+	stats_label.modulate = stats_color
+	stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	stats_label.custom_minimum_size = Vector2(35, 0)
+	
+	var background = ColorRect.new()
+	background.color = Color(0.12, 0.12, 0.18, 0.4)
+	background.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	background.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	item_container.add_child(background)
+	background.z_index = -1
+	
+	item_container.add_child(type_icon)
+	item_container.add_child(name_label)
+	item_container.add_child(stats_label)
+	
+	return item_container
+
 func _safe_set_text(node: Node, text: String):
 	if node and node.has_method("set_text"):
 		node.text = text
@@ -312,18 +463,6 @@ func update_visual_style(is_unlocked: bool, can_unlock: bool):
 		_safe_set_color(background_gradient, Color(0.15, 0.15, 0.25, 0.9))
 		_safe_set_color(border_highlight, Color(0.3, 0.3, 0.4, 0.8))
 		stop_glow()
-
-func update_card_preview():
-	if not card_icons_container:
-		return
-		
-	for i in range(card_icons_container.get_child_count()):
-		var icon = card_icons_container.get_child(i)
-		if icon:
-			icon.visible = false
-	
-	if mystery_text:
-		mystery_text.visible = false
 
 func start_unlocked_glow():
 	if not border_highlight:

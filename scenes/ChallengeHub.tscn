@@ -45,41 +45,72 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 30.0
-offset_top = 20.0
-offset_right = -30.0
-offset_bottom = -20.0
+offset_left = 15.0
+offset_top = 10.0
+offset_right = -15.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HeaderContainer" type="VBoxContainer" parent="MainContainer"]
+[node name="HeaderContainer" type="HBoxContainer" parent="MainContainer"]
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_vertical = 0
-alignment = 1
 
-[node name="Title" type="Label" parent="MainContainer/HeaderContainer"]
+[node name="TitleSection" type="VBoxContainer" parent="MainContainer/HeaderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="MainContainer/HeaderContainer/TitleSection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 0.8, 1)
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 28
 text = "🏪 CHALLENGE HUB"
-horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="MainContainer/HeaderContainer"]
+[node name="Subtitle" type="Label" parent="MainContainer/HeaderContainer/TitleSection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 12
 text = "Unlock new cards by completing challenges"
-horizontal_alignment = 1
 
-[node name="StatsLabel" type="Label" parent="MainContainer/HeaderContainer"]
+[node name="StatsSection" type="VBoxContainer" parent="MainContainer/HeaderContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 14
-text = "Collection: 0/0 bundles unlocked"
-horizontal_alignment = 1
+size_flags_horizontal = 3
+alignment = 2
 
-[node name="Spacer1" type="Control" parent="MainContainer"]
-custom_minimum_size = Vector2(0, 20)
+[node name="StatsLabel" type="Label" parent="MainContainer/HeaderContainer/StatsSection"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 12
+text = "Collection: 0/0 bundles unlocked"
+horizontal_alignment = 2
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="MainContainer/HeaderContainer/StatsSection"]
+layout_mode = 2
+size_flags_horizontal = 8
+alignment = 2
+
+[node name="BackButton" type="Button" parent="MainContainer/HeaderContainer/StatsSection/ButtonsContainer"]
+custom_minimum_size = Vector2(120, 35)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "⬅️ BACK"
+
+[node name="RefreshButton" type="Button" parent="MainContainer/HeaderContainer/StatsSection/ButtonsContainer"]
+visible = false
+custom_minimum_size = Vector2(100, 35)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "REFRESH"
+
+[node name="DebugButton" type="Button" parent="MainContainer/HeaderContainer/StatsSection/ButtonsContainer"]
+custom_minimum_size = Vector2(100, 35)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "🔓 DEBUG"
+
+[node name="HSeparator" type="HSeparator" parent="MainContainer"]
 layout_mode = 2
 
 [node name="ContentContainer" type="HBoxContainer" parent="MainContainer"]
@@ -115,9 +146,11 @@ horizontal_scroll_mode = 0
 
 [node name="BundlesGrid" type="GridContainer" parent="MainContainer/ContentContainer/BundlesPanel/BundlesScrollContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-columns = 4
+size_flags_horizontal = 6
+size_flags_vertical = 6
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 10
+columns = 2
 
 [node name="AIContainer" type="Control" parent="MainContainer/ContentContainer"]
 custom_minimum_size = Vector2(300, 0)
@@ -147,17 +180,17 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 15.0
-offset_top = 15.0
-offset_right = -15.0
-offset_bottom = -15.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="AITitle" type="Label" parent="MainContainer/ContentContainer/AIContainer/AIPanel/AIContent"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "THE CURATOR (AI)"
 horizontal_alignment = 1
 
@@ -165,6 +198,7 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="AICharacterContainer" type="Control" parent="MainContainer/ContentContainer/AIContainer/AIPanel/AIContent"]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -175,13 +209,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -51.5
-offset_top = -51.5
-offset_right = 51.5
-offset_bottom = 51.5
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 75
+theme_override_font_sizes/font_size = 60
 text = "🤖"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -191,23 +225,21 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="DialogBubble" type="Control" parent="MainContainer/ContentContainer/AIContainer/AIPanel/AIContent/AIDialogContainer"]
-custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="DialogPointer" type="Polygon2D" parent="MainContainer/ContentContainer/AIContainer/AIPanel/AIContent/AIDialogContainer/DialogBubble"]
-position = Vector2(135, 11)
+position = Vector2(135, 8)
 color = Color(0.454902, 0.0784314, 0.14902, 0.94902)
-polygon = PackedVector2Array(0, 0, -15, -15, 15, -15)
-uv = PackedVector2Array(0, 0, -15, -15, 15, -15)
+polygon = PackedVector2Array(0, 0, -12, -12, 12, -12)
+uv = PackedVector2Array(0, 0, -12, -12, 12, -12)
 
 [node name="DialogBox" type="Panel" parent="MainContainer/ContentContainer/AIContainer/AIPanel/AIContent/AIDialogContainer/DialogBubble"]
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.066
+anchor_top = 0.05
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 0.0179996
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -251,14 +283,14 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 15.0
-offset_top = 10.0
-offset_right = -15.0
-offset_bottom = -10.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.8, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
@@ -270,14 +302,14 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -32.0
-offset_top = -32.0
+offset_left = -25.0
+offset_top = -25.0
 offset_right = -5.0
 offset_bottom = -5.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 0.8)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 16
 text = "..."
 horizontal_alignment = 2
 vertical_alignment = 2
@@ -287,49 +319,12 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -15.0
-offset_top = 7.0
-offset_right = -7.0
-offset_bottom = 15.0
+offset_left = -12.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = 12.0
 grow_horizontal = 0
 color = Color(0.2, 0.8, 0.4, 0.8)
-
-[node name="Spacer2" type="Control" parent="MainContainer"]
-custom_minimum_size = Vector2(0, 15)
-layout_mode = 2
-
-[node name="ButtonsContainer" type="HBoxContainer" parent="MainContainer"]
-layout_mode = 2
-size_flags_vertical = 0
-alignment = 1
-
-[node name="BackButton" type="Button" parent="MainContainer/ButtonsContainer"]
-custom_minimum_size = Vector2(150, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "⬅️ BACK"
-
-[node name="Spacer3" type="Control" parent="MainContainer/ButtonsContainer"]
-custom_minimum_size = Vector2(30, 0)
-layout_mode = 2
-
-[node name="RefreshButton" type="Button" parent="MainContainer/ButtonsContainer"]
-visible = false
-custom_minimum_size = Vector2(150, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "REFRESH"
-
-[node name="Spacer4" type="Control" parent="MainContainer/ButtonsContainer"]
-custom_minimum_size = Vector2(30, 0)
-layout_mode = 2
-
-[node name="DebugButton" type="Button" parent="MainContainer/ButtonsContainer"]
-visible = false
-custom_minimum_size = Vector2(150, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "🔓 DEBUG"
 
 [node name="AudioManager" type="Node" parent="."]
 

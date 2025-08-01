@@ -1,6 +1,6 @@
 extends Control
 
-@onready var stats_label = $MainContainer/HeaderContainer/StatsLabel
+@onready var stats_label = $MainContainer/HeaderContainer/StatsSection/StatsLabel
 @onready var bundles_grid = $MainContainer/ContentContainer/BundlesPanel/BundlesScrollContainer/BundlesGrid
 @onready var bundles_scroll_container = $MainContainer/ContentContainer/BundlesPanel/BundlesScrollContainer
 @onready var ai_avatar = $MainContainer/ContentContainer/AIContainer/AIPanel/AIContent/AICharacterContainer/AIAvatar
@@ -8,9 +8,9 @@ extends Control
 @onready var dialog_bg = $MainContainer/ContentContainer/AIContainer/AIPanel/AIContent/AIDialogContainer/DialogBubble/DialogBox/DialogBG
 @onready var status_light = $MainContainer/ContentContainer/AIContainer/AIPanel/AIContent/AIDialogContainer/DialogBubble/DialogBox/StatusLight
 @onready var typing_indicator = $MainContainer/ContentContainer/AIContainer/AIPanel/AIContent/AIDialogContainer/DialogBubble/DialogBox/TypingIndicator
-@onready var back_button = $MainContainer/ButtonsContainer/BackButton
-@onready var refresh_button = $MainContainer/ButtonsContainer/RefreshButton
-@onready var debug_button = $MainContainer/ButtonsContainer/DebugButton
+@onready var back_button = $MainContainer/HeaderContainer/StatsSection/ButtonsContainer/BackButton
+@onready var refresh_button = $MainContainer/HeaderContainer/StatsSection/ButtonsContainer/RefreshButton
+@onready var debug_button = $MainContainer/HeaderContainer/StatsSection/ButtonsContainer/DebugButton
 @onready var ui_player = $AudioManager/UIPlayer
 @onready var hover_player = $AudioManager/HoverPlayer
 
@@ -31,10 +31,12 @@ var scroll_speed: float = 200.0
 var input_cooldown: float = 0.0
 var input_cooldown_time: float = 0.15
 
+var adaptive_columns: bool = true
+var min_card_width: float = 320.0
+var max_columns: int = 3
+
 var dialog_timer: Timer
 var current_dialog_queue: Array = []
-
-var layout_config: Dictionary = {}
 
 var intro_dialogs = [
 	"Welcome to my collection vault!",
@@ -63,7 +65,8 @@ func _ready():
 	setup_gamepad_navigation()
 	setup_challenge_music()
 	
-	call_deferred("setup_layout")
+	get_viewport().size_changed.connect(_on_viewport_resized)
+
 	
 	if accessed_from_game:
 		back_button.text = "BACK TO GAME"
@@ -86,10 +89,43 @@ func _ready():
 			save_first_visit_status(false)
 		else:
 			queue_dialog_sequence([casual_dialogs[randi() % casual_dialogs.size()]])
+	
+	call_deferred("setup_responsive_layout")
 
 func _process(delta):
 	if input_cooldown > 0:
 		input_cooldown -= delta
+
+func _on_viewport_resized():
+	if adaptive_columns:
+		call_deferred("setup_responsive_layout")
+
+func setup_responsive_layout():
+	if not bundles_grid:
+		return
+	
+	var viewport_size = get_viewport().get_visible_rect().size
+	var panel_width = bundles_scroll_container.size.x - 40
+	
+	var optimal_columns = max(1, int(panel_width / min_card_width))
+	optimal_columns = min(optimal_columns, max_columns)
+	
+	if bundles_grid.columns != optimal_columns:
+		bundles_grid.columns = optimal_columns
+		print("Adjusted columns to: ", optimal_columns)
+	
+	var h_separation = 15
+	var v_separation = 12
+	
+	if optimal_columns == 1:
+		h_separation = 0
+		v_separation = 20
+	elif optimal_columns >= 3:
+		h_separation = 10
+		v_separation = 10
+	
+	bundles_grid.add_theme_constant_override("h_separation", h_separation)
+	bundles_grid.add_theme_constant_override("v_separation", v_separation)
 
 func setup_challenge_music():
 	if GlobalMusicManager:
@@ -182,8 +218,7 @@ func update_bundle_selection():
 	if not gamepad_mode or bundle_card_instances.size() == 0:
 		return
 	
-	if selected_bundle_index < 0 or selected_bundle_index >= bundle_card_instances.size():
-		selected_bundle_index = 0
+	selected_bundle_index = clamp(selected_bundle_index, 0, bundle_card_instances.size() - 1)
 	
 	for i in range(bundle_card_instances.size()):
 		var bundle_card = bundle_card_instances[i]
@@ -194,11 +229,13 @@ func update_bundle_selection():
 	
 	var selected_bundle = bundle_card_instances[selected_bundle_index]
 	if is_instance_valid(selected_bundle):
-		selected_bundle.modulate = Color(1.2, 1.2, 0.9, 1.0)
-		selected_bundle.z_index = 10
-		selected_bundle.scale = Vector2(1.05, 1.05)
+		selected_bundle.modulate = Color(1.05, 1.05, 1.0, 1.0)
+		selected_bundle.z_index = 5
+		selected_bundle.scale = Vector2(1.02, 1.02)
 		
 		ensure_bundle_visible(selected_bundle_index)
+		
+		print("Selected bundle: ", selected_bundle_index, "/", bundle_card_instances.size() - 1)
 
 func clear_bundle_selection():
 	for bundle_card in bundle_card_instances:
@@ -216,27 +253,29 @@ func ensure_bundle_visible(bundle_index: int):
 		return
 
 	await get_tree().process_frame
+	await get_tree().process_frame
 	
-	var bundle_rect = selected_bundle.get_rect()
-	var bundle_global_pos = selected_bundle.global_position
-	var scroll_rect = bundles_scroll_container.get_rect()
-	var scroll_global_pos = bundles_scroll_container.global_position
-
-	var bundle_top = bundle_global_pos.y - scroll_global_pos.y
-	var bundle_bottom = bundle_top + bundle_rect.size.y
+	var bundle_global_rect = selected_bundle.get_global_rect()
+	var scroll_container_global_rect = bundles_scroll_container.get_global_rect()
+	
+	var bundle_top_relative = bundle_global_rect.position.y - scroll_container_global_rect.position.y
+	var bundle_bottom_relative = bundle_top_relative + bundle_global_rect.size.y
+	
 	var visible_top = bundles_scroll_container.scroll_vertical
-	var visible_bottom = visible_top + scroll_rect.size.y
+	var visible_bottom = visible_top + bundles_scroll_container.size.y
 	
 	var target_scroll = bundles_scroll_container.scroll_vertical
+	var margin = 60
 	
-	if bundle_top < visible_top:
-		target_scroll = max(0, bundle_top - 50)
-	elif bundle_bottom > visible_bottom:
-		target_scroll = bundle_bottom - scroll_rect.size.y + 50
+	if bundle_top_relative + visible_top < visible_top + margin:
+		target_scroll = max(0, bundle_top_relative + visible_top - margin)
+	elif bundle_bottom_relative + visible_top > visible_bottom - margin:
+		target_scroll = bundle_bottom_relative + visible_top - bundles_scroll_container.size.y + margin
 	
-	if target_scroll != bundles_scroll_container.scroll_vertical:
+	if abs(target_scroll - bundles_scroll_container.scroll_vertical) > 5:
 		var tween = create_tween()
-		tween.tween_property(bundles_scroll_container, "scroll_vertical", target_scroll, 0.2)
+		tween.tween_property(bundles_scroll_container, "scroll_vertical", target_scroll, 0.25)
+		await tween.finished
 
 func navigate_bundles(direction: Vector2) -> bool:
 	if bundle_card_instances.size() == 0 or input_cooldown > 0:
@@ -244,32 +283,47 @@ func navigate_bundles(direction: Vector2) -> bool:
 	
 	input_cooldown = input_cooldown_time
 	
-	var columns = layout_config.get("columns", 3)
+	var columns = bundles_grid.columns
+	var total_items = bundle_card_instances.size()
 	var current_row = selected_bundle_index / columns
 	var current_col = selected_bundle_index % columns
+	var total_rows = (total_items - 1) / columns
 	
 	var new_index = selected_bundle_index
 	
 	match direction:
 		Vector2.RIGHT:
-			new_index = (selected_bundle_index + 1) % bundle_card_instances.size()
+			new_index = selected_bundle_index + 1
+			if new_index >= total_items:
+				new_index = 0
+		
 		Vector2.LEFT:
-			new_index = (selected_bundle_index - 1 + bundle_card_instances.size()) % bundle_card_instances.size()
+			new_index = selected_bundle_index - 1
+			if new_index < 0:
+				new_index = total_items - 1
+		
 		Vector2.DOWN:
-			var next_row_index = selected_bundle_index + columns
-			if next_row_index < bundle_card_instances.size():
-				new_index = next_row_index
+			var target_row = current_row + 1
+			if target_row <= total_rows:
+				new_index = target_row * columns + current_col
+				if new_index >= total_items:
+					new_index = total_items - 1
 			else:
 				new_index = current_col
+				if new_index >= total_items:
+					new_index = 0
+		
 		Vector2.UP:
-			var prev_row_index = selected_bundle_index - columns
-			if prev_row_index >= 0:
-				new_index = prev_row_index
+			var target_row = current_row - 1
+			if target_row >= 0:
+				new_index = target_row * columns + current_col
 			else:
-				var last_row = (bundle_card_instances.size() - 1) / columns
-				new_index = min(last_row * columns + current_col, bundle_card_instances.size() - 1)
+				var last_row_start = total_rows * columns
+				new_index = last_row_start + current_col
+				if new_index >= total_items:
+					new_index = total_items - 1
 	
-	if new_index != selected_bundle_index:
+	if new_index != selected_bundle_index and new_index >= 0 and new_index < total_items:
 		selected_bundle_index = new_index
 		update_bundle_selection()
 		play_hover_sound()
@@ -294,62 +348,6 @@ func activate_selected_bundle():
 	else:
 		var progress_text = UnlockManagers.get_progress_text(bundle_info.id)
 		queue_dialog_sequence(["You need to: " + bundle_info.requirement_text + " (" + progress_text + ")"])
-
-func setup_layout():
-	calculate_optimal_layout()
-	configure_bundles_grid()
-	
-	get_viewport().size_changed.connect(_on_viewport_resized)
-
-func calculate_optimal_layout():
-	var viewport_size = get_viewport().size
-	var available_width = viewport_size.x - 350
-	
-	var target_card_width = 260
-	var min_spacing = 20
-	var max_columns = 6
-	
-	var theoretical_columns = int(available_width / (target_card_width + min_spacing))
-	var optimal_columns = clamp(theoretical_columns, 2, max_columns)
-	
-	var total_spacing = min_spacing * (optimal_columns - 1)
-	var actual_card_width = (available_width - total_spacing) / optimal_columns
-	
-	layout_config = {
-		"columns": optimal_columns,
-		"card_width": max(220, actual_card_width), 
-		"card_height": _calculate_card_height(actual_card_width),
-		"spacing": min_spacing,
-		"viewport_width": viewport_size.x,
-		"viewport_height": viewport_size.y
-	}
-
-func _calculate_card_height(card_width: float) -> float:
-	return card_width * 0.75
-
-func configure_bundles_grid():
-	if layout_config.is_empty():
-		return
-	
-	bundles_grid.columns = layout_config.columns
-	
-	var spacing = layout_config.spacing
-	bundles_grid.add_theme_constant_override("h_separation", spacing)
-	bundles_grid.add_theme_constant_override("v_separation", spacing)
-	
-	bundles_scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	bundles_scroll_container.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-
-func _on_viewport_resized():
-	call_deferred("recalculate_layout")
-
-func recalculate_layout():
-	calculate_optimal_layout()
-	configure_bundles_grid()
-	
-	for card in bundle_card_instances:
-		if card and is_instance_valid(card):
-			_update_card_size(card)
 
 func setup_dialog_system():
 	dialog_timer = Timer.new()
@@ -461,29 +459,72 @@ func update_stats_display():
 	]
 
 func load_bundles():
+	print("=== load_bundles() start ===")
+	
 	for instance in bundle_card_instances:
 		if is_instance_valid(instance):
 			instance.queue_free()
 	bundle_card_instances.clear()
 	
-	var bundles = UnlockManagers.get_all_bundles_info()
+	if not UnlockManagers:
+		print("ERROR: UnlockManagers is null in load_bundles!")
+		return
 	
-	for bundle_info in bundles:
+	if not bundles_grid:
+		print("ERROR: bundles_grid is null! Path: ", get_path())
+		return
+	
+	var bundles = UnlockManagers.get_all_bundles_info()
+	print("Found ", bundles.size(), " bundles to load")
+	
+	for i in range(bundles.size()):
+		var bundle_info = bundles[i]
+		print("Creating bundle card for: ", bundle_info.get("name", "Unknown"))
 		var bundle_card = create_bundle_card(bundle_info)
 		bundles_grid.add_child(bundle_card)
 		bundle_card_instances.append(bundle_card)
+		print("Bundle card ", i, " added to grid")
+	
+	print("Total bundle cards created: ", bundle_card_instances.size())
+	print("Grid children count: ", bundles_grid.get_child_count())
+	
+	call_deferred("force_grid_layout")
 	
 	selected_bundle_index = 0
 	if gamepad_mode:
 		update_bundle_selection()
+	
+	print("=== load_bundles() complete ===")
+
+func force_grid_layout():
+	if not bundles_grid:
+		return
+	
+	await get_tree().process_frame
+	
+	setup_responsive_layout()
+	
+	bundles_grid.queue_sort()
+	
+	var available_width = bundles_scroll_container.size.x - 40
+	var columns = bundles_grid.columns
+	var separation = bundles_grid.get_theme_constant("h_separation")
+	var card_width = (available_width - (separation * (columns - 1))) / columns
+	
+	card_width = max(card_width, min_card_width)
+	
+	for child in bundles_grid.get_children():
+		if child is BundleCard:
+			child.custom_minimum_size = Vector2(card_width, 360)
+			child.size = Vector2(card_width, 360)
+	
+	await get_tree().process_frame
+	bundles_grid.queue_sort()
 
 func create_bundle_card(bundle_info: Dictionary) -> BundleCard:
 	var bundle_card = bundle_card_scene.instantiate() as BundleCard
 	
 	bundle_card.setup_bundle(bundle_info)
-	
-	_update_card_size(bundle_card)
-	
 	bundle_card.mouse_filter = Control.MOUSE_FILTER_PASS
 	
 	if bundle_card.bundle_unlock_requested.connect(_on_bundle_unlock_requested) != OK:
@@ -493,19 +534,9 @@ func create_bundle_card(bundle_info: Dictionary) -> BundleCard:
 	if bundle_card.bundle_unhovered.connect(_on_bundle_unhovered) != OK:
 		print("Error connecting bundle_unhovered")
 	
-	print("Bundle card created and signals connected for: ", bundle_info.get("name", "Unknown"))
+	print("Bundle card created with size: ", bundle_card.size, " for: ", bundle_info.get("name", "Unknown"))
 	
 	return bundle_card
-
-func _update_card_size(bundle_card: BundleCard):
-	if layout_config.is_empty():
-		return
-	
-	var card_width = layout_config.card_width
-	var card_height = layout_config.card_height
-	
-	bundle_card.custom_minimum_size = Vector2(card_width, card_height)
-	bundle_card.size = Vector2(card_width, card_height)
 
 func show_ai_dialog(text: String):
 	if not dialog_text:
@@ -714,20 +745,21 @@ func play_hover_sound():
 
 func _handle_gamepad_input(event):
 	if bundles_scroll_container.has_focus():
+		var handled = false
+		
 		if event.is_action_pressed("ui_right"):
-			navigate_bundles(Vector2.RIGHT)
-			get_viewport().set_input_as_handled()
+			handled = navigate_bundles(Vector2.RIGHT)
 		elif event.is_action_pressed("ui_left"):
-			navigate_bundles(Vector2.LEFT)
-			get_viewport().set_input_as_handled()
+			handled = navigate_bundles(Vector2.LEFT)
 		elif event.is_action_pressed("ui_down"):
-			navigate_bundles(Vector2.DOWN)
-			get_viewport().set_input_as_handled()
+			handled = navigate_bundles(Vector2.DOWN)
 		elif event.is_action_pressed("ui_up"):
-			navigate_bundles(Vector2.UP)
-			get_viewport().set_input_as_handled()
+			handled = navigate_bundles(Vector2.UP)
 		elif event.is_action_pressed("ui_accept") or event.is_action_pressed("game_select"):
 			activate_selected_bundle()
+			handled = true
+		
+		if handled:
 			get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_down") and not bundles_scroll_container.has_focus():
 		if bundle_card_instances.size() > 0:
