@@ -107,7 +107,7 @@ var bundles: Dictionary = {
 		"requirement_type": "total_damage_dealt",
 		"requirement_value": 500,
 		"cards": ["War Axe", "Fierce Attack", "Devastating Blow", "Healing"],
-		"rarity_info": "2 Uncommon Attacks, 1 Epic Attack"
+		"rarity_info": "2 Uncommon Attacks, 1 Epic Attack, 1 Uncommon"
 	},
 
 	"fortress_defender": {
