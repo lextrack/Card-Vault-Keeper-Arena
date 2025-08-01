@@ -21,6 +21,8 @@ var is_screen_shaking: bool = false
 var original_turn_label_y: float
 var floating_damage_count: int = 0
 
+var current_hand_hash: String = ""
+
 var player_turn_color = Color(0.08, 0.13, 0.18, 0.9)
 var ai_turn_color = Color(0.15, 0.08, 0.08, 0.9)
 var transition_time = 0.8
@@ -43,6 +45,22 @@ func _get_ui_references():
 	game_over_label = main_scene.game_over_label
 	top_panel_bg = main_scene.top_panel_bg
 	ui_layer = main_scene.ui_layer
+
+func _generate_hand_hash(hand: Array) -> String:
+	var hash_string = ""
+	for card in hand:
+		if card is CardData:
+			hash_string += card.card_name + "_" + str(card.cost) + "_"
+	return hash_string
+
+func _has_hand_changed(player: Player) -> bool:
+	if not player or not player.hand:
+		return true
+	
+	var new_hash = _generate_hand_hash(player.hand)
+	var changed = new_hash != current_hand_hash
+	current_hand_hash = new_hash
+	return changed
 
 func update_all_labels(player: Player, ai: Player):
 	update_player_hp(player.current_hp)
@@ -209,6 +227,23 @@ func animate_turn_transition(is_player_turn: bool):
 	settle_tween.tween_property(turn_label, "modulate", color, 0.15)
 
 func update_hand_display(player: Player, card_scene: PackedScene, hand_container: Container):
+	if not player:
+		push_error("Player is null in update_hand_display")
+		return
+	if not card_scene:
+		push_error("Card scene is null in update_hand_display")
+		return
+	if not hand_container:
+		push_error("Hand container is null in update_hand_display")
+		return
+	if not player.hand:
+		push_error("Player hand is null in update_hand_display")
+		return
+	
+	if not _has_hand_changed(player) and card_instances.size() == player.hand.size():
+		_update_existing_cards_playability(player)
+		return
+	
 	for child in hand_container.get_children():
 		child.queue_free()
 	
@@ -216,7 +251,15 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 	
 	for i in range(player.hand.size()):
 		var card_data = player.hand[i]
+		if not card_data:
+			print("Warning: Card data is null at index ", i)
+			continue
+			
 		var card_instance = card_scene.instantiate()
+		if not card_instance:
+			print("Warning: Failed to instantiate card at index ", i)
+			continue
+		
 		card_instance.set_card_data(card_data)
 		card_instance.card_clicked.connect(main_scene._on_card_clicked)
 		
@@ -234,6 +277,17 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 	var controls_panel = main_scene.controls_panel
 	if controls_panel:
 		controls_panel.update_cards_available(card_instances.size() > 0)
+
+func _update_existing_cards_playability(player: Player):
+	_clean_invalid_card_instances()
+	
+	for i in range(min(card_instances.size(), player.hand.size())):
+		var card_instance = card_instances[i]
+		var card_data = player.hand[i]
+		
+		if is_instance_valid(card_instance) and card_data:
+			var can_play = main_scene.is_player_turn and player.can_play_card(card_data)
+			card_instance.set_playable(can_play)
 
 func _on_card_hover():
 	var input_manager = main_scene.input_manager
@@ -354,6 +408,12 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 	if not gamepad_mode or not main_scene.is_player_turn:
 		for i in range(card_instances.size()):
 			var card = card_instances[i]
+
+			if not is_instance_valid(card):
+				continue
+			if i >= player.hand.size():
+				continue
+			
 			card.z_index = 0
 			if player.can_play_card(player.hand[i]):
 				card.modulate = Color.WHITE
@@ -363,6 +423,12 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 		
 	for i in range(card_instances.size()):
 		var card = card_instances[i]
+
+		if not is_instance_valid(card):
+			continue
+		if i >= player.hand.size():
+			continue
+			
 		if i == selected_card_index:
 			card.z_index = 15
 			if player.can_play_card(player.hand[i]):
@@ -376,7 +442,104 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 			else:
 				card.modulate = Color(0.4, 0.4, 0.4, 0.7)
 
+func update_hand_display_no_animation(player: Player, card_scene: PackedScene, hand_container: Container):
+	if not player:
+		push_error("Player is null in update_hand_display_no_animation")
+		return
+	if not card_scene:
+		push_error("Card scene is null in update_hand_display_no_animation")
+		return
+	if not hand_container:
+		push_error("Hand container is null in update_hand_display_no_animation")
+		return
+	if not player.hand:
+		push_error("Player hand is null in update_hand_display_no_animation")
+		return
+
+	for child in hand_container.get_children():
+		child.queue_free()
+	
+	card_instances.clear()
+	current_hand_hash = _generate_hand_hash(player.hand)
+	
+	for i in range(player.hand.size()):
+		var card_data = player.hand[i]
+		if not card_data:
+			print("Warning: Card data is null at index ", i)
+			continue
+			
+		var card_instance = card_scene.instantiate()
+		if not card_instance:
+			print("Warning: Failed to instantiate card at index ", i)
+			continue
+
+		card_instance.disable_entrance_animation()
+		
+		card_instance.set_card_data(card_data)
+		card_instance.card_clicked.connect(main_scene._on_card_clicked)
+		
+		if card_instance.has_signal("mouse_entered"):
+			card_instance.mouse_entered.connect(_on_card_hover)
+		
+		hand_container.add_child(card_instance)
+		card_instances.append(card_instance)
+		
+		var can_play = main_scene.is_player_turn and player.can_play_card(card_data)
+		card_instance.set_playable(can_play)
+	
+	selected_card_index = clamp(selected_card_index, 0, max(0, card_instances.size() - 1))
+	
+	var controls_panel = main_scene.controls_panel
+	if controls_panel:
+		controls_panel.update_cards_available(card_instances.size() > 0)
+	
+func update_hand_display_with_new_cards_animation(player: Player, card_scene: PackedScene, hand_container: Container, new_cards_count: int = 0):
+	if not _has_hand_changed(player):
+		return
+	
+	update_hand_display(player, card_scene, hand_container)
+	
+	if new_cards_count > 0 and card_instances.size() >= new_cards_count:
+		await main_scene.get_tree().process_frame
+		
+		var start_index = card_instances.size() - new_cards_count
+		for i in range(start_index, card_instances.size()):
+			var card_instance = card_instances[i]
+			if is_instance_valid(card_instance):
+				if card_instance.entrance_tween:
+					card_instance.entrance_tween.kill()
+				
+				card_instance.modulate.a = 0.0
+				card_instance.scale = Vector2(0.9, 0.9)
+				
+				var delay = (i - start_index) * 0.1
+				if delay > 0:
+					main_scene.get_tree().create_timer(delay).timeout.connect(func():
+						if is_instance_valid(card_instance):
+							_animate_simple_card_entrance(card_instance)
+					)
+				else:
+					_animate_simple_card_entrance(card_instance)
+
+func _animate_simple_card_entrance(card_instance: Control):
+	var tween = main_scene.create_tween()
+	tween.set_parallel(true)
+	
+	tween.tween_property(card_instance, "modulate:a", 1.0, 0.15)
+	
+	tween.tween_property(card_instance, "scale", card_instance.original_scale * 1.05, 0.15)
+	tween.tween_property(card_instance, "scale", card_instance.original_scale, 0.1).set_delay(0.15)
+
+	await tween.finished
+	if card_instance.is_playable:
+		card_instance.start_idle_shadow_animation()
+
 func navigate_cards(direction: int, player: Player):
+	if card_instances.size() == 0:
+		return false
+	
+	_clean_invalid_card_instances()
+	
 	if card_instances.size() == 0:
 		return false
 		
@@ -389,5 +552,22 @@ func navigate_cards(direction: int, player: Player):
 
 func get_selected_card():
 	if card_instances.size() > 0 and selected_card_index < card_instances.size():
-		return card_instances[selected_card_index]
+		var selected_card = card_instances[selected_card_index]
+		if is_instance_valid(selected_card):
+			return selected_card
 	return null
+
+func _clean_invalid_card_instances():
+	var valid_instances = []
+	for card in card_instances:
+		if is_instance_valid(card):
+			valid_instances.append(card)
+	
+	card_instances = valid_instances
+	
+	if selected_card_index >= card_instances.size():
+		selected_card_index = max(0, card_instances.size() - 1)
+
+func force_recreate_hand(player: Player, card_scene: PackedScene, hand_container: Container):
+	current_hand_hash = "" 
+	update_hand_display(player, card_scene, hand_container)

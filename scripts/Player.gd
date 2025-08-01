@@ -21,6 +21,9 @@ var cards_played_this_turn: int = 0
 var turn_number: int = 0
 var was_at_low_hp_this_game: bool = false
 
+var ai_turn_active: bool = false
+var should_stop_ai_turn: bool = false
+
 signal hp_changed(new_hp: int)
 signal mana_changed(new_mana: int)
 signal shield_changed(new_shield: int)
@@ -229,11 +232,21 @@ func start_turn():
 	turn_number += 1
 	current_mana = max_mana
 	cards_played_this_turn = 0
-	draw_card()
+	
+	var cards_to_draw = min(get_max_cards_per_turn(), max_hand_size - hand.size())
+	var cards_actually_drawn = 0
+	
+	for i in range(cards_to_draw):
+		if draw_card():
+			cards_actually_drawn += 1
+		else:
+			break
+	
+	if cards_actually_drawn == 0:
+		draw_card()
+	
 	mana_changed.emit(current_mana)
 	cards_played_changed.emit(cards_played_this_turn, get_max_cards_per_turn())
-	
-	print("🔄 ", "AI" if is_ai else "Player", " starting turn ", turn_number)
 	
 	var current_bonus = get_damage_bonus()
 	turn_changed.emit(turn_number, current_bonus)
@@ -439,6 +452,8 @@ func ai_turn(opponent: Player):
 	if not is_ai:
 		return
 	
+	ai_turn_active = true
+	
 	print("   AI executing turn logic...")
 	print("   AI turn number: ", turn_number)
 	print("   Available mana: ", current_mana)
@@ -548,6 +563,17 @@ func ai_turn(opponent: Player):
 		else:
 			print("AI: No card chosen, breaking turn")
 			break
+	
+	ai_turn_active = false
+	print("AI: Turn completed naturally")
+	
+func stop_ai_turn():
+	if is_ai and ai_turn_active:
+		should_stop_ai_turn = true
+		print("AI: Turn stop requested")
+
+func is_ai_turn_active() -> bool:
+	return is_ai and ai_turn_active
 			
 func debug_damage_calculation(card: CardData, target: Player = null) -> Dictionary:
 	var debug_info = {

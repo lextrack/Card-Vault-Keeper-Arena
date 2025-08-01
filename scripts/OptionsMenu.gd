@@ -49,7 +49,6 @@ var applied_window_mode: int = 0
 var applied_resolution_index: int = 0
 var applied_vsync_enabled: bool = true
 
-# Cambiar de ConfirmationDialog a ExitConfirmationDialog personalizado
 var confirmation_dialog: ExitConfirmationDialog
 
 var available_resolutions: Array = [
@@ -283,26 +282,20 @@ func _save_current_settings():
 	_save_audio_settings()
 	_save_video_settings()
 
-# Nueva función para configurar el diálogo personalizado
 func _setup_confirmation_dialog():
 	confirmation_dialog = ExitConfirmationDialog.new()
 	confirmation_dialog.setup(self)
-	
-	# Configurar para el contexto de opciones
+
 	confirmation_dialog.set_options_context()
 
-# Nueva función para AudioHelper personalizado para OptionsMenu
 func get_audio_helper():
-	# Si estamos en juego, usar el audio_helper del juego
 	if is_in_game and game_scene and game_scene.has_method("get"):
 		var game_audio_helper = game_scene.get("audio_helper")
 		if game_audio_helper:
 			return game_audio_helper
 	
-	# Si no, crear uno temporal o usar el audio_manager directamente
 	return audio_manager
 
-# Modificar las funciones de confirmación para usar el nuevo sistema
 func return_to_menu():
 	_copy_applied_to_current()
 	_force_close_options()
@@ -678,7 +671,6 @@ func _input(event):
 	if not visible:
 		return
 	
-	# Manejar input del diálogo de confirmación personalizado
 	if confirmation_dialog and confirmation_dialog.is_showing:
 		confirmation_dialog.handle_input(event)
 		get_viewport().set_input_as_handled()

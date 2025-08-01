@@ -97,11 +97,11 @@ static func get_ai_config(difficulty: String) -> Dictionary:
 			return {
 				"hp": 42,
 				"mana": 11,
-				"cards_per_turn": 3,
+				"cards_per_turn": 2,
 				"hand_size": 6,
 				"deck_size": STARTER_DECK_SIZE,
-				"aggression": 0.75,
-				"heal_threshold": 0.2
+				"aggression": 0.7,
+				"heal_threshold": 0.6
 			}
 		_:
 			return get_ai_config("normal")

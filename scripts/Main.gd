@@ -190,7 +190,7 @@ func restore_game_from_saved_state():
 			UnlockManagers.progress_updated.connect(_on_unlock_progress_updated)
 	
 	ui_manager.update_all_labels(player, ai)
-	ui_manager.update_hand_display(player, card_scene, hand_container)
+	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
 	
 	start_game_music()
 	
@@ -553,6 +553,10 @@ func cleanup_notifications():
 		
 	if options_menu:
 		options_menu.hide_options()
+	
+	clear_bundle_celebration_queue()
+	
+	await get_tree().process_frame
 
 func _setup_controls_panel():
 	controls_panel = controls_panel_scene.instantiate()
@@ -607,6 +611,13 @@ func setup_game():
 	player = game_manager.player
 	ai = game_manager.ai
 	
+	if not player:
+		push_error("Failed to create player in setup_game")
+		return
+	if not ai:
+		push_error("Failed to create AI in setup_game")
+		return
+	
 	_connect_player_signals()
 	_connect_ai_signals()
 	
@@ -620,7 +631,7 @@ func setup_game():
 		damage_bonus_label.visible = false
 	
 	ui_manager.update_all_labels(player, ai)
-	ui_manager.update_hand_display(player, card_scene, hand_container)
+	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
 	
 	start_game_music()
 	start_player_turn()
@@ -764,22 +775,50 @@ func add_replacement_card(target_player: Player, available_templates: Array):
 	
 	if replacement_card:
 		target_player.deck.append(replacement_card)
-		
-func _on_player_hp_changed(new_hp: int):
-	ui_manager.update_player_hp(new_hp)
-	
-	if StatisticsManagers and new_hp > player.current_hp:
-		var healing = new_hp - player.current_hp
-		StatisticsManagers.combat_action("healing_done", healing)
 
-func _on_player_shield_changed(new_shield: int):
-	ui_manager.update_player_shield(new_shield)
+func _disconnect_player_signals():
+	if not player:
+		return
 	
-	if StatisticsManagers and new_shield > player.current_shield:
-		var shield_gained = new_shield - player.current_shield
-		StatisticsManagers.combat_action("shield_gained", shield_gained)
+	if player.hp_changed.is_connected(ui_manager.update_player_hp):
+		player.hp_changed.disconnect(ui_manager.update_player_hp)
+	if player.mana_changed.is_connected(ui_manager.update_player_mana):
+		player.mana_changed.disconnect(ui_manager.update_player_mana)
+	if player.shield_changed.is_connected(ui_manager.update_player_shield):
+		player.shield_changed.disconnect(ui_manager.update_player_shield)
+	if player.player_died.is_connected(_on_player_died):
+		player.player_died.disconnect(_on_player_died)
+	if player.hand_changed.is_connected(_on_player_hand_changed):
+		player.hand_changed.disconnect(_on_player_hand_changed)
+	if player.cards_played_changed.is_connected(_on_player_cards_played_changed):
+		player.cards_played_changed.disconnect(_on_player_cards_played_changed)
+	if player.turn_changed.is_connected(_on_turn_changed):
+		player.turn_changed.disconnect(_on_turn_changed)
+	if player.card_drawn.is_connected(_on_player_card_drawn):
+		player.card_drawn.disconnect(_on_player_card_drawn)
+
+func _disconnect_ai_signals():
+	if not ai:
+		return
+	
+	if ai.hp_changed.is_connected(ui_manager.update_ai_hp):
+		ai.hp_changed.disconnect(ui_manager.update_ai_hp)
+	if ai.mana_changed.is_connected(ui_manager.update_ai_mana):
+		ai.mana_changed.disconnect(ui_manager.update_ai_mana)
+	if ai.shield_changed.is_connected(ui_manager.update_ai_shield):
+		ai.shield_changed.disconnect(ui_manager.update_ai_shield)
+	if ai.player_died.is_connected(_on_ai_died):
+		ai.player_died.disconnect(_on_ai_died)
+	if ai.ai_card_played.is_connected(_on_ai_card_played):
+		ai.ai_card_played.disconnect(_on_ai_card_played)
 
 func _connect_player_signals():
+	if not player:
+		push_error("Cannot connect player signals: player is null")
+		return
+	
+	_disconnect_player_signals()
+	
 	player.hp_changed.connect(ui_manager.update_player_hp)
 	player.mana_changed.connect(ui_manager.update_player_mana)
 	player.shield_changed.connect(ui_manager.update_player_shield)
@@ -793,6 +832,12 @@ func _connect_player_signals():
 	player.shield_changed.connect(_on_player_shield_changed)
 
 func _connect_ai_signals():
+	if not ai:
+		push_error("Cannot connect AI signals: ai is null")
+		return
+		
+	_disconnect_ai_signals()
+	
 	ai.hp_changed.connect(ui_manager.update_ai_hp)
 	ai.mana_changed.connect(ui_manager.update_ai_mana)
 	ai.shield_changed.connect(ui_manager.update_ai_shield)
@@ -805,7 +850,7 @@ func _on_ai_damage_dealt(damage: int):
 	ui_manager.show_floating_damage(damage, target_pos, false)
 
 func start_player_turn():
-	if is_player_turn:
+	if is_player_turn or game_manager.is_game_ended():
 		return
 		
 	is_player_turn = true
@@ -814,7 +859,18 @@ func start_player_turn():
 	player.turn_number += 1
 	player.current_mana = player.max_mana
 	player.cards_played_this_turn = 0
-	player.draw_card()
+	
+	var cards_to_draw = min(player.get_max_cards_per_turn(), player.max_hand_size - player.hand.size())
+	var cards_actually_drawn = 0
+	
+	for i in range(cards_to_draw):
+		if player.draw_card():
+			cards_actually_drawn += 1
+		else:
+			break
+	
+	if cards_actually_drawn == 0:
+		player.draw_card()
 	
 	player.mana_changed.emit(player.current_mana)
 	player.cards_played_changed.emit(player.cards_played_this_turn, player.get_max_cards_per_turn())
@@ -827,6 +883,9 @@ func start_player_turn():
 	
 	controls_panel.update_player_turn(true)
 	controls_panel.update_cards_available(player.hand.size() > 0)
+	
+	if cards_actually_drawn > 0:
+		player.card_drawn.emit(cards_actually_drawn, true)
 
 func start_ai_turn():
 	if not is_player_turn:
@@ -838,7 +897,18 @@ func start_ai_turn():
 	ai.turn_number += 1
 	ai.current_mana = ai.max_mana
 	ai.cards_played_this_turn = 0
-	ai.draw_card()
+	
+	var cards_to_draw = min(ai.get_max_cards_per_turn(), ai.max_hand_size - ai.hand.size())
+	var cards_actually_drawn = 0
+	
+	for i in range(cards_to_draw):
+		if ai.draw_card():
+			cards_actually_drawn += 1
+		else:
+			break
+	
+	if cards_actually_drawn == 0:
+		ai.draw_card()
 	
 	ai.mana_changed.emit(ai.current_mana)
 	ai.cards_played_changed.emit(ai.cards_played_this_turn, ai.get_max_cards_per_turn())
@@ -855,12 +925,13 @@ func start_ai_turn():
 	
 	await ai.ai_turn(player)
 	
-	if game_manager.should_restart_for_no_cards():
-		await game_manager.restart_for_no_cards()
-		return
-	
-	await get_tree().create_timer(1.0).timeout
-	start_player_turn()
+	if not game_manager.is_game_ended():
+		if game_manager.should_restart_for_no_cards():
+			await game_manager.restart_for_no_cards()
+			return
+		
+		await get_tree().create_timer(0.8).timeout
+		start_player_turn()
 
 func restart_game():
 	cleanup_notifications()
@@ -868,7 +939,8 @@ func restart_game():
 	game_count += 1
 	game_manager.restart_game(game_count, difficulty)
 	
-	await get_tree().create_timer(GameBalance.get_timer_delay("new_game")).timeout
+	await get_tree().create_timer(GameBalance.get_timer_delay("new_game") + 0.5).timeout
+	
 	setup_game_with_new_music()
 
 func setup_game_with_new_music():
@@ -890,7 +962,7 @@ func setup_game_with_new_music():
 		damage_bonus_label.visible = false
 	
 	ui_manager.update_all_labels(player, ai)
-	ui_manager.update_hand_display(player, card_scene, hand_container)
+	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
 	
 	start_new_game_music()
 	start_player_turn()
@@ -924,7 +996,7 @@ func setup_game_without_music():
 		damage_bonus_label.visible = false
 	
 	ui_manager.update_all_labels(player, ai)
-	ui_manager.update_hand_display(player, card_scene, hand_container)
+	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
 	
 	start_new_game_music()
 	start_player_turn()
@@ -937,10 +1009,13 @@ func _on_player_damage_taken(damage_amount: int):
 		StatisticsManagers.combat_action("damage_taken", damage_amount)
 
 func _on_player_hand_changed():
-	ui_manager.update_hand_display(player, card_scene, hand_container)
+	if not player:
+		return
+		
+	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
 	ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
 	
-	if is_player_turn and player.get_hand_size() == 0:
+	if is_player_turn and player.get_hand_size() == 0 and not game_manager.is_game_ended():
 		await game_manager.end_turn_no_cards()
 		start_ai_turn()
 
@@ -949,16 +1024,22 @@ func _on_player_cards_played_changed(cards_played: int, max_cards: int):
 	ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
 	ui_manager.update_cards_played_info(cards_played, max_cards, difficulty)
 	
-	if cards_played >= max_cards:
-		await game_manager.end_turn_limit_reached()
-		start_ai_turn()
-	elif is_player_turn and player.get_hand_size() == 0:
-		await game_manager.end_turn_no_cards()
-		start_ai_turn()
+	if not game_manager.is_game_ended():
+		if cards_played >= max_cards:
+			await game_manager.end_turn_limit_reached()
+			start_ai_turn()
+		elif is_player_turn and player.get_hand_size() == 0:
+			await game_manager.end_turn_no_cards()
+			start_ai_turn()
 
 func _on_player_card_drawn(cards_count: int, from_deck: bool):
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(0.2).timeout
 	audio_helper.play_card_draw_sound()
+	
+	if cards_count > 0 and ui_manager.has_method("update_hand_display_with_new_cards_animation"):
+		ui_manager.update_hand_display_with_new_cards_animation(player, card_scene, hand_container, cards_count)
+	else:
+		ui_manager.update_hand_display(player, card_scene, hand_container)
 
 func _on_turn_changed(turn_num: int, damage_bonus: int):
 	ui_manager.update_all_labels(player, ai)
@@ -974,9 +1055,12 @@ func _on_turn_changed(turn_num: int, damage_bonus: int):
 			damage_bonus_label.visible = false
 
 func _on_player_died():
+	game_manager.mark_game_ended()
 	_track_game_end(false)
 	
-	await get_tree().create_timer(1.0).timeout
+	await _wait_for_actions_to_complete()
+
+	game_manager.finalize_game_end()
 	
 	cleanup_notifications()
 	
@@ -988,6 +1072,9 @@ func _on_player_died():
 		
 	GameState.add_game_result(false)
 	game_notification.show_game_end_notification("Defeat", "hp_zero")
+	
+	await get_tree().create_timer(1.5).timeout
+	
 	await game_manager.handle_game_over("YOU LOST! Restarting...", end_turn_button)
 	restart_game()
 
@@ -995,9 +1082,12 @@ func _on_ai_card_played(card: CardData):
 	ai_notification.show_card_notification(card, "AI")
 
 func _on_ai_died():
+	game_manager.mark_game_ended()
 	_track_game_end(true)
 	
-	await get_tree().create_timer(1.0).timeout
+	await _wait_for_actions_to_complete()
+
+	game_manager.finalize_game_end()
 	
 	cleanup_notifications()
 
@@ -1009,8 +1099,25 @@ func _on_ai_died():
 		
 	GameState.add_game_result(true)
 	game_notification.show_game_end_notification("Victory!", "hp_zero")
+	
+	await get_tree().create_timer(1.5).timeout
+	
 	await game_manager.handle_game_over("YOU WON! Restarting...", end_turn_button)
 	restart_game()
+
+func _wait_for_actions_to_complete():
+	var max_wait_time = 10.0
+	var wait_time = 0.0
+	var check_interval = 0.1
+	
+	while wait_time < max_wait_time:
+		if game_manager.can_end_game():
+			return
+
+		await get_tree().create_timer(check_interval).timeout
+		wait_time += check_interval
+	
+	print("Timeout reached, proceeding with game end anyway")
 
 func _track_game_end(player_won: bool):
 	if not UnlockManagers:
@@ -1049,7 +1156,21 @@ func _track_game_end(player_won: bool):
 	
 	if player and player.turn_number >= 15:
 		UnlockManagers.track_progress("survive_turns", player.turn_number, extra_data)
+
+func _on_player_hp_changed(new_hp: int):
+	ui_manager.update_player_hp(new_hp)
 	
+	if StatisticsManagers and new_hp > player.current_hp:
+		var healing = new_hp - player.current_hp
+		StatisticsManagers.combat_action("healing_done", healing)
+
+func _on_player_shield_changed(new_shield: int):
+	ui_manager.update_player_shield(new_shield)
+	
+	if StatisticsManagers and new_shield > player.current_shield:
+		var shield_gained = new_shield - player.current_shield
+		StatisticsManagers.combat_action("shield_gained", shield_gained)
+
 func _notification(what):
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		cleanup_notifications()
@@ -1097,14 +1218,14 @@ func _on_card_clicked(card: Card):
 			player.play_card_without_hand_removal(card_data, ai, audio_helper)
 	
 	player.remove_card_from_hand(card_data)
-	
+
 func debug_unlock_bundle(bundle_id: String):
 	if UnlockManagers:
 		UnlockManagers.debug_unlock_all() if bundle_id == "all" else UnlockManagers.unlock_bundle(bundle_id)
 		restart_game()
 
 func _on_end_turn_pressed():
-	if not is_player_turn:
+	if not is_player_turn or game_manager.is_game_ended():
 		return
 	
 	if game_manager.should_restart_for_no_cards():
