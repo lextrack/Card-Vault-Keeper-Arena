@@ -1,0 +1,217 @@
+class_name BundleCelebration
+extends RefCounted
+
+var main_scene: Control
+var celebration_queue: Array = []
+var is_showing_celebration: bool = false
+
+signal celebration_completed
+
+func setup(main: Control):
+	main_scene = main
+
+func queue_celebration(bundle_info: Dictionary, cards: Array):
+	"""Añade una celebración a la cola"""
+	celebration_queue.append({
+		"bundle_info": bundle_info,
+		"cards": cards
+	})
+	
+	if not is_showing_celebration:
+		_process_queue()
+
+func clear_all_celebrations():
+	"""Limpia todas las celebraciones pendientes y activas"""
+	celebration_queue.clear()
+	is_showing_celebration = false
+	
+	# Limpiar overlays activos
+	var active_overlays = main_scene.get_children().filter(func(child):
+		return child is Control and child.z_index == 1000
+	)
+	
+	for overlay in active_overlays:
+		if is_instance_valid(overlay):
+			overlay.queue_free()
+
+func _process_queue():
+	"""Procesa la cola de celebraciones"""
+	if celebration_queue.size() == 0:
+		is_showing_celebration = false
+		celebration_completed.emit()
+		return
+	
+	is_showing_celebration = true
+	var celebration_data = celebration_queue.pop_front()
+	
+	await _show_celebration(celebration_data.bundle_info, celebration_data.cards)
+	
+	# Continuar con la siguiente celebración si hay más
+	if celebration_queue.size() > 0:
+		await main_scene.get_tree().create_timer(0.5).timeout
+		_process_queue()
+	else:
+		is_showing_celebration = false
+		celebration_completed.emit()
+
+func _show_celebration(bundle_info: Dictionary, cards: Array):
+	"""Muestra una celebración individual"""
+	var overlay = _create_overlay()
+	var panel = _create_panel()
+	overlay.add_child(panel)
+	
+	_populate_content(panel, bundle_info, cards)
+	
+	await _animate_entrance(overlay, panel)
+	_spawn_particles(overlay)
+	
+	# Auto-close después de 3 segundos
+	var celebration_finished = false
+	var close_celebration = func():
+		if celebration_finished:
+			return
+		celebration_finished = true
+		await _close_celebration(overlay)
+	
+	var timer = Timer.new()
+	timer.wait_time = 3.0
+	timer.one_shot = true
+	timer.timeout.connect(close_celebration)
+	overlay.add_child(timer)
+	timer.start()
+	
+	# Esperar hasta que termine
+	while not celebration_finished and is_instance_valid(overlay):
+		await main_scene.get_tree().process_frame
+
+func _create_overlay() -> Control:
+	"""Crea el overlay de fondo"""
+	var overlay = Control.new()
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.z_index = 1000
+	main_scene.add_child(overlay)
+	
+	var bg = ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0, 0, 0, 0.8)
+	overlay.add_child(bg)
+	
+	return overlay
+
+func _create_panel() -> Panel:
+	"""Crea el panel principal de la celebración"""
+	var panel = Panel.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.size = Vector2(500, 300)
+	panel.position = Vector2(-250, -150)
+	
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.15, 0.05, 1)
+	style.border_color = Color(1, 0.8, 0.2, 1)
+	style.border_width_left = 3
+	style.border_width_right = 3
+	style.border_width_top = 3
+	style.border_width_bottom = 3
+	panel.add_theme_stylebox_override("panel", style)
+	
+	return panel
+
+func _populate_content(panel: Panel, bundle_info: Dictionary, cards: Array):
+	"""Llena el panel con el contenido de la celebración"""
+	var vbox = VBoxContainer.new()
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vbox.add_theme_constant_override("separation", 15)
+	vbox.offset_left = 20
+	vbox.offset_top = 20
+	vbox.offset_right = -20
+	vbox.offset_bottom = -20
+	panel.add_child(vbox)
+	
+	# Título principal
+	var title = _create_label("BUNDLE UNLOCKED!", 28, Color(1, 0.9, 0.2, 1))
+	vbox.add_child(title)
+	
+	# Nombre del bundle
+	var bundle_name = _create_label(bundle_info.name, 20, Color(0.9, 1, 0.9, 1))
+	vbox.add_child(bundle_name)
+	
+	# Descripción
+	var description = _create_label(bundle_info.description, 14, Color(0.8, 0.9, 0.8, 1))
+	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(description)
+	
+	# Lista de cartas
+	var cards_text = "New Cards: " + ", ".join(cards)
+	var cards_label = _create_label(cards_text, 16, Color(0.7, 1, 0.9, 1))
+	cards_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(cards_label)
+
+func _create_label(text: String, font_size: int, color: Color) -> Label:
+	"""Helper para crear labels estilizados"""
+	var label = Label.new()
+	label.text = text
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", color)
+	return label
+
+func _animate_entrance(overlay: Control, panel: Panel):
+	"""Anima la entrada de la celebración"""
+	overlay.modulate.a = 0.0
+	panel.scale = Vector2(0.5, 0.5)
+	
+	var tween = main_scene.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(overlay, "modulate:a", 1.0, 0.5)
+	tween.tween_property(panel, "scale", Vector2(1.1, 1.1), 0.4)
+	tween.tween_property(panel, "scale", Vector2(1.0, 1.0), 0.2)
+	
+	await tween.finished
+
+func _spawn_particles(overlay: Control):
+	"""Crea partículas de celebración"""
+	var particles = ["✨", "🎉", "⭐", "💫", "🌟"]
+	
+	for i in range(10):
+		var particle = Label.new()
+		particle.text = particles[randi() % particles.size()]
+		particle.add_theme_font_size_override("font_size", 24)
+		particle.position = Vector2(
+			randf_range(50, overlay.size.x - 50),
+			randf_range(50, overlay.size.y - 200)
+		)
+		overlay.add_child(particle)
+		
+		var tween = main_scene.create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(particle, "position:y", particle.position.y - 100, 2.0)
+		tween.tween_property(particle, "modulate:a", 0.0, 2.0)
+		
+		tween.finished.connect(func():
+			if is_instance_valid(particle):
+				particle.queue_free()
+		)
+
+func _close_celebration(overlay: Control):
+	"""Cierra una celebración con animación"""
+	if not is_instance_valid(overlay):
+		return
+		
+	var fade_tween = main_scene.create_tween()
+	fade_tween.tween_property(overlay, "modulate:a", 0.0, 0.3)
+	await fade_tween.finished
+	
+	if is_instance_valid(overlay):
+		overlay.queue_free()
+
+func wait_for_celebrations_to_complete() -> void:
+	"""Espera a que todas las celebraciones terminen"""
+	var max_wait = 5.0
+	var wait_time = 0.0
+	
+	while is_showing_celebration and wait_time < max_wait:
+		await main_scene.get_tree().create_timer(0.1).timeout
+		wait_time += 0.1
+	
+	if celebration_queue.size() > 0:
+		await main_scene.get_tree().create_timer(0.5).timeout

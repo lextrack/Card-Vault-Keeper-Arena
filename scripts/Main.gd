@@ -37,6 +37,7 @@ var game_count: int = 1
 var card_scene = preload("res://scenes/Card.tscn")
 var ai_notification_scene = preload("res://scenes/AICardNotification.tscn")
 var game_notification_scene = preload("res://scenes/GameNotification.tscn")
+var bundle_celebration_system: BundleCelebration
 
 @export var controls_panel_scene: PackedScene = preload("res://scenes/ControlsPanel.tscn")
 @export var options_menu_scene: PackedScene = preload("res://scenes/OptionsMenu.tscn")
@@ -179,7 +180,7 @@ func restore_game_from_saved_state():
 	ui_manager.update_all_labels(player, ai)
 	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
 	
-	start_game_music()
+	start_game_music(false)
 	
 	if is_player_turn:
 		ui_manager.start_player_turn(player, difficulty)
@@ -209,192 +210,11 @@ func _setup_unlock_system():
 
 func _on_bundle_unlocked(bundle_id: String, cards: Array):
 	var bundle_info = UnlockManagers.get_bundle_info(bundle_id)
-	queue_bundle_celebration(bundle_info, cards)
+	bundle_celebration_system.queue_celebration(bundle_info, cards)
 	audio_helper.play_bonus_sound()
-	
-func queue_bundle_celebration(bundle_info: Dictionary, cards: Array):
-	bundle_celebration_queue.append({
-		"bundle_info": bundle_info,
-		"cards": cards
-	})
-	
-	if not is_showing_bundle_celebration:
-		process_bundle_celebration_queue()
-
-func show_bundle_unlock_celebration(bundle_info: Dictionary, cards: Array):
-	var overlay = _create_celebration_overlay()
-	var panel = _create_celebration_panel()
-	overlay.add_child(panel)
-	
-	_populate_celebration_content(panel, bundle_info, cards)
-	
-	await _animate_celebration_entrance(overlay, panel)
-	_spawn_celebration_particles(overlay)
-	
-	var celebration_finished = false
-	var close_celebration = func():
-		if celebration_finished:
-			return
-		celebration_finished = true
-		await _close_celebration(overlay)
-	
-	var timer = Timer.new()
-	timer.wait_time = 3.0
-	timer.one_shot = true
-	timer.timeout.connect(close_celebration)
-	overlay.add_child(timer)
-	timer.start()
-	
-	while not celebration_finished and is_instance_valid(overlay):
-		await get_tree().process_frame
-
-func _create_celebration_overlay() -> Control:
-	var overlay = Control.new()
-	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	overlay.z_index = 1000
-	add_child(overlay)
-	
-	var bg = ColorRect.new()
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0, 0, 0, 0.8)
-	overlay.add_child(bg)
-	
-	return overlay
-
-func _create_celebration_panel() -> Panel:
-	var panel = Panel.new()
-	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	panel.size = Vector2(500, 300)
-	panel.position = Vector2(-250, -150)
-	
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.05, 0.15, 0.05, 1)
-	style.border_color = Color(1, 0.8, 0.2, 1)
-	style.border_width_left = 3
-	style.border_width_right = 3
-	style.border_width_top = 3
-	style.border_width_bottom = 3
-	panel.add_theme_stylebox_override("panel", style)
-	
-	return panel
-
-func _populate_celebration_content(panel: Panel, bundle_info: Dictionary, cards: Array):
-	var vbox = VBoxContainer.new()
-	vbox.name = "VBoxContainer"
-	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 15)
-	vbox.offset_left = 20
-	vbox.offset_top = 20
-	vbox.offset_right = -20
-	vbox.offset_bottom = -20
-	panel.add_child(vbox)
-	
-	var title = _create_celebration_label("BUNDLE UNLOCKED!", 28, Color(1, 0.9, 0.2, 1))
-	vbox.add_child(title)
-	
-	var bundle_name = _create_celebration_label(bundle_info.name, 20, Color(0.9, 1, 0.9, 1))
-	vbox.add_child(bundle_name)
-	
-	var description = _create_celebration_label(bundle_info.description, 14, Color(0.8, 0.9, 0.8, 1))
-	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vbox.add_child(description)
-	
-	var cards_label = _create_celebration_label("New Cards: " + ", ".join(cards), 16, Color(0.7, 1, 0.9, 1))
-	cards_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vbox.add_child(cards_label)
-
-func _create_celebration_label(text: String, font_size: int, color: Color) -> Label:
-	var label = Label.new()
-	label.text = text
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", color)
-	return label
-
-func _animate_celebration_entrance(overlay: Control, panel: Panel):
-	overlay.modulate.a = 0.0
-	panel.scale = Vector2(0.5, 0.5)
-	
-	var tween = create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(overlay, "modulate:a", 1.0, 0.5)
-	tween.tween_property(panel, "scale", Vector2(1.1, 1.1), 0.4)
-	tween.tween_property(panel, "scale", Vector2(1.0, 1.0), 0.2)
-	
-	await tween.finished
-
-func _spawn_celebration_particles(overlay: Control):
-	var particles = ["✨", "🎉", "⭐", "💫", "🌟"]
-	
-	for i in range(10):
-		var particle = Label.new()
-		particle.text = particles[randi() % particles.size()]
-		particle.add_theme_font_size_override("font_size", 24)
-		particle.position = Vector2(
-			randf_range(50, overlay.size.x - 50),
-			randf_range(50, overlay.size.y - 200)
-		)
-		overlay.add_child(particle)
-		
-		var tween = create_tween()
-		tween.set_parallel(true)
-		tween.tween_property(particle, "position:y", particle.position.y - 100, 2.0)
-		tween.tween_property(particle, "modulate:a", 0.0, 2.0)
-		
-		tween.finished.connect(func():
-			if is_instance_valid(particle):
-				particle.queue_free()
-		)
-
-func _close_celebration(overlay: Control):
-	if not is_instance_valid(overlay):
-		return
-		
-	var fade_tween = create_tween()
-	fade_tween.tween_property(overlay, "modulate:a", 0.0, 0.3)
-	await fade_tween.finished
-	
-	if is_instance_valid(overlay):
-		overlay.queue_free()
-
-func clear_bundle_celebration_queue():
-	bundle_celebration_queue.clear()
-	is_showing_bundle_celebration = false
-	
-	var active_overlays = get_children().filter(func(child):
-		return child is Control and child.z_index == 1000
-	)
-	
-	for overlay in active_overlays:
-		if is_instance_valid(overlay):
-			overlay.queue_free()
-
-func process_bundle_celebration_queue():
-	if bundle_celebration_queue.size() == 0:
-		is_showing_bundle_celebration = false
-		return
-	
-	is_showing_bundle_celebration = true
-	var celebration_data = bundle_celebration_queue.pop_front()
-	
-	await show_bundle_unlock_celebration(celebration_data.bundle_info, celebration_data.cards)
-	
-	if bundle_celebration_queue.size() > 0:
-		await get_tree().create_timer(0.5).timeout
-		process_bundle_celebration_queue()
-	else:
-		is_showing_bundle_celebration = false
 		
 func _wait_for_celebrations_to_complete():
-	var max_wait = 5.0
-	var wait_time = 0.0
-	
-	while is_showing_bundle_celebration and wait_time < max_wait:
-		await get_tree().create_timer(0.1).timeout
-		wait_time += 0.1
-	
-	if bundle_celebration_queue.size() > 0:
-		await get_tree().create_timer(0.5).timeout
+	await bundle_celebration_system.wait_for_celebrations_to_complete()
 
 func _wait_for_actions_to_complete():
 	var max_wait_time = 10.0
@@ -431,6 +251,9 @@ func _setup_components():
 	
 	confirmation_dialog = ExitConfirmationDialog.new()
 	confirmation_dialog.setup(self)
+	
+	bundle_celebration_system = BundleCelebration.new()
+	bundle_celebration_system.setup(self)
 
 func _setup_notifications():
 	ai_notification = ai_notification_scene.instantiate()
@@ -451,7 +274,7 @@ func cleanup_notifications():
 	if options_menu:
 		options_menu.hide_options()
 	
-	clear_bundle_celebration_queue()
+	bundle_celebration_system.clear_all_celebrations()
 	
 	await get_tree().process_frame
 
@@ -479,17 +302,6 @@ func _play_direct_entrance():
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 1.0, 0.5)
 	await tween.finished
-	
-func start_game_music():
-	if GlobalMusicManager:
-		if game_music_playlist.size() > 0:
-			GlobalMusicManager.set_game_music_playlist(game_music_playlist)
-		else:
-			print("Warning: No game music playlist configured!")
-			return
-		
-		var is_new_game = not returning_from_challengehub
-		GlobalMusicManager.start_game_music(1.5, is_new_game)
 
 func stop_game_music(fade_duration: float = 1.0):
 	if GlobalMusicManager:
@@ -524,7 +336,7 @@ func setup_game():
 	ui_manager.update_all_labels(player, ai)
 	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
 	
-	start_game_music()
+	start_game_music(not returning_from_challengehub)
 	start_player_turn()
 		
 func verify_and_startup_deck():
@@ -677,6 +489,8 @@ func restart_game():
 func setup_game_with_new_music():
 	verify_and_startup_deck()
 	
+	start_game_music(true)
+	
 	game_manager.setup_new_game(difficulty)
 	player = game_manager.player
 	ai = game_manager.ai
@@ -690,10 +504,9 @@ func setup_game_with_new_music():
 	ui_manager.update_all_labels(player, ai)
 	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
 	
-	start_new_game_music()
 	start_player_turn()
-
-func start_new_game_music():
+	
+func start_game_music(is_new_game: bool = false):
 	if GlobalMusicManager:
 		if game_music_playlist.size() > 0:
 			GlobalMusicManager.set_game_music_playlist(game_music_playlist)
@@ -701,7 +514,7 @@ func start_new_game_music():
 			print("Warning: No game music playlist configured!")
 			return
 		
-		GlobalMusicManager.start_game_music(1.5, true)
+		GlobalMusicManager.start_game_music(1.5, is_new_game)
 	
 func _on_player_damage_taken(damage_amount: int):
 	audio_helper.play_damage_sound(damage_amount)
