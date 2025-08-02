@@ -108,6 +108,7 @@ volume_db = 5.0
 
 [node name="UIClickPlayer" type="AudioStreamPlayer" parent="AudioManager/UISounds"]
 stream = ExtResource("10_bjd11")
+volume_db = -1.0
 
 [node name="UIHoverPlayer" type="AudioStreamPlayer" parent="AudioManager/UISounds"]
 
@@ -365,7 +366,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 23
+theme_override_constants/separation = 25
 alignment = 1
 
 [node name="BottomPanel" type="Panel" parent="UILayer"]
