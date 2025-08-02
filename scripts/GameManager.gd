@@ -37,31 +37,79 @@ func setup_new_game(difficulty: String):
 	
 	main_scene.game_over_label.visible = false
 	
+	# Conectar las señales centralizadamente
+	connect_all_signals()
+	
 	print("Game setup complete - Turn numbers reset to 0")
 
-func _cleanup_existing_players():
-	if player:
-		_disconnect_player_signals(player)
-		player.queue_free()
-		player = null
-	
-	if ai:
-		_disconnect_ai_signals(ai)
-		ai.queue_free()
-		ai = null
-	
-	if main_scene:
-		await main_scene.get_tree().process_frame
-		await main_scene.get_tree().process_frame
+func connect_all_signals():
+	"""Conecta todas las señales del player y AI de forma centralizada"""
+	connect_player_signals()
+	connect_ai_signals()
 
-func _disconnect_player_signals(p: Player):
-	if not p:
+func connect_player_signals():
+	"""Conecta todas las señales del player"""
+	if not player or not main_scene:
+		push_error("Cannot connect player signals: player or main_scene is null")
 		return
-		
-	var connections_to_disconnect = [
+	
+	# Desconectar primero para evitar conexiones duplicadas
+	disconnect_player_signals()
+	
+	# Conectar señales del UI
+	player.hp_changed.connect(main_scene.ui_manager.update_player_hp)
+	player.mana_changed.connect(main_scene.ui_manager.update_player_mana)
+	player.shield_changed.connect(main_scene.ui_manager.update_player_shield)
+	
+	# Conectar señales de eventos del juego
+	player.player_died.connect(main_scene._on_player_died)
+	player.hand_changed.connect(main_scene._on_player_hand_changed)
+	player.cards_played_changed.connect(main_scene._on_player_cards_played_changed)
+	player.turn_changed.connect(main_scene._on_turn_changed)
+	player.card_drawn.connect(main_scene._on_player_card_drawn)
+	player.damage_taken.connect(main_scene._on_player_damage_taken)
+	player.hp_changed.connect(main_scene._on_player_hp_changed)
+	player.shield_changed.connect(main_scene._on_player_shield_changed)
+	
+	print("Player signals connected successfully")
+
+func connect_ai_signals():
+	"""Conecta todas las señales del AI"""
+	if not ai or not main_scene:
+		push_error("Cannot connect AI signals: ai or main_scene is null")
+		return
+	
+	# Desconectar primero para evitar conexiones duplicadas
+	disconnect_ai_signals()
+	
+	# Conectar señales del UI
+	ai.hp_changed.connect(main_scene.ui_manager.update_ai_hp)
+	ai.mana_changed.connect(main_scene.ui_manager.update_ai_mana)
+	ai.shield_changed.connect(main_scene.ui_manager.update_ai_shield)
+	
+	# Conectar señales de eventos del juego
+	ai.player_died.connect(main_scene._on_ai_died)
+	ai.ai_card_played.connect(main_scene._on_ai_card_played)
+	
+	print("AI signals connected successfully")
+
+func disconnect_all_signals():
+	"""Desconecta todas las señales del player y AI"""
+	disconnect_player_signals()
+	disconnect_ai_signals()
+
+func disconnect_player_signals():
+	"""Desconecta todas las señales del player"""
+	if not player:
+		return
+	
+	var signals_to_disconnect = [
+		# Señales del UI
 		["hp_changed", main_scene.ui_manager.update_player_hp],
 		["mana_changed", main_scene.ui_manager.update_player_mana],
 		["shield_changed", main_scene.ui_manager.update_player_shield],
+		
+		# Señales de eventos del juego
 		["player_died", main_scene._on_player_died],
 		["hand_changed", main_scene._on_player_hand_changed],
 		["cards_played_changed", main_scene._on_player_cards_played_changed],
@@ -72,32 +120,54 @@ func _disconnect_player_signals(p: Player):
 		["shield_changed", main_scene._on_player_shield_changed]
 	]
 	
-	for connection in connections_to_disconnect:
-		var signal_name = connection[0]
-		var callable_target = connection[1]
-		
-		if p.has_signal(signal_name) and p.is_connected(signal_name, callable_target):
-			p.disconnect(signal_name, callable_target)
+	_disconnect_signals_from_list(player, signals_to_disconnect)
 
-func _disconnect_ai_signals(a: Player):
-	if not a:
+func disconnect_ai_signals():
+	"""Desconecta todas las señales del AI"""
+	if not ai:
 		return
-		
-	var connections_to_disconnect = [
+	
+	var signals_to_disconnect = [
+		# Señales del UI
 		["hp_changed", main_scene.ui_manager.update_ai_hp],
 		["mana_changed", main_scene.ui_manager.update_ai_mana],
 		["shield_changed", main_scene.ui_manager.update_ai_shield],
+		
+		# Señales de eventos del juego
 		["player_died", main_scene._on_ai_died],
 		["ai_card_played", main_scene._on_ai_card_played]
 	]
 	
-	for connection in connections_to_disconnect:
+	_disconnect_signals_from_list(ai, signals_to_disconnect)
+
+func _disconnect_signals_from_list(source_object: Object, signals_list: Array):
+	"""Función helper para desconectar señales de una lista"""
+	if not source_object or not main_scene:
+		return
+		
+	for connection in signals_list:
 		var signal_name = connection[0]
 		var callable_target = connection[1]
 		
-		if a.has_signal(signal_name) and a.is_connected(signal_name, callable_target):
-			a.disconnect(signal_name, callable_target)
+		if source_object.has_signal(signal_name) and source_object.is_connected(signal_name, callable_target):
+			source_object.disconnect(signal_name, callable_target)
 
+func _cleanup_existing_players():
+	if player:
+		disconnect_player_signals()
+		player.queue_free()
+		player = null
+	
+	if ai:
+		disconnect_ai_signals()
+		ai.queue_free()
+		ai = null
+	
+	if main_scene:
+		await main_scene.get_tree().process_frame
+		await main_scene.get_tree().process_frame
+
+# Resto de funciones de GameManager permanecen igual...
 func restart_game(game_count: int, difficulty: String):
 	if restart_in_progress:
 		return

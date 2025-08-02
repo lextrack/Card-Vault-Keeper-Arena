@@ -19,7 +19,6 @@ var selected_card_index: int = 0
 var original_ui_position: Vector2
 var is_screen_shaking: bool = false
 var original_turn_label_y: float
-var floating_damage_count: int = 0
 
 var current_hand_hash: String = ""
 

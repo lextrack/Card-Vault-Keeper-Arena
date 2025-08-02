@@ -17,8 +17,6 @@ extends Control
 @onready var audio_manager = $AudioManager
 
 var options_menu: OptionsMenu
-@export var options_menu_scene: PackedScene = preload("res://scenes/OptionsMenu.tscn")
-
 var ui_manager: UIManager
 var game_manager: GameManager
 var input_manager: InputManager
@@ -27,21 +25,21 @@ var confirmation_dialog: ExitConfirmationDialog
 var returning_from_challengehub: bool = false
 var bundle_celebration_queue: Array = []
 var is_showing_bundle_celebration: bool = false
-
-var card_scene = preload("res://scenes/Card.tscn")
-var ai_notification_scene = preload("res://scenes/AICardNotification.tscn")
-var game_notification_scene = preload("res://scenes/GameNotification.tscn")
-@export var controls_panel_scene: PackedScene = preload("res://scenes/ControlsPanel.tscn")
-
 var player: Player
 var ai: Player
 var ai_notification: AICardNotification
 var game_notification: GameNotification
 var controls_panel: ControlsPanel
-
 var is_player_turn: bool = true
 var difficulty: String = "normal"
 var game_count: int = 1
+
+var card_scene = preload("res://scenes/Card.tscn")
+var ai_notification_scene = preload("res://scenes/AICardNotification.tscn")
+var game_notification_scene = preload("res://scenes/GameNotification.tscn")
+
+@export var controls_panel_scene: PackedScene = preload("res://scenes/ControlsPanel.tscn")
+@export var options_menu_scene: PackedScene = preload("res://scenes/OptionsMenu.tscn")
 
 var game_music_playlist: Array = [
 	preload("res://audio/music/game_battle_1.ogg"),
@@ -66,10 +64,6 @@ func initialize_game():
 	
 	if StatisticsManagers:
 		StatisticsManagers.start_game(difficulty)
-		
-	if OS.is_debug_build():
-		create_debug_overlay()
-		_validate_card_system()
 	
 	await handle_scene_entrance()
 	setup_game()
@@ -106,10 +100,6 @@ func initialize_game_from_saved_state():
 	
 	if StatisticsManagers:
 		pass
-		
-	if OS.is_debug_build():
-		create_debug_overlay()
-		_validate_card_system()
 	
 	await handle_scene_entrance()
 	await restore_game_from_saved_state()
@@ -149,7 +139,7 @@ func show_new_cards_notification(new_cards: Array):
 	if game_notification:
 		game_notification.show_success(message, detail)
 	else:
-		show_simple_unlock_notification(title, message)
+		push_error("Error trying to show notification")
 	
 func verify_deck_consistency_after_unlock():
 	if not player or not UnlockManagers:
@@ -177,9 +167,6 @@ func restore_game_from_saved_state():
 		push_error("Failed to restore game state, starting new game")
 		setup_game()
 		return
-	
-	_connect_player_signals()
-	_connect_ai_signals()
 	
 	if UnlockManagers:
 		if not UnlockManagers.bundle_unlocked.is_connected(_on_bundle_unlocked):
@@ -213,94 +200,6 @@ func restore_game_from_saved_state():
 			print("Post-ChallengeHub unlock stats: ", current_stats.unlocked_bundles, "/", current_stats.total_bundles)
 		
 	GameStateManager.clear_saved_state()
-	
-func show_simple_unlock_notification(title: String, message: String):
-	var notification = Label.new()
-	notification.text = title + "\n" + message
-	notification.anchor_left = 0.5
-	notification.anchor_right = 0.5
-	notification.anchor_top = 0.2
-	notification.anchor_bottom = 0.2
-	notification.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	notification.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	notification.add_theme_font_size_override("font_size", 18)
-	notification.add_theme_color_override("font_color", Color(0.2, 1.0, 0.2, 1.0))
-	
-	var bg = ColorRect.new()
-	bg.color = Color(0.0, 0.0, 0.0, 0.8)
-	bg.anchor_left = 0.3
-	bg.anchor_right = 0.7
-	bg.anchor_top = 0.15
-	bg.anchor_bottom = 0.25
-	
-	ui_layer.add_child(bg)
-	ui_layer.add_child(notification)
-	
-	notification.modulate.a = 0.0
-	bg.modulate.a = 0.0
-	
-	var tween = create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(notification, "modulate:a", 1.0, 0.5)
-	tween.tween_property(bg, "modulate:a", 1.0, 0.5)
-	
-	var timer = Timer.new()
-	timer.wait_time = 3.0
-	timer.one_shot = true
-	add_child(timer)
-	timer.start()
-	
-	await timer.timeout
-	
-	var fade_out_tween = create_tween()
-	fade_out_tween.set_parallel(true)
-	fade_out_tween.tween_property(notification, "modulate:a", 0.0, 0.5)
-	fade_out_tween.tween_property(bg, "modulate:a", 0.0, 0.5)
-	await fade_out_tween.finished
-	
-	notification.queue_free()
-	bg.queue_free()
-	timer.queue_free()
-
-func create_debug_overlay():
-	var debug_label = Label.new()
-	debug_label.name = "DebugOverlay"
-	debug_label.text = "Loading debug..."
-
-	debug_label.anchor_left = 0.0
-	debug_label.anchor_top = 1.0
-	debug_label.anchor_right = 0.0
-	debug_label.anchor_bottom = 1.0
-
-	debug_label.offset_left = 10
-	debug_label.offset_top = -30
-
-	debug_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	debug_label.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-
-	debug_label.add_theme_font_size_override("font_size", 12)
-	debug_label.add_theme_color_override("font_color", Color.YELLOW)
-	
-	ui_layer.add_child(debug_label)
-	var timer = Timer.new()
-	timer.wait_time = 1.0
-	timer.autostart = true
-	timer.timeout.connect(update_debug_overlay)
-	add_child(timer)
-
-func update_debug_overlay():
-	var debug_label = ui_layer.get_node_or_null("DebugOverlay")
-	if not debug_label or not UnlockManagers:
-		return
-	
-	var stats = UnlockManagers.get_unlock_stats()
-	var text = "Bundles: %d/%d | Cards: %d | %.1f%%" % [
-		stats.unlocked_bundles,
-		stats.total_bundles,
-		stats.available_cards,
-		stats.completion_percentage
-	]
-	debug_label.text = text
 	
 func _setup_unlock_system():
 	if UnlockManagers:
@@ -485,28 +384,37 @@ func process_bundle_celebration_queue():
 		process_bundle_celebration_queue()
 	else:
 		is_showing_bundle_celebration = false
+		
+func _wait_for_celebrations_to_complete():
+	var max_wait = 5.0
+	var wait_time = 0.0
+	
+	while is_showing_bundle_celebration and wait_time < max_wait:
+		await get_tree().create_timer(0.1).timeout
+		wait_time += 0.1
+	
+	if bundle_celebration_queue.size() > 0:
+		await get_tree().create_timer(0.5).timeout
+
+func _wait_for_actions_to_complete():
+	var max_wait_time = 10.0
+	var wait_time = 0.0
+	var check_interval = 0.1
+	
+	while wait_time < max_wait_time:
+		if game_manager.can_end_game():
+			return
+
+		await get_tree().create_timer(check_interval).timeout
+		wait_time += check_interval
+	
+	print("Timeout reached, proceeding with game end anyway")
 
 func _on_card_unlocked(card_name: String):
 	pass
 
 func _on_unlock_progress_updated(bundle_id: String, current: int, required: int):
 	pass
-	
-func _validate_card_system():
-	var validation = CardProbability.run_full_validation()
-	
-	if not validation.database_valid:
-		print("ERROR: Invalid card database:")
-		for error in validation.errors:
-			print("   ", error)
-	
-	if not validation.generation_working:
-		print("ERROR: Deck generation not working")
-	
-	if validation.warnings.size() > 0:
-		print("WARNINGS from card system:")
-		for warning in validation.warnings:
-			print("   ", warning)
 
 func _setup_components():
 	ui_manager = UIManager.new()
@@ -607,15 +515,6 @@ func setup_game():
 		push_error("Failed to create AI in setup_game")
 		return
 	
-	_connect_player_signals()
-	_connect_ai_signals()
-	
-	if OS.is_debug_build():
-		verify_deck_compliance()
-		if not validate_deck_generation():
-			push_error("Deck generation validation failed - using emergency reset")
-			emergency_deck_reset()
-	
 	if damage_bonus_label:
 		damage_bonus_label.visible = false
 
@@ -627,69 +526,6 @@ func setup_game():
 	
 	start_game_music()
 	start_player_turn()
-	
-func verify_deck_compliance():
-	if player:
-		var player_cards = player.get_all_cards()
-		var locked_count = 0
-		var locked_cards = []
-		for card in player_cards:
-			if card is CardData and not UnlockManagers.is_card_available(card.card_name):
-				locked_count += 1
-				locked_cards.append(card.card_name)
-		
-		if locked_count > 0:
-			print("Player deck has ", locked_count, " locked cards!")
-			set_deck_compliance(player, locked_cards)
-	
-	if ai:
-		var ai_cards = ai.get_all_cards()
-		var ai_locked_count = 0
-		var ai_locked_cards = []
-		for card in ai_cards:
-			if card is CardData and not UnlockManagers.is_card_available(card.card_name):
-				ai_locked_count += 1
-				ai_locked_cards.append(card.card_name)
-		
-		if ai_locked_count > 0:
-			print("AI deck has ", ai_locked_count, " locked cards!")
-			set_deck_compliance(ai, ai_locked_cards)
-			
-func set_deck_compliance(target_player: Player, violations: Array):
-	var available_templates = CardDatabase.get_available_card_templates()
-	if available_templates.size() == 0:
-		push_error("No available card templates for compliance fix!")
-		return
-	
-	for violation in violations:
-		remove_card_from_player(target_player, violation)
-		add_replacement_card(target_player, available_templates)
-	
-func remove_card_from_player(target_player: Player, card_name: String):
-	var removed = false
-	
-	for i in range(target_player.hand.size() - 1, -1, -1):
-		var card = target_player.hand[i]
-		if card is CardData and card.card_name == card_name:
-			target_player.hand.remove_at(i)
-			removed = true
-			break
-	
-	if not removed:
-		for i in range(target_player.deck.size() - 1, -1, -1):
-			var card = target_player.deck[i]
-			if card is CardData and card.card_name == card_name:
-				target_player.deck.remove_at(i)
-				removed = true
-				break
-	
-	if not removed:
-		for i in range(target_player.discard_pile.size() - 1, -1, -1):
-			var card = target_player.discard_pile[i]
-			if card is CardData and card.card_name == card_name:
-				target_player.discard_pile.remove_at(i)
-				removed = true
-				break
 		
 func verify_and_startup_deck():
 	if not UnlockManagers:
@@ -734,112 +570,6 @@ func validate_deck_generation():
 		print("Pool status: ", in_pool, "/", all_possible, " cards in pool (", filtered, " filtered out)")
 	
 	return violations.size() == 0
-
-func emergency_deck_reset():
-	print("EMERGENCY: Resetting to safe starter deck")
-	
-	if player:
-		player.deck.clear()
-		player.hand.clear()
-		player.discard_pile.clear()
-		
-		var safe_deck = DeckGenerator._create_emergency_deck()
-		player.deck = safe_deck
-		player.draw_initial_hand()
-		
-		ui_manager.update_hand_display(player, card_scene, hand_container)
-	
-	if ai:
-		ai.deck.clear()
-		ai.hand.clear()
-		ai.discard_pile.clear()
-		
-		var safe_ai_deck = DeckGenerator.create_difficulty_deck(difficulty, 30)
-		ai.deck = safe_ai_deck
-		ai.draw_initial_hand()
-		
-func add_replacement_card(target_player: Player, available_templates: Array):
-	if available_templates.size() == 0:
-		return
-	
-	var random_template = available_templates[randi() % available_templates.size()]
-	var replacement_card = CardBuilder.from_template(random_template)
-	
-	if replacement_card:
-		target_player.deck.append(replacement_card)
-
-func _disconnect_player_signals():
-	if not player:
-		return
-	
-	if player.hp_changed.is_connected(ui_manager.update_player_hp):
-		player.hp_changed.disconnect(ui_manager.update_player_hp)
-	if player.mana_changed.is_connected(ui_manager.update_player_mana):
-		player.mana_changed.disconnect(ui_manager.update_player_mana)
-	if player.shield_changed.is_connected(ui_manager.update_player_shield):
-		player.shield_changed.disconnect(ui_manager.update_player_shield)
-	if player.player_died.is_connected(_on_player_died):
-		player.player_died.disconnect(_on_player_died)
-	if player.hand_changed.is_connected(_on_player_hand_changed):
-		player.hand_changed.disconnect(_on_player_hand_changed)
-	if player.cards_played_changed.is_connected(_on_player_cards_played_changed):
-		player.cards_played_changed.disconnect(_on_player_cards_played_changed)
-	if player.turn_changed.is_connected(_on_turn_changed):
-		player.turn_changed.disconnect(_on_turn_changed)
-	if player.card_drawn.is_connected(_on_player_card_drawn):
-		player.card_drawn.disconnect(_on_player_card_drawn)
-
-func _disconnect_ai_signals():
-	if not ai:
-		return
-	
-	if ai.hp_changed.is_connected(ui_manager.update_ai_hp):
-		ai.hp_changed.disconnect(ui_manager.update_ai_hp)
-	if ai.mana_changed.is_connected(ui_manager.update_ai_mana):
-		ai.mana_changed.disconnect(ui_manager.update_ai_mana)
-	if ai.shield_changed.is_connected(ui_manager.update_ai_shield):
-		ai.shield_changed.disconnect(ui_manager.update_ai_shield)
-	if ai.player_died.is_connected(_on_ai_died):
-		ai.player_died.disconnect(_on_ai_died)
-	if ai.ai_card_played.is_connected(_on_ai_card_played):
-		ai.ai_card_played.disconnect(_on_ai_card_played)
-
-func _connect_player_signals():
-	if not player:
-		push_error("Cannot connect player signals: player is null")
-		return
-	
-	_disconnect_player_signals()
-	
-	player.hp_changed.connect(ui_manager.update_player_hp)
-	player.mana_changed.connect(ui_manager.update_player_mana)
-	player.shield_changed.connect(ui_manager.update_player_shield)
-	player.player_died.connect(_on_player_died)
-	player.hand_changed.connect(_on_player_hand_changed)
-	player.cards_played_changed.connect(_on_player_cards_played_changed)
-	player.turn_changed.connect(_on_turn_changed)
-	player.card_drawn.connect(_on_player_card_drawn)
-	player.damage_taken.connect(_on_player_damage_taken)
-	player.hp_changed.connect(_on_player_hp_changed)
-	player.shield_changed.connect(_on_player_shield_changed)
-
-func _connect_ai_signals():
-	if not ai:
-		push_error("Cannot connect AI signals: ai is null")
-		return
-		
-	_disconnect_ai_signals()
-	
-	ai.hp_changed.connect(ui_manager.update_ai_hp)
-	ai.mana_changed.connect(ui_manager.update_ai_mana)
-	ai.shield_changed.connect(ui_manager.update_ai_shield)
-	ai.player_died.connect(_on_ai_died)
-	ai.ai_card_played.connect(_on_ai_card_played)
-	
-func _on_ai_damage_dealt(damage: int):
-	var ai_stats_panel = $UILayer/TopPanel/StatsContainer/AIStatsPanel
-	var target_pos = ai_stats_panel.global_position + ai_stats_panel.size / 2
-	ui_manager.show_floating_damage(damage, target_pos, false)
 
 func start_player_turn():
 	if is_player_turn or game_manager.is_game_ended():
@@ -950,14 +680,6 @@ func setup_game_with_new_music():
 	game_manager.setup_new_game(difficulty)
 	player = game_manager.player
 	ai = game_manager.ai
-	
-	_connect_player_signals()
-	_connect_ai_signals()
-	
-	if OS.is_debug_build():
-		verify_deck_compliance()
-		if not validate_deck_generation():
-			emergency_deck_reset()
 
 	if damage_bonus_label:
 		damage_bonus_label.visible = false
@@ -980,30 +702,6 @@ func start_new_game_music():
 			return
 		
 		GlobalMusicManager.start_game_music(1.5, true)
-	
-func setup_game_without_music():
-	verify_and_startup_deck()
-	
-	game_manager.setup_new_game(difficulty)
-	player = game_manager.player
-	ai = game_manager.ai
-	
-	_connect_player_signals()
-	_connect_ai_signals()
-	
-	if OS.is_debug_build():
-		verify_deck_compliance()
-		if not validate_deck_generation():
-			emergency_deck_reset()
-
-	if damage_bonus_label:
-		damage_bonus_label.visible = false
-	
-	ui_manager.update_all_labels(player, ai)
-	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
-	
-	start_new_game_music()
-	start_player_turn()
 	
 func _on_player_damage_taken(damage_amount: int):
 	audio_helper.play_damage_sound(damage_amount)
@@ -1114,32 +812,6 @@ func _on_ai_died():
 	await game_manager.handle_game_over("YOU WON! Restarting...", end_turn_button)
 	restart_game()
 
-	
-func _wait_for_celebrations_to_complete():
-	var max_wait = 5.0
-	var wait_time = 0.0
-	
-	while is_showing_bundle_celebration and wait_time < max_wait:
-		await get_tree().create_timer(0.1).timeout
-		wait_time += 0.1
-	
-	if bundle_celebration_queue.size() > 0:
-		await get_tree().create_timer(0.5).timeout
-
-func _wait_for_actions_to_complete():
-	var max_wait_time = 10.0
-	var wait_time = 0.0
-	var check_interval = 0.1
-	
-	while wait_time < max_wait_time:
-		if game_manager.can_end_game():
-			return
-
-		await get_tree().create_timer(check_interval).timeout
-		wait_time += check_interval
-	
-	print("Timeout reached, proceeding with game end anyway")
-
 func _track_game_end(player_won: bool):
 	if not UnlockManagers:
 		return
@@ -1240,11 +912,6 @@ func _on_card_clicked(card: Card):
 	
 	player.remove_card_from_hand(card_data)
 
-func debug_unlock_bundle(bundle_id: String):
-	if UnlockManagers:
-		UnlockManagers.debug_unlock_all() if bundle_id == "all" else UnlockManagers.unlock_bundle(bundle_id)
-		restart_game()
-
 func _on_end_turn_pressed():
 	if not is_player_turn or game_manager.is_game_ended():
 		return
@@ -1254,22 +921,6 @@ func _on_end_turn_pressed():
 		return
 	
 	start_ai_turn()
-
-func debug_test_save_restore():
-	if OS.is_debug_build():
-		print("=== TESTING SAVE/RESTORE SYSTEM ===")
-		print("Current game state:")
-		print("  Player HP: ", player.current_hp if player else "null")
-		print("  AI HP: ", ai.current_hp if ai else "null")
-		print("  Turn: ", "Player" if is_player_turn else "AI")
-		
-		var saved = GameStateManager.save_game_state(self)
-		print("Save successful: ", saved)
-		
-		if saved:
-			print("Saved state contains:")
-			for key in GameStateManager.saved_game_state.keys():
-				print("  ", key, ": ", GameStateManager.saved_game_state[key])
 
 func _input(event):
 	if confirmation_dialog.is_showing:
@@ -1289,91 +940,6 @@ func _input(event):
 		return
 		
 	input_manager.handle_input(event)
-	
-	if OS.is_debug_build():
-		if event.is_action_pressed("ui_page_up"):
-			debug_comprehensive_check()
-		elif event.is_action_pressed("ui_page_down"):
-			debug_force_compliance_check()
-		elif event.is_action_pressed("ui_home"):
-			debug_test_deck_generation()
-		elif event.is_action_pressed("ui_end"):
-			debug_test_save_restore()
-				
-func debug_comprehensive_check():
-	print("\n === COMPREHENSIVE SYSTEM CHECK ===")
-	
-	debug_unlock_system()
-	
-	var deck_valid = validate_deck_generation()
-	var db_validation = CardDatabase.validate_database()
-	
-	print("\n SUMMARY:")
-	print("Deck generation valid: ", deck_valid)
-	print("Database availability valid: ", db_validation.valid)
-	
-	if db_validation.errors.size() > 0:
-		print("Database errors: ", db_validation.errors)
-	
-	if db_validation.availability_issues.size() > 0:
-		print("Availability issues: ", db_validation.availability_issues)
-	
-	print("=== END COMPREHENSIVE CHECK ===\n")
-	
-func debug_force_compliance_check():
-	print("\n === FORCING COMPLIANCE CHECK ===")
-	
-	verify_deck_compliance()
-	
-	var test_pool = WeightedCardPool.new()
-	test_pool.add_templates(CardDatabase.get_all_card_templates())
-	var pool_validation = test_pool.validate_pool()
-	
-	print("   Pool status:")
-	print("   Total cards: ", pool_validation.total_cards)
-	print("   Available: ", pool_validation.available_cards)
-	print("   Locked: ", pool_validation.locked_cards)
-	
-	if pool_validation.locked_cards > 0:
-		print("Pool contains locked cards - this could cause issues")
-	
-	print("=== END COMPLIANCE CHECK ===\n")
-
-func debug_test_deck_generation():
-	print("\n  === TESTING DECK GENERATION ===")
-	
-	for i in range(5):
-		print("Test ", i + 1, ":")
-		var test_deck = DeckGenerator.create_starter_deck()
-		var violations = []
-		
-		for card in test_deck:
-			if card is CardData and not UnlockManagers.is_card_available(card.card_name):
-				violations.append(card.card_name)
-		
-		if violations.size() == 0:
-			print("   Clean deck - ", test_deck.size(), " cards")
-		else:
-			print("   Violations: ", violations)
-	
-	print("=== END GENERATION TEST ===\n")
-			
-func debug_unlock_system():
-	print("\n=== UNLOCK SYSTEM DEBUG ===")
-	if UnlockManagers:
-		var stats = UnlockManagers.get_unlock_stats()
-		print("Bundles: ", stats.unlocked_bundles, "/", stats.total_bundles)
-		print("Completion: ", "%.1f" % stats.completion_percentage, "%")
-		print("Available cards: ", stats.available_cards)
-		
-		print("\n Bundle Status:")
-		var bundles = UnlockManagers.get_all_bundles_info()
-		for bundle in bundles:
-			var status = "UNLOCKED" if bundle.unlocked else ("🔓 READY" if bundle.can_unlock else "🔒 LOCKED")
-			var progress = UnlockManagers.get_progress_text(bundle.id)
-			print("  ", bundle.name, ": ", status, " (", progress, ")")
-	else:
-		print("UnlockManager not available")
 	
 func open_challengehub():
 	if not is_player_turn or confirmation_dialog.is_showing:

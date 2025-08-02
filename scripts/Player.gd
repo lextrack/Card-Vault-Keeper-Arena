@@ -599,27 +599,6 @@ func stop_ai_turn():
 
 func is_ai_turn_active() -> bool:
 	return is_ai and ai_turn_active
-			
-func debug_damage_calculation(card: CardData, target: Player = null) -> Dictionary:
-	var debug_info = {
-		"player_type": "AI" if is_ai else "Player",
-		"turn_number": turn_number,
-		"card_name": card.card_name,
-		"card_type": card.card_type,
-		"base_damage": card.damage,
-		"calculated_bonus": get_damage_bonus(),
-		"expected_total": card.damage + get_damage_bonus(),
-		"can_play": can_play_card(card),
-		"current_mana": current_mana,
-		"card_cost": card.cost
-	}
-	
-	if target:
-		debug_info["target_hp"] = target.current_hp
-		debug_info["target_shield"] = target.current_shield
-	
-	print("DAMAGE DEBUG: ", debug_info)
-	return debug_info
 
 func verify_game_state() -> Dictionary:
 	return {
