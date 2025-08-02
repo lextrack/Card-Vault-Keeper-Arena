@@ -631,7 +631,7 @@ func _track_game_end(player_won: bool):
 	
 	var game_time = 0.0
 	if StatisticsManagers and StatisticsManagers.game_start_time > 0:
-		game_time = Time.get_ticks_msec() / 1000.0 - StatisticsManagers.game_start_time
+		game_time = (Time.get_ticks_msec() / 1000.0) - StatisticsManagers.game_start_time
 	
 	var damage_taken = 0
 	var final_hp = 0
@@ -752,7 +752,60 @@ func _input(event):
 		open_challengehub()
 		return
 		
+	if OS.is_debug_build() and event.is_action_pressed("ui_home"):
+		debug_show_deck_info()
+		
 	input_manager.handle_input(event)
+	
+func debug_show_deck_info():
+	if not player or not ai:
+		print("=== DEBUG: Player or AI not available ===")
+		return
+	
+	print("\n=== DECK DEBUG INFO ===")
+	
+	print("\n--- PLAYER DECK ---")
+	var player_all_cards = player.get_all_cards()
+	var player_card_count = {}
+	
+	for card in player_all_cards:
+		if card is CardData:
+			var card_name = card.card_name
+			if player_card_count.has(card_name):
+				player_card_count[card_name] += 1
+			else:
+				player_card_count[card_name] = 1
+	
+	print("Total cards in player deck: ", player_all_cards.size())
+	print("Unique cards: ", player_card_count.size())
+	
+	for card_name in player_card_count.keys():
+		print("  ", card_name, " x", player_card_count[card_name])
+
+	print("\n--- AI DECK ---")
+	var ai_all_cards = ai.get_all_cards()
+	var ai_card_count = {}
+	
+	for card in ai_all_cards:
+		if card is CardData:
+			var card_name = card.card_name
+			if ai_card_count.has(card_name):
+				ai_card_count[card_name] += 1
+			else:
+				ai_card_count[card_name] = 1
+	
+	print("Total cards in AI deck: ", ai_all_cards.size())
+	print("Unique cards: ", ai_card_count.size())
+	
+	for card_name in ai_card_count.keys():
+		print("  ", card_name, " x", ai_card_count[card_name])
+	
+	if UnlockManagers:
+		print("\n--- AVAILABLE CARDS (UnlockManager) ---")
+		var available_cards = UnlockManagers.get_available_cards()
+		print("Total available cards: ", available_cards.size())
+		for card_name in available_cards:
+			print("  ", card_name)
 	
 func open_challengehub():
 	if not is_player_turn or confirmation_dialog.is_showing:

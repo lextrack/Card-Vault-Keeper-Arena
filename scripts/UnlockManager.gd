@@ -13,7 +13,7 @@ var bundles: Dictionary = {
 	"starter_pack": {
 		"name": "Starter Pack",
 		"description": "Essential cards for new fighters",
-		"requirement_text": "FREE - Always available",
+
 		"requirement_type": "free",
 		"requirement_value": 0,
 		"cards": ["Power Strike", "Heavy Blow", "Restoration"],
@@ -123,7 +123,7 @@ var bundles: Dictionary = {
 
 var _starter_cards: Array[String] = [
 	"Basic Strike",
-	"Quick Strike", 
+	"Quick Strike",
 	"Slash",
 	"Sword",
 	"Blade Strike",
@@ -261,6 +261,7 @@ func _check_cascade_unlocks():
 
 func track_progress(progress_type: String, value: int = 1, extra_data: Dictionary = {}):
 	var progress_made = false
+	var bundles_to_unlock = []
 	
 	for bundle_id in bundles.keys():
 		if is_bundle_unlocked(bundle_id):
@@ -276,7 +277,10 @@ func track_progress(progress_type: String, value: int = 1, extra_data: Dictionar
 			progress_updated.emit(bundle_id, new_progress, bundle.requirement_value)
 			
 			if can_unlock_bundle(bundle_id):
-				unlock_bundle(bundle_id)
+				bundles_to_unlock.append(bundle_id)
+
+	for bundle_id in bundles_to_unlock:
+		unlock_bundle(bundle_id)
 	
 	if progress_made:
 		save_progress()
@@ -300,12 +304,12 @@ func _calculate_progress(bundle: Dictionary, progress_type: String, value: int, 
 				var turns = extra_data.get("turns", 0)
 				if turns >= bundle.requirement_value:
 					return bundle.requirement_value
-		
+					
 		"speed_win_hard":
 			if progress_type == "game_won" and extra_data.get("difficulty") == "hard":
 				var game_time = extra_data.get("time", 999)
 				if game_time <= bundle.requirement_value:
-					return 1
+					return bundle.requirement_value
 		
 		"hybrid_cards_played":
 			if progress_type == "card_played" and extra_data.get("card_type") == "hybrid":
@@ -365,7 +369,7 @@ func get_progress_text(bundle_id: String) -> String:
 			else:
 				return str(displayed_current) + "/" + str(required) + " turns survived"
 		"speed_win_hard":
-			if current > 0:
+			if current >= required:
 				return "COMPLETED"
 			else:
 				return "0/1 speed wins"
