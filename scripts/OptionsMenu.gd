@@ -655,11 +655,13 @@ func _detect_input_method(event: InputEvent):
 		if not gamepad_mode:
 			gamepad_mode = true
 			last_input_was_gamepad = true
+			CursorManager.set_gamepad_mode(true)
 			_on_input_method_changed()
 	elif event is InputEventMouse or event is InputEventKey:
 		if gamepad_mode:
 			gamepad_mode = false
 			last_input_was_gamepad = false
+			CursorManager.set_gamepad_mode(false)
 			_on_input_method_changed()
 
 func _on_input_method_changed():

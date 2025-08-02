@@ -108,6 +108,7 @@ Reduce your opponent's health to 0 to win the match.
 - [color=lime]B:[/color] End turn
 - [color=lime]X:[/color] Restart match
 - [color=lime]Back/View:[/color] Return to main menu
+- [color=lime]START:[/color] Options menu
 - [color=lime]RB:[/color] View complete key mapping during gameplay
 
 [font_size=16][color=white]With Keyboard/Mouse:[/color][/font_size]
@@ -115,6 +116,7 @@ Reduce your opponent's health to 0 to win the match.
 - [color=lime]Click "End Turn":[/color] End turn
 - [color=lime]R:[/color] Restart match
 - [color=lime]ESC:[/color] Return to main menu
+- [color=lime]TAB:[/color] Options menu
 - [color=lime]H:[/color] View complete key mapping during gameplay""",
 
 	"🏪 Challenge Hub": """[font_size=24][color=yellow]🏆 CHALLENGE HUB[/color][/font_size]

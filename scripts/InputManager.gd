@@ -104,12 +104,14 @@ func _detect_input_method(event: InputEvent):
 	if event is InputEventJoypadButton and event.pressed:
 		if not last_input_was_gamepad:
 			last_input_was_gamepad = true
+			CursorManager.set_gamepad_mode(true)
 			if main_scene.is_player_turn and main_scene.player and is_input_enabled():
 				gamepad_mode = true
 				_update_ui_for_gamepad_mode()
 	elif event is InputEventMouse or (event is InputEventKey and event.pressed):
 		if last_input_was_gamepad:
 			last_input_was_gamepad = false
+			CursorManager.set_gamepad_mode(false) 
 			if main_scene.is_player_turn and main_scene.player and is_input_enabled():
 				gamepad_mode = false
 				_update_ui_for_gamepad_mode()

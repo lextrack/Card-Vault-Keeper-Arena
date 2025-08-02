@@ -740,6 +740,11 @@ func _input(event):
 		confirmation_dialog.handle_input(event)
 		return
 		
+	if event is InputEventJoypadButton and event.pressed:
+		CursorManager.set_gamepad_mode(true)
+	elif event is InputEventMouse:
+		CursorManager.set_gamepad_mode(false)
+		
 	if event.is_action_pressed("show_options") and is_player_turn and not options_menu.visible:
 		show_options_menu()
 		return
