@@ -618,6 +618,9 @@ func setup_game():
 	
 	if damage_bonus_label:
 		damage_bonus_label.visible = false
+
+	if end_turn_button:
+		ui_manager.reset_turn_button(end_turn_button, input_manager.gamepad_mode)
 	
 	ui_manager.update_all_labels(player, ai)
 	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
@@ -869,6 +872,10 @@ func start_player_turn():
 	
 	audio_helper.play_turn_change_sound(true)
 	ui_manager.start_player_turn(player, difficulty)
+
+	if end_turn_button:
+		ui_manager.reset_turn_button(end_turn_button, input_manager.gamepad_mode)
+		ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
 	
 	controls_panel.update_player_turn(true)
 	controls_panel.update_cards_available(player.hand.size() > 0)
@@ -877,7 +884,7 @@ func start_player_turn():
 		player.card_drawn.emit(cards_actually_drawn, true)
 
 func start_ai_turn():
-	if not is_player_turn:
+	if not is_player_turn or game_manager.is_game_ended():
 		return
 		
 	is_player_turn = false
@@ -920,9 +927,14 @@ func start_ai_turn():
 			return
 		
 		await get_tree().create_timer(0.8).timeout
-		start_player_turn()
+		
+		if not game_manager.is_game_ended():
+			start_player_turn()
 
 func restart_game():
+	if game_manager.is_restart_in_progress():
+		return
+	
 	cleanup_notifications()
 	
 	game_count += 1
@@ -949,6 +961,9 @@ func setup_game_with_new_music():
 
 	if damage_bonus_label:
 		damage_bonus_label.visible = false
+	
+	if end_turn_button:
+		ui_manager.reset_turn_button(end_turn_button, input_manager.gamepad_mode)
 	
 	ui_manager.update_all_labels(player, ai)
 	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
@@ -1044,7 +1059,9 @@ func _on_turn_changed(turn_num: int, damage_bonus: int):
 			damage_bonus_label.visible = false
 
 func _on_player_died():
-	game_manager.mark_game_ended()
+	if not game_manager.mark_game_ended():
+		return
+	
 	_track_game_end(false)
 	
 	await _wait_for_actions_to_complete()
@@ -1073,13 +1090,12 @@ func _on_ai_card_played(card: CardData):
 	ai_notification.show_card_notification(card, "AI")
 
 func _on_ai_died():
-	game_manager.mark_game_ended()
+	if not game_manager.mark_game_ended():
+		return
+	
 	_track_game_end(true)
-	
 	await _wait_for_actions_to_complete()
-
 	game_manager.finalize_game_end()
-	
 	await _wait_for_celebrations_to_complete()
 	
 	cleanup_notifications()
@@ -1097,6 +1113,7 @@ func _on_ai_died():
 	
 	await game_manager.handle_game_over("YOU WON! Restarting...", end_turn_button)
 	restart_game()
+
 	
 func _wait_for_celebrations_to_complete():
 	var max_wait = 5.0

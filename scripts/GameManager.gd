@@ -6,6 +6,7 @@ var player: Player
 var ai: Player
 var game_ended: bool = false
 var pending_game_end: bool = false
+var restart_in_progress: bool = false
 
 func setup(main: Control):
 	main_scene = main
@@ -13,6 +14,7 @@ func setup(main: Control):
 func setup_new_game(difficulty: String):
 	game_ended = false
 	pending_game_end = false
+	restart_in_progress = false
 
 	_cleanup_existing_players()
 	
@@ -97,17 +99,24 @@ func _disconnect_ai_signals(a: Player):
 			a.disconnect(signal_name, callable_target)
 
 func restart_game(game_count: int, difficulty: String):
+	if restart_in_progress:
+		return
+	
+	restart_in_progress = true
 	game_ended = false
 	pending_game_end = false
 	
 	main_scene.turn_label.text = "New game!"
 	main_scene.ui_manager.selected_card_index = 0
+
+	if main_scene.end_turn_button:
+		main_scene.ui_manager.reset_turn_button(main_scene.end_turn_button, false)
 	
 	var difficulty_desc = GameBalance.get_difficulty_description(difficulty)
 	main_scene.game_info_label.text = "Game #" + str(game_count) + " | " + difficulty.to_upper()
 
 func should_restart_for_no_cards() -> bool:
-	if game_ended or not player or not ai:
+	if game_ended or pending_game_end or restart_in_progress or not player or not ai:
 		return false
 		
 	return DeckManager.should_restart_game(
@@ -118,9 +127,11 @@ func should_restart_for_no_cards() -> bool:
 	)
 	
 func restart_for_no_cards():
-	if game_ended:
+	if game_ended or restart_in_progress:
+		print("Cannot restart for no cards: game ended or restart in progress")
 		return
-		
+	
+	restart_in_progress = true
 	game_ended = true
 	
 	main_scene.turn_label.text = "Both out of cards!"
@@ -130,20 +141,21 @@ func restart_for_no_cards():
 	
 	main_scene.restart_game()
 
-func mark_game_ended():
+func mark_game_ended() -> bool:
+	if pending_game_end or game_ended:
+		return false
+	
 	pending_game_end = true
-	print("Game end marked - waiting for actions to complete")
+	return true
 
 func can_end_game() -> bool:
 	if not pending_game_end:
 		return false
 	
 	if ai and ai.has_method("is_ai_turn_active") and ai.is_ai_turn_active():
-		print("Waiting for AI turn to complete...")
 		return false
 	
 	if _has_pending_card_animations():
-		print("Waiting for card animations to complete...")
 		return false
 	
 	return true
@@ -158,6 +170,7 @@ func _has_pending_card_animations() -> bool:
 
 func finalize_game_end():
 	if game_ended:
+		print("Game end already finalized")
 		return
 		
 	game_ended = true
@@ -170,8 +183,11 @@ func is_game_ended() -> bool:
 func is_game_ending() -> bool:
 	return pending_game_end or game_ended
 
+func is_restart_in_progress() -> bool:
+	return restart_in_progress
+
 func end_turn_limit_reached():
-	if game_ended:
+	if game_ended or restart_in_progress:
 		return
 		
 	main_scene.turn_label.text = "Limit reached!"
@@ -179,7 +195,7 @@ func end_turn_limit_reached():
 	await main_scene.get_tree().create_timer(GameBalance.get_timer_delay("turn_end")).timeout
 
 func end_turn_no_cards():
-	if game_ended:
+	if game_ended or restart_in_progress:
 		return
 		
 	main_scene.turn_label.text = "No cards!"
@@ -187,7 +203,7 @@ func end_turn_no_cards():
 	await main_scene.get_tree().create_timer(GameBalance.get_timer_delay("turn_end")).timeout
 
 func handle_game_over(message: String, end_turn_button: Button):
-	if game_ended:
+	if game_ended or restart_in_progress:
 		return
 		
 	game_ended = true

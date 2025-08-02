@@ -34,9 +34,9 @@ var bundles: Dictionary = {
 	"mystic_defense": {
 		"name": "Mystic Defense",
 		"description": "Advanced protective magic",
-		"requirement_text": "Survive 10+ turns in any game",
+		"requirement_text": "Survive 12+ turns in any game",
 		"requirement_type": "survive_turns",
-		"requirement_value": 10,
+		"requirement_value": 12,
 		"cards": ["Iron Defense", "Armored Strike", "Battle Healer"],
 		"rarity_info": "1 Uncommon Shield, 1 Uncommon Hybrid, 1 Rare Hybrid"
 	},
@@ -54,9 +54,9 @@ var bundles: Dictionary = {
 	"hybrid_mastery": {
 		"name": "Hybrid Mastery",
 		"description": "Versatile combination effects",
-		"requirement_text": "Play 25 hybrid cards total",
+		"requirement_text": "Play 30 hybrid cards total",
 		"requirement_type": "hybrid_cards_played",
-		"requirement_value": 25,
+		"requirement_value": 30,
 		"cards": ["Paladin's Resolve", "Divine Retribution", "Fortress Guard"],
 		"rarity_info": "3 Rare Hybrid"
 	},

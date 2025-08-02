@@ -42,6 +42,8 @@ var selection_tween: Tween
 var has_played_epic_animation: bool = false
 var has_played_entrance: bool = false
 var should_play_entrance: bool = true
+var is_being_played: bool = false
+var animation_in_progress: bool = false
 
 func _ready():
 	original_scale = scale
@@ -201,10 +203,11 @@ func animate_shadow_on_click():
 		animate_shadow_on_unhover()
 
 func play_entrance_animation():
-	if has_played_entrance or not should_play_entrance:
+	if has_played_entrance or not should_play_entrance or is_being_played:
 		return
 		
 	has_played_entrance = true
+	animation_in_progress = true
 	
 	modulate.a = 0.0
 	scale = Vector2(0.7, 0.7)
@@ -226,10 +229,15 @@ func play_entrance_animation():
 	
 	await entrance_tween.finished
 	
-	if is_playable:
+	animation_in_progress = false
+	
+	if is_playable and not is_being_played:
 		start_idle_shadow_animation()
 
 func play_selection_animation():
+	if is_being_played or animation_in_progress:
+		return
+		
 	if not is_playable:
 		play_disabled_animation()
 		return
@@ -242,28 +250,55 @@ func play_selection_animation():
 	selection_tween = create_tween()
 	selection_tween.set_parallel(true)
 	
-	selection_tween.tween_property(self, "scale", original_scale * 1.2, 0.08)
-	selection_tween.tween_property(self, "scale", original_scale, 0.12).set_delay(0.08)
+	selection_tween.tween_property(self, "scale", original_scale * 1.1, 0.06)
+	selection_tween.tween_property(self, "scale", original_scale, 0.08).set_delay(0.06)
+	
+	var original_modulate = modulate
+	selection_tween.tween_property(self, "modulate", Color(1.15, 1.15, 1.15, 1.0), 0.06)
+	selection_tween.tween_property(self, "modulate", original_modulate, 0.08).set_delay(0.06)
 
 func play_disabled_animation():
+	if is_being_played or animation_in_progress:
+		return
+		
+	animation_in_progress = true
+	
 	var shake_tween = create_tween()
 	shake_tween.set_parallel(true)
 	
-	shake_tween.tween_property(self, "position:x", original_position.x + 3, 0.05)
-	shake_tween.tween_property(self, "position:x", original_position.x - 3, 0.05)
-	shake_tween.tween_property(self, "position:x", original_position.x + 2, 0.05)
-	shake_tween.tween_property(self, "position:x", original_position.x, 0.05)
+	var shake_positions = [
+		original_position + Vector2(3, 0),
+		original_position + Vector2(-3, 0),
+		original_position + Vector2(2, 0),
+		original_position + Vector2(-2, 0),
+		original_position
+	]
+	
+	for i in range(shake_positions.size()):
+		var delay = i * 0.04
+		shake_tween.tween_property(self, "position", shake_positions[i], 0.04).set_delay(delay)
+	
+	var original_modulate = modulate
+	shake_tween.tween_property(self, "modulate", Color(1.3, 0.7, 0.7, 1.0), 0.08)
+	shake_tween.tween_property(self, "modulate", original_modulate, 0.12).set_delay(0.08)
+	
+	await shake_tween.finished
+	animation_in_progress = false
 
 func play_card_animation():
+	if is_being_played:
+		return
+		
+	is_being_played = true
 	card_played.emit(self)
 	_cleanup_tweens()
 	
 	play_tween = create_tween()
 	play_tween.set_parallel(true)
 	
-	play_tween.tween_property(self, "position", position + Vector2(0, -50), 0.1)
-	play_tween.tween_property(self, "scale", Vector2(0.8, 0.8), 0.1)
-	play_tween.tween_property(self, "modulate:a", 0.0, 0.1)
+	play_tween.tween_property(self, "position", position + Vector2(0, -80), 0.1)
+	play_tween.tween_property(self, "scale", Vector2(0.7, 0.7), 0.1)
+	play_tween.tween_property(self, "modulate:a", 0.0, 0.15)
 	
 	if card_shadow:
 		play_tween.tween_property(card_shadow, "modulate:a", 0.0, 0.1)
@@ -276,7 +311,7 @@ func _cleanup_tweens():
 	
 	var tweens_to_kill = [hover_tween, entrance_tween, epic_border_tween, playable_tween, shadow_tween, selection_tween]
 	for tween in tweens_to_kill:
-		if tween:
+		if tween and tween.is_valid():
 			tween.kill()
 
 func update_display():
@@ -412,12 +447,17 @@ func get_rarity_colors() -> Dictionary:
 
 func _on_card_input(event: InputEvent):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		play_selection_animation()
-		if is_playable:
+		if is_being_played or animation_in_progress:
+			print("Card input ignored - animation in progress or card being played")
+			return
+			
+		if is_playable and not is_being_played:
 			card_clicked.emit(self)
 
+		play_selection_animation()
+
 func _on_mouse_entered():
-	if not is_hovered and is_playable:
+	if not is_hovered and is_playable and not is_being_played and not animation_in_progress:
 		is_hovered = true
 		
 		animate_shadow_on_hover()
@@ -427,11 +467,15 @@ func _on_mouse_entered():
 		
 		hover_tween = create_tween()
 		hover_tween.set_parallel(true)
-		hover_tween.tween_property(self, "scale", original_scale * 1.08, 0.12)
-		hover_tween.tween_property(self, "z_index", 10, 0.06)
+		
+		hover_tween.tween_property(self, "scale", original_scale * 1.03, 0.1).set_ease(Tween.EASE_OUT)
+		hover_tween.tween_property(self, "z_index", 5, 0.05)
+		
+		var hover_modulate = modulate * Color(1.05, 1.05, 1.05, 1.0)
+		hover_tween.tween_property(self, "modulate", hover_modulate, 0.1)
 
 func _on_mouse_exited():
-	if is_hovered:
+	if is_hovered and not is_being_played:
 		is_hovered = false
 		
 		animate_shadow_on_unhover()
@@ -441,8 +485,14 @@ func _on_mouse_exited():
 		
 		hover_tween = create_tween()
 		hover_tween.set_parallel(true)
-		hover_tween.tween_property(self, "scale", original_scale, 0.12)
-		hover_tween.tween_property(self, "z_index", 0, 0.06)
+		
+		hover_tween.tween_property(self, "scale", original_scale, 0.15).set_ease(Tween.EASE_OUT)
+		hover_tween.tween_property(self, "z_index", 0, 0.1)
+		
+		if is_playable:
+			hover_tween.tween_property(self, "modulate", Color.WHITE, 0.15)
+		else:
+			hover_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.15)
 
 func set_card_data(data: CardData):
 	card_data = data
@@ -452,6 +502,9 @@ func set_card_data(data: CardData):
 			call_deferred("play_epic_entrance_animation")
 
 func set_playable(playable: bool):
+	if is_being_played:
+		return
+		
 	is_playable = playable
 	
 	if playable_tween:
@@ -462,7 +515,7 @@ func set_playable(playable: bool):
 	if playable:
 		playable_tween.tween_property(self, "modulate", Color.WHITE, 0.2)
 		mouse_filter = Control.MOUSE_FILTER_PASS
-		if has_played_entrance:
+		if has_played_entrance and not is_being_played:
 			start_idle_shadow_animation()
 	else:
 		playable_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.15)
@@ -484,7 +537,7 @@ func set_playable(playable: bool):
 			hover_tween.set_parallel(true)
 			hover_tween.tween_property(self, "scale", original_scale, 0.12)
 			hover_tween.tween_property(self, "z_index", 0, 0.06)
-
+			
 func set_mouse_filter_recursive(node: Node):
 	if node is Control:
 		var control = node as Control
@@ -543,5 +596,6 @@ func play_epic_entrance_animation():
 
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
+		is_being_played = true
 		stop_idle_shadow_animation()
 		_cleanup_tweens()

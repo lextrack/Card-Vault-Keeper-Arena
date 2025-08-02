@@ -50,9 +50,15 @@ func start_player_turn():
 	gamepad_mode = last_input_was_gamepad
 	var end_turn_button = main_scene.end_turn_button
 	
+	if end_turn_button:
+		main_scene.ui_manager.reset_turn_button(end_turn_button, gamepad_mode)
+	
 	_update_controls_panel()
 	main_scene.ui_manager.selected_card_index = 0
 	main_scene.ui_manager.update_card_selection(gamepad_mode, main_scene.player)
+	
+	if end_turn_button and main_scene.player:
+		main_scene.ui_manager.update_turn_button_text(main_scene.player, end_turn_button, gamepad_mode)
 
 func start_ai_turn():
 	gamepad_mode = false

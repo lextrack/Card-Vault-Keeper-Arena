@@ -187,6 +187,10 @@ func start_player_turn(player: Player, difficulty: String):
 	if end_turn_button:
 		end_turn_button.disabled = false
 
+		var input_manager = main_scene.input_manager
+		var gamepad_mode = input_manager.gamepad_mode if input_manager else false
+		update_turn_button_text(player, end_turn_button, gamepad_mode)
+
 func start_ai_turn(ai: Player):
 	animate_turn_transition(false)
 	
@@ -299,13 +303,21 @@ func _on_card_hover():
 func update_turn_button_text(player: Player, end_turn_button: Button, gamepad_mode: bool):
 	if not end_turn_button or not player:
 		return
+
+	if not main_scene.is_player_turn:
+		end_turn_button.text = "AI Turn"
+		end_turn_button.disabled = true
+		return
 		
 	var cards_played = player.get_cards_played()
 	var max_cards = player.get_max_cards_per_turn()
 	var playable_cards = DeckManager.get_playable_cards(player.hand, player.current_mana)
 	
+	end_turn_button.disabled = false
+	
 	if cards_played >= max_cards:
 		end_turn_button.text = "Waiting"
+		end_turn_button.disabled = true
 	elif playable_cards.size() == 0:
 		end_turn_button.text = "No playable cards"
 	elif player.get_hand_size() == 0:
@@ -315,6 +327,18 @@ func update_turn_button_text(player: Player, end_turn_button: Button, gamepad_mo
 			end_turn_button.text = "🎮 End Turn"
 		else:
 			end_turn_button.text = "End Turn"
+			
+func reset_turn_button(end_turn_button: Button, gamepad_mode: bool = false):
+	if not end_turn_button:
+		return
+	
+	end_turn_button.disabled = false
+	if gamepad_mode:
+		end_turn_button.text = "🎮 End Turn"
+	else:
+		end_turn_button.text = "End Turn"
+	
+	print("Turn button reset to initial state")
 
 func update_cards_played_info(cards_played: int, max_cards: int, difficulty: String):
 	var difficulty_name = difficulty.to_upper()

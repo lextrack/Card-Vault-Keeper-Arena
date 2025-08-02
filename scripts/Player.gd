@@ -452,7 +452,13 @@ func ai_turn(opponent: Player):
 	if not is_ai:
 		return
 	
+	var main_scene = get_tree().get_first_node_in_group("main_scene")
+	if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
+		print("AI turn cancelled - game already ended")
+		return
+	
 	ai_turn_active = true
+	should_stop_ai_turn = false
 	
 	print("   AI executing turn logic...")
 	print("   AI turn number: ", turn_number)
@@ -461,11 +467,15 @@ func ai_turn(opponent: Player):
 	
 	await get_tree().create_timer(GameBalance.get_timer_delay("ai_turn_start")).timeout
 	
+	if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
+		ai_turn_active = false
+		print("AI turn cancelled - game ended during delay")
+		return
+	
 	var ai_config = GameBalance.get_ai_config(difficulty)
 	var heal_threshold = ai_config.get("heal_threshold", 0.3)
 	var aggression = ai_config.get("aggression", 0.5)
 	
-	var main_scene = get_tree().get_first_node_in_group("main_scene")
 	var audio_helper = null
 	
 	if not main_scene:
@@ -476,7 +486,11 @@ func ai_turn(opponent: Player):
 	
 	print("AI turn config - Heal threshold: ", heal_threshold, " | Aggression: ", aggression)
 	
-	while can_play_more_cards():
+	while can_play_more_cards() and not should_stop_ai_turn:
+		if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
+			print("AI turn stopped - game ended during turn")
+			break
+		
 		var playable_cards = DeckManager.get_playable_cards(hand, current_mana)
 		
 		if playable_cards.size() == 0:
@@ -529,7 +543,7 @@ func ai_turn(opponent: Player):
 			chosen_card = playable_cards[0]
 			print("AI: Choosing fallback card: ", chosen_card.card_name)
 		
-		if chosen_card:
+		if chosen_card and not should_stop_ai_turn:
 			var ai_bonus = get_damage_bonus()
 			print("   AI chosen card details:")
 			print("   Card: ", chosen_card.card_name, " | Type: ", chosen_card.card_type)
@@ -541,6 +555,11 @@ func ai_turn(opponent: Player):
 			ai_card_played.emit(chosen_card)
 			
 			await get_tree().create_timer(GameBalance.get_timer_delay("ai_card_notification")).timeout
+			
+			if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
+				ai_turn_active = false
+				print("AI turn stopped - game ended during notification")
+				return
 			
 			if audio_helper:
 				print("AI playing sound for: ", chosen_card.card_type)
@@ -560,11 +579,17 @@ func ai_turn(opponent: Player):
 					play_card(chosen_card, opponent)
 			
 			await get_tree().create_timer(GameBalance.get_timer_delay("ai_card_play")).timeout
+			
+			if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
+				ai_turn_active = false
+				print("AI turn stopped - game ended after playing card")
+				return
 		else:
-			print("AI: No card chosen, breaking turn")
+			print("AI: No card chosen or turn stopped, breaking turn")
 			break
 	
 	ai_turn_active = false
+	should_stop_ai_turn = false
 	print("AI: Turn completed naturally")
 	
 func stop_ai_turn():
