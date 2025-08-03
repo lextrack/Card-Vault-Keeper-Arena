@@ -6,6 +6,7 @@ var gamepad_mode: bool = false
 var last_input_was_gamepad: bool = false
 var options_menu: OptionsMenu
 var input_enabled: bool = true
+var input_processing: bool = false
 
 func setup(main: Control, options: OptionsMenu = null):
 	main_scene = main
@@ -30,6 +31,7 @@ func _setup_button_navigation():
 
 func enable_input():
 	input_enabled = true
+	input_processing = false
 	if last_input_was_gamepad:
 		gamepad_mode = true
 		CursorManager.set_gamepad_mode(true)
@@ -38,9 +40,10 @@ func enable_input():
 func disable_input():
 	input_enabled = false
 	gamepad_mode = false
+	input_processing = false 
 
 func is_input_enabled() -> bool:
-	return input_enabled and not _is_menu_blocking_input() and not _is_game_transitioning()
+	return input_enabled and not _is_menu_blocking_input() and not _is_game_transitioning() and not input_processing
 
 func _is_menu_blocking_input() -> bool:
 	if options_menu and options_menu.visible:
@@ -62,12 +65,17 @@ func force_gamepad_mode_activation():
 	if last_input_was_gamepad and is_input_enabled():
 		gamepad_mode = true
 		CursorManager.set_gamepad_mode(true)
+
+		await main_scene.get_tree().process_frame
+		await main_scene.get_tree().process_frame
 		_update_ui_for_gamepad_mode()
 		print("Gamepad mode forcefully activated after transition")
 
 func start_player_turn():
 	if not is_input_enabled() or _is_game_transitioning():
 		return
+		
+	input_processing = false
 		
 	if last_input_was_gamepad:
 		gamepad_mode = true
@@ -92,6 +100,7 @@ func start_player_turn():
 
 func start_ai_turn():
 	gamepad_mode = false
+	input_processing = false
 	main_scene.ui_manager.update_hand_display(main_scene.player, main_scene.card_scene, main_scene.hand_container)
 
 func handle_input(event: InputEvent):
@@ -129,6 +138,9 @@ func _handle_options_menu_toggle():
 
 func _on_options_menu_closed():
 	enable_input()
+	
+	await main_scene.get_tree().process_frame
+	await main_scene.get_tree().process_frame
 	
 	if main_scene.is_player_turn and gamepad_mode:
 		var end_turn_button = main_scene.end_turn_button
@@ -174,7 +186,17 @@ func _handle_controls_toggle():
 		main_scene.audio_helper.play_card_hover_sound()
 
 func _handle_gamepad_navigation(event: InputEvent):
-	if not is_input_enabled() or _is_game_transitioning():
+	if not is_input_enabled() or _is_game_transitioning() or input_processing:
+		return
+	
+	if not main_scene.player or not main_scene.player.can_play_more_cards():
+		if event.is_action_pressed("game_select"):
+			print("Cannot play more cards this turn")
+			return
+		if event.is_action_pressed("ui_left") or event.is_action_pressed("ui_right"):
+			_handle_navigation_only(event)
+		elif event.is_action_pressed("game_back"):
+			_handle_end_turn_input()
 		return
 		
 	if event.is_action_pressed("ui_left"):
@@ -184,14 +206,44 @@ func _handle_gamepad_navigation(event: InputEvent):
 		if main_scene.ui_manager.navigate_cards(1, main_scene.player):
 			main_scene.audio_helper.play_card_hover_sound()
 	elif event.is_action_pressed("game_select"):
-		var selected_card = main_scene.ui_manager.get_selected_card()
-		if selected_card:
-			main_scene._on_card_clicked(selected_card)
+		_handle_card_selection()
 	elif event.is_action_pressed("game_back"):
-		var end_turn_button = main_scene.end_turn_button
-		if end_turn_button and not end_turn_button.disabled:
-			end_turn_button.release_focus()
-			main_scene._on_end_turn_pressed()
+		_handle_end_turn_input()
+
+func _handle_navigation_only(event: InputEvent):
+	if event.is_action_pressed("ui_left"):
+		if main_scene.ui_manager.navigate_cards(-1, main_scene.player):
+			main_scene.audio_helper.play_card_hover_sound()
+	elif event.is_action_pressed("ui_right"):
+		if main_scene.ui_manager.navigate_cards(1, main_scene.player):
+			main_scene.audio_helper.play_card_hover_sound()
+
+func _handle_card_selection():
+	if input_processing:
+		return
+
+	if not main_scene.player.can_play_more_cards():
+		print("Card limit reached - cannot play more cards")
+		return
+		
+	var selected_card = main_scene.ui_manager.get_selected_card()
+	if selected_card:
+		if not main_scene.player.can_play_card(selected_card.card_data):
+			print("Cannot play selected card - insufficient mana or other restriction")
+			return
+			
+		input_processing = true 
+		main_scene._on_card_clicked(selected_card)
+		
+		main_scene.get_tree().create_timer(0.2).timeout.connect(func():
+			input_processing = false
+		)
+
+func _handle_end_turn_input():
+	var end_turn_button = main_scene.end_turn_button
+	if end_turn_button and not end_turn_button.disabled:
+		end_turn_button.release_focus()
+		main_scene._on_end_turn_pressed()
 
 func _on_button_focus(button: Button):
 	if not is_input_enabled():

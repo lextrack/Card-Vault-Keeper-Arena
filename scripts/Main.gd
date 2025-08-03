@@ -389,8 +389,8 @@ func start_player_turn():
 		return
 		
 	is_player_turn = true
-	input_manager.start_player_turn()
 	
+	# Reset player turn state
 	player.turn_number += 1
 	player.current_mana = player.max_mana
 	player.cards_played_this_turn = 0
@@ -423,8 +423,15 @@ func start_player_turn():
 	controls_panel.update_player_turn(true)
 	controls_panel.update_cards_available(player.hand.size() > 0)
 	
+	# Enable input AFTER UI updates and add small delay for gamepad
 	if input_manager.last_input_was_gamepad:
+		# Add delay to ensure smooth transition
+		await get_tree().process_frame
+		await get_tree().process_frame
+		input_manager.start_player_turn()
 		input_manager.force_gamepad_mode_activation()
+	else:
+		input_manager.start_player_turn()
 	
 	if cards_actually_drawn > 0:
 		player.card_drawn.emit(cards_actually_drawn, true)
@@ -434,6 +441,8 @@ func start_ai_turn():
 		return
 		
 	is_player_turn = false
+	
+	# Disable input immediately when AI turn starts
 	input_manager.start_ai_turn()
 	
 	ai.turn_number += 1
@@ -472,7 +481,7 @@ func start_ai_turn():
 			await game_manager.restart_for_no_cards()
 			return
 		
-		await get_tree().create_timer(0.8).timeout
+		await get_tree().create_timer(0.4).timeout  # Reduced from 0.8 to 0.4
 		
 		if not game_manager.is_game_ended():
 			start_player_turn()
@@ -711,6 +720,12 @@ func _notification(what):
 
 func _on_card_clicked(card: Card):
 	if not is_player_turn or not player.can_play_card(card.card_data) or is_game_transitioning:
+		return
+	
+	# Additional check to prevent playing more cards than allowed
+	if not player.can_play_more_cards():
+		print("Cannot play more cards this turn - limit reached")
+		card.animate_mana_insufficient()  # Show feedback
 		return
 
 	var card_data = card.card_data

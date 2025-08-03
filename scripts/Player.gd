@@ -52,10 +52,10 @@ func create_player_deck_by_difficulty() -> Array:
 		
 func play_card_without_hand_removal(card: CardData, target: Player = null, audio_helper: AudioHelper = null) -> bool:
 	if not can_play_card(card):
-		print("❌ Cannot play card: ", card.card_name, " | Mana: ", current_mana, "/", card.cost, " | Cards played: ", cards_played_this_turn, "/", get_max_cards_per_turn())
 		return false
 	
-	print("Playing card: ", card.card_name, " (", card.card_type, ") | Cost: ", card.cost, " | Turn: ", turn_number)
+	if cards_played_this_turn >= get_max_cards_per_turn():
+		return false
 	
 	spend_mana(card.cost)
 	discard_pile.append(card)
@@ -113,7 +113,7 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 				if not is_ai and StatisticsManagers:
 					StatisticsManagers.combat_action("damage_dealt", damage_dealt)
 			elif card.damage > 0 and not target:
-				print("⚠️ Hybrid card with damage played without target!")
+				print("Hybrid card with damage played without target!")
 			
 			if card.heal > 0:
 				print("     Heal: ", card.heal, " HP")
@@ -126,7 +126,9 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 				if not is_ai and UnlockManagers:
 					UnlockManagers.track_progress("damage_blocked", card.shield)
 	
-	print("   Mana after card: ", current_mana, " | Cards played this turn: ", cards_played_this_turn)
+	if cards_played_this_turn >= get_max_cards_per_turn():
+		print("CARD LIMIT REACHED - No more cards can be played this turn")
+	
 	return true
 
 func remove_card_from_hand(card: CardData):
@@ -265,8 +267,14 @@ func sync_turn_with_opponent(opponent: Player):
 func can_play_card(card: CardData) -> bool:
 	var has_mana = current_mana >= card.cost
 	var can_play_more_cards = cards_played_this_turn < get_max_cards_per_turn()
+	
+	if not has_mana:
+		print("Cannot play card: insufficient mana (", current_mana, "/", card.cost, ")")
+	if not can_play_more_cards:
+		print("Cannot play card: card limit reached (", cards_played_this_turn, "/", get_max_cards_per_turn(), ")")
+	
 	return has_mana and can_play_more_cards
-
+	
 func play_card(card: CardData, target: Player = null) -> bool:
 	if not can_play_card(card):
 		return false
@@ -326,7 +334,10 @@ func get_cards_played() -> int:
 	return cards_played_this_turn
 
 func can_play_more_cards() -> bool:
-	return cards_played_this_turn < get_max_cards_per_turn()
+	var can_play = cards_played_this_turn < get_max_cards_per_turn()
+	if not can_play:
+		print("Card limit reached: ", cards_played_this_turn, "/", get_max_cards_per_turn())
+	return can_play
 
 func set_difficulty(new_difficulty: String):
 	difficulty = new_difficulty
