@@ -571,7 +571,7 @@ func _on_player_hand_changed():
 		return
 		
 	var was_gamepad_selection_active = (
-		input_manager.gamepad_mode and 
+		input_manager.gamepad_mode and
 		is_player_turn and
 		ui_manager.gamepad_selection_active and
 		player.cards_played_this_turn > 0
@@ -821,10 +821,6 @@ func _input(event):
 		
 	if event.is_action_pressed("show_options") and is_player_turn and not options_menu.visible and not is_game_transitioning:
 		show_options_menu()
-		return
-		
-	if event.is_action_pressed("ui_accept") and is_player_turn and not end_turn_button.disabled and not input_manager.gamepad_mode and not is_game_transitioning:
-		_on_end_turn_pressed()
 		return
 		
 	if event.is_action_pressed("ChallengeHub_access") and is_player_turn and not is_game_transitioning:

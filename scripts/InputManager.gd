@@ -130,8 +130,8 @@ func handle_input(event: InputEvent):
 	elif event.is_action_pressed("game_exit"):
 		if not _is_game_transitioning():
 			main_scene.show_exit_confirmation()
-	elif main_scene.is_player_turn and gamepad_mode and main_scene.player and not _is_game_transitioning():
-		_handle_gamepad_navigation(event)
+	elif main_scene.is_player_turn and (gamepad_mode or event is InputEventKey) and main_scene.player and not _is_game_transitioning():
+		_handle_keyboard_and_gamepad_navigation(event)
 
 func _handle_options_menu_toggle():
 	if not options_menu:
@@ -165,7 +165,7 @@ func _detect_input_method(event: InputEvent):
 	elif event is InputEventMouse or (event is InputEventKey and event.pressed):
 		if last_input_was_gamepad:
 			last_input_was_gamepad = false
-			CursorManager.set_gamepad_mode(false) 
+			CursorManager.set_gamepad_mode(false)
 			if main_scene.is_player_turn and main_scene.player and is_input_enabled():
 				gamepad_mode = false
 				_update_ui_for_gamepad_mode()
@@ -195,39 +195,28 @@ func _handle_controls_toggle():
 		controls_panel.toggle_visibility()
 		main_scene.audio_helper.play_card_hover_sound()
 
-func _handle_gamepad_navigation(event: InputEvent):
+func _handle_keyboard_and_gamepad_navigation(event: InputEvent):
 	if not is_input_enabled() or _is_game_transitioning() or input_processing:
 		return
 	
-	if not main_scene.player or not main_scene.player.can_play_more_cards():
-		if event.is_action_pressed("game_select"):
+	if event.is_action_pressed("ui_left"):
+		if main_scene.ui_manager.navigate_cards(-1, main_scene.player):
+			main_scene.audio_helper.play_card_hover_sound()
+		return
+	elif event.is_action_pressed("ui_right"):
+		if main_scene.ui_manager.navigate_cards(1, main_scene.player):
+			main_scene.audio_helper.play_card_hover_sound()
+		return
+
+	if main_scene.player.can_play_more_cards():
+		if event.is_action_pressed("ui_accept") or event.is_action_pressed("game_select"):
+			_handle_card_selection()
 			return
 			
-		if event.is_action_pressed("ui_left") or event.is_action_pressed("ui_right"):
-			_handle_navigation_only(event)
-		elif event.is_action_pressed("game_back"):
-			_handle_end_turn_input()
+	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("game_back"):
+		_handle_end_turn_input()
 		return
 		
-	if event.is_action_pressed("ui_left"):
-		if main_scene.ui_manager.navigate_cards(-1, main_scene.player):
-			main_scene.audio_helper.play_card_hover_sound()
-	elif event.is_action_pressed("ui_right"):
-		if main_scene.ui_manager.navigate_cards(1, main_scene.player):
-			main_scene.audio_helper.play_card_hover_sound()
-	elif event.is_action_pressed("game_select"):
-		_handle_card_selection()
-	elif event.is_action_pressed("game_back"):
-		_handle_end_turn_input()
-
-func _handle_navigation_only(event: InputEvent):
-	if event.is_action_pressed("ui_left"):
-		if main_scene.ui_manager.navigate_cards(-1, main_scene.player):
-			main_scene.audio_helper.play_card_hover_sound()
-	elif event.is_action_pressed("ui_right"):
-		if main_scene.ui_manager.navigate_cards(1, main_scene.player):
-			main_scene.audio_helper.play_card_hover_sound()
-
 func _handle_card_selection():
 	if input_processing:
 		return
@@ -248,7 +237,6 @@ func _handle_card_selection():
 		)
 
 func _handle_end_turn_input():
-	"""Handle end turn input"""
 	var end_turn_button = main_scene.end_turn_button
 	if end_turn_button and not end_turn_button.disabled:
 		end_turn_button.release_focus()
