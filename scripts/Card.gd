@@ -107,7 +107,7 @@ func apply_gamepad_selection_style():
 	selection_tween.set_parallel(true)
 	
 	selection_tween.tween_property(self, "scale", original_scale * 1.08, 0.15).set_ease(Tween.EASE_OUT)
-	selection_tween.tween_property(self, "z_index", 15, 0.05)
+	selection_tween.tween_property(self, "z_index", 5, 0.05)
 
 	var selected_modulate = modulate * Color(1.12, 1.12, 1.1, 1.0)
 	selection_tween.tween_property(self, "modulate", selected_modulate, 0.15)
@@ -348,7 +348,7 @@ func _on_mouse_entered():
 		hover_tween.set_parallel(true)
    	
 		hover_tween.tween_property(self, "scale", original_scale * 1.06, 0.12).set_ease(Tween.EASE_OUT)
-		hover_tween.tween_property(self, "z_index", 10, 0.05)
+		hover_tween.tween_property(self, "z_index", 5, 0.05)
    	
 		var hover_modulate = modulate * Color(1.08, 1.08, 1.08, 1.0)
 		hover_tween.tween_property(self, "modulate", hover_modulate, 0.12)

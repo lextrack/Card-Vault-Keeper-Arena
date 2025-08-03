@@ -489,32 +489,55 @@ func start_ai_turn():
 			start_player_turn()
 
 func restart_game():
-	if game_manager.is_restart_in_progress():
-		print("Restart already in progress, skipping")
+	if is_game_transitioning:
 		return
 	
 	is_game_transitioning = true
 	input_manager.disable_input()
-	controls_panel.force_hide()
-	
-	cleanup_notifications()
-	
-	game_count += 1
-	game_manager.restart_game(game_count, difficulty)
 
-	var restart_delay = GameBalance.get_timer_delay("new_game") + 0.2
-	print("Restart delay: ", restart_delay, "s")
-	await get_tree().create_timer(restart_delay).timeout
+	var fade_rect = ColorRect.new()
+	fade_rect.color = Color(0, 0, 0, 0)
+	fade_rect.size = get_viewport_rect().size
+	fade_rect.z_index = 100
+	add_child(fade_rect)
+	
+	var message_label = Label.new()
+	message_label.text = "NEW GAME"
+	
+	var font = load("res://fonts/Philosopher-Bold.ttf")
+	if font:
+		message_label.add_theme_font_override("font", font)
+		message_label.add_theme_font_size_override("font_size", 72)
+	
+	message_label.modulate.a = 0
+	message_label.z_index = 101
+	message_label.position = get_viewport_rect().size / 2 - Vector2(200, 36)
+	add_child(message_label)
+	
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 1), 0.7)
+	tween.tween_property(message_label, "modulate:a", 1.0, 1.0).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.0).set_trans(Tween.TRANS_BACK)  # Efecto de flotación
+	
+	await tween.finished
 	
 	setup_game_with_new_music()
-
-	await get_tree().process_frame
-	await get_tree().process_frame
 	
+	for card in ui_manager.card_instances:
+		if is_instance_valid(card):
+			card.z_index = 50 
+	
+	tween = create_tween().set_parallel(true)
+	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 0), 0.9)
+	tween.tween_property(message_label, "modulate:a", 0, 0.7).set_delay(0.3)
+	tween.tween_property(message_label, "position:y", message_label.position.y - 50, 0.7).set_delay(0.3)
+	
+	await tween.finished
+
+	fade_rect.queue_free()
+	message_label.queue_free()
 	is_game_transitioning = false
-	if is_player_turn:
-		input_manager.enable_input()
-		input_manager.force_gamepad_state_update()
+	input_manager.enable_input()
 
 func setup_game_with_new_music():
 	verify_and_startup_deck()
