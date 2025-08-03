@@ -43,8 +43,8 @@ var robot_speaking_timer: Timer
 var dialog_duration_per_word: float = 0.15
 
 var intro_dialogs = [
-	"Welcome to my collection vault!",
-	"I am the keeper of these powerful card bundles...",
+	"Welcome to my collection vault...",
+	"I am the keeper of these powerful card bundles.",
 	"Complete the challenges and these cards will be yours."
 ]
 
@@ -57,7 +57,20 @@ var casual_dialogs = [
 	"The cards are watching your progress with interest...",
 	"I've seen warriors fall because they ignored defensive cards.",
 	"Every card in my vault has proven its worth in battle.",
-	"Have you checked what you need to do to unlock the next bundle? Then start a game, I'm looking forward to fighting with you."
+	"The ancient cards whisper secrets of victory...",
+	"Power calls to those who dare to earn it.",
+	"These bundles hold mysteries yet to be unveiled..."
+]
+
+var mysterious_dialogs = [
+	"Something stirs in the vault...",
+	"The cards sense your presence...",
+	"Ancient powers await the worthy...",
+	"I sense potential in you...",
+	"The path to mastery is never easy...",
+	"Destiny favors the prepared mind...",
+	"Knowledge is the sharpest blade...",
+	"Victory belongs to those who understand..."
 ]
 
 func _ready():
@@ -76,9 +89,9 @@ func _ready():
 		back_button.text = "BACK TO GAME"
 		var game_age = GameStateManager.get_save_age_seconds()
 		if game_age >= 0 and game_age < 60:
-			queue_dialog_sequence(["Your game is waiting... Take your time browsing!"])
+			queue_dialog_sequence(["Your battle awaits... Take your time browsing."])
 		else:
-			queue_dialog_sequence(["Ahh, you're back!"])
+			queue_dialog_sequence(["Ahh, you return to my vault..."])
 	else:
 		back_button.text = "BACK"
 	
@@ -350,8 +363,7 @@ func activate_selected_bundle():
 	if bundle_info.can_unlock:
 		_on_bundle_unlock_requested(bundle_info.id)
 	else:
-		var progress_text = UnlockManagers.get_progress_text(bundle_info.id)
-		queue_dialog_sequence(["You need to: " + bundle_info.requirement_text + " (" + progress_text + ")"])
+		queue_dialog_sequence(["The path is not yet clear..."])
 
 func setup_dialog_system():
 	dialog_timer = Timer.new()
@@ -367,7 +379,8 @@ func _process_dialog_queue():
 	if current_dialog_queue.is_empty():
 		dialog_timer.wait_time = 8.0
 		dialog_timer.start()
-		current_dialog_queue = [casual_dialogs[randi() % casual_dialogs.size()]]
+		var dialog_pool = casual_dialogs + mysterious_dialogs
+		current_dialog_queue = [dialog_pool[randi() % dialog_pool.size()]]
 		return
 	
 	var next_dialog = current_dialog_queue.pop_front()
@@ -393,14 +406,14 @@ func setup_ui():
 		
 func handle_lost_game_state():
 	if accessed_from_game and not GameStateManager.has_saved_state():
-		queue_dialog_sequence(["I'm sorry, but your game state seems to have been lost..."])
+		queue_dialog_sequence(["The threads of your battle have been severed..."])
 		accessed_from_game = false
 		back_button.text = "BACK TO MENU"
 		
 		var timer = Timer.new()
 		timer.wait_time = 3.0
 		timer.one_shot = true
-		timer.timeout.connect(func(): queue_dialog_sequence(["You'll need to start a new game from the main menu."]))
+		timer.timeout.connect(func(): queue_dialog_sequence(["A new path must be forged from the beginning."]))
 		add_child(timer)
 		timer.start()
 
@@ -639,6 +652,7 @@ func _on_bundle_hovered(bundle_info: Dictionary):
 		
 		if bundle_info.can_unlock:
 			new_mood = "alert"
+			robot_head_instance.dramatic_reaction("excitement")
 		elif bundle_info.unlocked:
 			new_mood = "happy"
 		else:
@@ -648,19 +662,32 @@ func _on_bundle_hovered(bundle_info: Dictionary):
 			robot_head_instance.set_mood(new_mood)
 		
 		robot_current_mood = new_mood
-		
-		if randf() < 0.3:
-			var hover_message = _get_hover_message(bundle_info)
-			queue_dialog_sequence([hover_message])
 
-func _get_hover_message(bundle_info: Dictionary) -> String:
+func _get_mysterious_hover_message(bundle_info: Dictionary) -> String:
 	if bundle_info.unlocked:
-		return "You already own the " + bundle_info.name + "!"
+		var positive_messages = [
+			"This power serves you well...",
+			"A worthy addition to your arsenal.",
+			"These cards remember their master."
+		]
+		return positive_messages[randi() % positive_messages.size()]
 	elif bundle_info.can_unlock:
-		return "Ah, the " + bundle_info.name + " is ready for you!"
+		var ready_messages = [
+			"The moment approaches...",
+			"Power calls to you...",
+			"Your efforts have borne fruit.",
+			"The vault recognizes your worth."
+		]
+		return ready_messages[randi() % ready_messages.size()]
 	else:
-		var progress_text = UnlockManagers.get_progress_text(bundle_info.id)
-		return "The " + bundle_info.name + " awaits... " + progress_text
+		var locked_messages = [
+			"Patience, young warrior...",
+			"The path demands more...",
+			"Not yet...",
+			"Prove your worth first.",
+			"These secrets are well guarded."
+		]
+		return locked_messages[randi() % locked_messages.size()]
 
 func _on_bundle_unhovered():
 	if robot_head_instance:
@@ -670,10 +697,16 @@ func _on_bundle_unhovered():
 
 func _on_bundle_unlocked(bundle_id: String, cards: Array):
 	var bundle_info = UnlockManagers.get_bundle_info(bundle_id)
-	var message = "Congratulations! " + bundle_info.name + " is now available!"
-	queue_dialog_sequence([message])
+	var celebration_messages = [
+		"The vault yields its secrets!",
+		"Power is yours to command!",
+		"Another mystery unveiled...",
+		"Your destiny unfolds..."
+	]
+	queue_dialog_sequence([celebration_messages[randi() % celebration_messages.size()]])
 	
 	if robot_head_instance:
+		robot_head_instance.dramatic_reaction("excitement")
 		robot_head_instance.set_mood("happy")
 		robot_head_instance.flash_neck_lights()
 		robot_current_mood = "happy"
@@ -696,47 +729,16 @@ func _on_bundle_unlocked(bundle_id: String, cards: Array):
 		celebration_tween.tween_property(status_light, "color", Color(0.2, 0.8, 0.4, 0.8), 0.2)
 	
 	load_shop_data()
-	
-func get_contextual_robot_reaction(bundle_info: Dictionary) -> Dictionary:
-	var reactions = {
-		"can_unlock": [
-			"This bundle calls to you...",
-			"I sense you're ready for this challenge.",
-			"The cards within are eager to serve."
-		],
-		"unlocked": [
-			"You've mastered this collection.",
-			"These cards recognize their owner.",
-			"Well earned, warrior."
-		],
-		"locked": [
-			"Patience... prove yourself first.",
-			"These cards await a worthy master.",
-			"The challenge beckons..."
-		]
-	}
-	
-	var mood = "normal"
-	var messages = reactions["locked"]
-	
-	if bundle_info.unlocked:
-		mood = "happy"
-		messages = reactions["unlocked"]
-	elif bundle_info.can_unlock:
-		mood = "alert"
-		messages = reactions["can_unlock"]
-	
-	return {
-		"mood": mood,
-		"message": messages[randi() % messages.size()]
-	}
-
 
 func _on_progress_updated(bundle_id: String, current: int, required: int):
 	if current == required - 1 and required > 1:
-		var bundle_info = UnlockManagers.get_bundle_info(bundle_id)
-		var encouragement = "You're almost ready for " + bundle_info.name + "!"
-		queue_dialog_sequence([encouragement])
+		if randf() < 0.3:
+			var subtle_encouragement = [
+				"Something stirs in the depths...",
+				"The vault trembles with anticipation...",
+				"Power grows restless..."
+			]
+			queue_dialog_sequence([subtle_encouragement[randi() % subtle_encouragement.size()]])
 
 func _on_back_pressed():
 	if is_transitioning:
@@ -746,7 +748,7 @@ func _on_back_pressed():
 	play_ui_sound("button_click")
 
 	if accessed_from_game:
-		queue_dialog_sequence(["Good luck in your battle!"])
+		queue_dialog_sequence(["May fortune favor your battles..."])
 		await get_tree().create_timer(0.8).timeout
 		
 		if GlobalMusicManager:
@@ -762,7 +764,7 @@ func _on_back_pressed():
 func _on_refresh_pressed():
 	play_ui_sound("button_click")
 	load_shop_data()
-	queue_dialog_sequence(["*refreshes inventory* Everything's up to date!"])
+	queue_dialog_sequence(["The vault's knowledge refreshes itself..."])
 
 func _on_debug_pressed():
 	if not UnlockManagers:
@@ -780,7 +782,7 @@ func _on_debug_pressed():
 		UnlockManagers.save_progress()
 		
 		load_shop_data()
-		queue_dialog_sequence(["*winks* Everything's unlocked now!"])
+		queue_dialog_sequence(["*The vault bends to your will* All secrets revealed."])
 		
 		debug_button.text = "🗑️ RESET ALL"
 		debug_mode_unlock = false
@@ -789,7 +791,7 @@ func _on_debug_pressed():
 		UnlockManagers.reset_all_progress()
 		
 		load_shop_data()
-		queue_dialog_sequence(["*serious* Back to basics. Prove yourself again."])
+		queue_dialog_sequence(["*The vault seals itself once more* Prove yourself again, warrior."])
 		
 		debug_button.text = "🔓 UNLOCK ALL"
 		debug_mode_unlock = true
