@@ -36,6 +36,7 @@ var selection_tween: Tween
 var has_played_epic_animation: bool = false
 var is_being_played: bool = false
 var animation_in_progress: bool = false
+var gamepad_selection_applied: bool = false
 
 func _ready():
 	original_scale = scale
@@ -91,6 +92,14 @@ func animate_mana_insufficient():
 	animation_in_progress = false
 		
 func apply_gamepad_selection_style():
+	if gamepad_selection_applied or animation_in_progress or is_being_played:
+		return 
+		
+	if selection_tween and selection_tween.is_valid():
+		return
+	
+	gamepad_selection_applied = true
+	
 	if selection_tween:
 		selection_tween.kill()
 	
@@ -108,6 +117,11 @@ func apply_gamepad_selection_style():
 	selection_tween.set_loops()
 
 func remove_gamepad_selection_style():
+	if not gamepad_selection_applied:
+		return
+	
+	gamepad_selection_applied = false
+	
 	if selection_tween:
 		selection_tween.kill()
 	
@@ -168,11 +182,16 @@ func play_card_animation():
 	await play_tween.finished
 	queue_free()
 
+func has_gamepad_selection_applied() -> bool:
+	return gamepad_selection_applied
+
 func _cleanup_tweens():
 	var tweens_to_kill = [hover_tween, epic_border_tween, playable_tween, selection_tween]
 	for tween in tweens_to_kill:
 		if tween and tween.is_valid():
 			tween.kill()
+	
+	gamepad_selection_applied = false
 
 func update_display():
 	name_label.text = card_data.card_name

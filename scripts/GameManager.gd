@@ -177,7 +177,6 @@ func should_restart_for_no_cards() -> bool:
 	
 func restart_for_no_cards():
 	if game_ended or restart_in_progress:
-		print("Cannot restart for no cards: game ended or restart in progress")
 		return
 	
 	if main_scene and main_scene.input_manager:
@@ -205,12 +204,24 @@ func can_end_game() -> bool:
 		return false
 	
 	if ai and ai.has_method("is_ai_turn_active") and ai.is_ai_turn_active():
+		print("Cannot end game: AI turn still active")
 		return false
-	
-	if _has_pending_card_animations():
+
+	if _has_critical_pending_animations():
+		print("Cannot end game: Critical animations pending")
 		return false
 	
 	return true
+	
+func _has_critical_pending_animations() -> bool:
+	if main_scene and main_scene.ui_manager and main_scene.ui_manager.card_instances:
+		for card in main_scene.ui_manager.card_instances:
+			if is_instance_valid(card):
+				if card.has_method("get") and card.get("is_being_played"):
+					return true
+				if card.has_method("get") and card.get("play_tween") and card.play_tween.is_valid():
+					return true
+	return false
 
 func _has_pending_card_animations() -> bool:
 	if main_scene and main_scene.ui_manager and main_scene.ui_manager.card_instances:
@@ -254,7 +265,6 @@ func end_turn_no_cards():
 	main_scene.game_info_label.text = "Ending turn automatically..."
 	await main_scene.get_tree().create_timer(GameBalance.get_timer_delay("turn_end")).timeout
 
-
 func handle_game_over(message: String, end_turn_button: Button):
 	if game_ended or restart_in_progress:
 		return
@@ -272,8 +282,11 @@ func handle_game_over(message: String, end_turn_button: Button):
 	
 	if end_turn_button:
 		end_turn_button.disabled = true
-	
-	await main_scene.get_tree().create_timer(GameBalance.get_timer_delay("death_restart")).timeout
+
+	var death_delay = GameBalance.get_timer_delay("death_restart")
+	death_delay = min(death_delay, 2.0)
+	print("Death restart delay: ", death_delay, "s")
+	await main_scene.get_tree().create_timer(death_delay).timeout
 	
 func is_safe_to_process_actions() -> bool:
 	return not game_ended and not pending_game_end and not restart_in_progress and not _is_game_transitioning()

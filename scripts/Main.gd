@@ -213,14 +213,23 @@ func _on_bundle_unlocked(bundle_id: String, cards: Array):
 	var bundle_info = UnlockManagers.get_bundle_info(bundle_id)
 	bundle_celebration_system.queue_celebration(bundle_info, cards)
 	audio_helper.play_bonus_sound()
-		
+
 func _wait_for_celebrations_to_complete():
-	await bundle_celebration_system.wait_for_celebrations_to_complete()
+	var max_wait_time = 2.0
+	var wait_time = 0.0
+	var check_interval = 0.05
+	
+	while wait_time < max_wait_time:
+		if not bundle_celebration_system or bundle_celebration_system.is_celebrations_complete():
+			return
+
+		await get_tree().create_timer(check_interval).timeout
+		wait_time += check_interval
 
 func _wait_for_actions_to_complete():
-	var max_wait_time = 10.0
+	var max_wait_time = 3.0
 	var wait_time = 0.0
-	var check_interval = 0.1
+	var check_interval = 0.05
 	
 	while wait_time < max_wait_time:
 		if game_manager.can_end_game():
@@ -228,8 +237,6 @@ func _wait_for_actions_to_complete():
 
 		await get_tree().create_timer(check_interval).timeout
 		wait_time += check_interval
-	
-	print("Timeout reached, proceeding with game end anyway")
 
 func _on_card_unlocked(card_name: String):
 	pass
@@ -389,8 +396,7 @@ func start_player_turn():
 		return
 		
 	is_player_turn = true
-	
-	# Reset player turn state
+
 	player.turn_number += 1
 	player.current_mana = player.max_mana
 	player.cards_played_this_turn = 0
@@ -423,26 +429,22 @@ func start_player_turn():
 	controls_panel.update_player_turn(true)
 	controls_panel.update_cards_available(player.hand.size() > 0)
 	
-	# Enable input AFTER UI updates and add small delay for gamepad
 	if input_manager.last_input_was_gamepad:
-		# Add delay to ensure smooth transition
 		await get_tree().process_frame
 		await get_tree().process_frame
 		input_manager.start_player_turn()
-		input_manager.force_gamepad_mode_activation()
 	else:
 		input_manager.start_player_turn()
 	
 	if cards_actually_drawn > 0:
 		player.card_drawn.emit(cards_actually_drawn, true)
-
+		
 func start_ai_turn():
 	if not is_player_turn or game_manager.is_game_ended():
 		return
 		
 	is_player_turn = false
 	
-	# Disable input immediately when AI turn starts
 	input_manager.start_ai_turn()
 	
 	ai.turn_number += 1
@@ -481,13 +483,14 @@ func start_ai_turn():
 			await game_manager.restart_for_no_cards()
 			return
 		
-		await get_tree().create_timer(0.4).timeout  # Reduced from 0.8 to 0.4
+		await get_tree().create_timer(0.4).timeout
 		
 		if not game_manager.is_game_ended():
 			start_player_turn()
 
 func restart_game():
 	if game_manager.is_restart_in_progress():
+		print("Restart already in progress, skipping")
 		return
 	
 	is_game_transitioning = true
@@ -498,8 +501,10 @@ func restart_game():
 	
 	game_count += 1
 	game_manager.restart_game(game_count, difficulty)
-	
-	await get_tree().create_timer(GameBalance.get_timer_delay("new_game") + 0.5).timeout
+
+	var restart_delay = GameBalance.get_timer_delay("new_game") + 0.2
+	print("Restart delay: ", restart_delay, "s")
+	await get_tree().create_timer(restart_delay).timeout
 	
 	setup_game_with_new_music()
 
@@ -548,17 +553,6 @@ func _on_player_damage_taken(damage_amount: int):
 	if StatisticsManagers:
 		StatisticsManagers.combat_action("damage_taken", damage_amount)
 
-func _on_player_hand_changed():
-	if not player:
-		return
-		
-	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
-	ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
-	
-	if is_player_turn and player.get_hand_size() == 0 and not game_manager.is_game_ended():
-		await game_manager.end_turn_no_cards()
-		start_ai_turn()
-
 func _on_player_cards_played_changed(cards_played: int, max_cards: int):
 	ui_manager.update_hand_display(player, card_scene, hand_container)
 	ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
@@ -571,6 +565,29 @@ func _on_player_cards_played_changed(cards_played: int, max_cards: int):
 		elif is_player_turn and player.get_hand_size() == 0:
 			await game_manager.end_turn_no_cards()
 			start_ai_turn()
+
+func _on_player_hand_changed():
+	if not player:
+		return
+		
+	var was_gamepad_selection_active = (
+		input_manager.gamepad_mode and 
+		is_player_turn and
+		ui_manager.gamepad_selection_active and
+		player.cards_played_this_turn > 0
+	)
+	
+	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
+	ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
+	
+	if was_gamepad_selection_active:
+		await get_tree().process_frame
+		ui_manager.gamepad_selection_active = true
+		ui_manager.update_card_selection(true, player)
+	
+	if is_player_turn and player.get_hand_size() == 0 and not game_manager.is_game_ended():
+		await game_manager.end_turn_no_cards()
+		start_ai_turn()
 
 func _on_player_card_drawn(cards_count: int, from_deck: bool):
 	await get_tree().create_timer(0.2).timeout
@@ -600,16 +617,23 @@ func _on_player_died():
 	if not game_manager.mark_game_ended():
 		return
 	
+	print("PLAYER DIED. Starting end sequence")
 	is_game_transitioning = true
 	input_manager.disable_input()
 	
 	_track_game_end(false)
 	
+	var start_time = Time.get_ticks_msec() / 1000.0
 	await _wait_for_actions_to_complete()
+	var actions_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
+	print("Actions wait completed in: ", actions_wait_time, "s")
 
 	game_manager.finalize_game_end()
 	
+	start_time = Time.get_ticks_msec() / 1000.0
 	await _wait_for_celebrations_to_complete()
+	var celebrations_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
+	print("Celebrations wait completed in: ", celebrations_wait_time, "s")
 	
 	cleanup_notifications()
 	
@@ -627,7 +651,6 @@ func _on_player_died():
 	await game_manager.handle_game_over("YOU LOST! Restarting...", end_turn_button)
 	restart_game()
 
-
 func _on_ai_card_played(card: CardData):
 	ai_notification.show_card_notification(card, "AI")
 
@@ -635,13 +658,23 @@ func _on_ai_died():
 	if not game_manager.mark_game_ended():
 		return
 	
+	print("AI DIED. Starting end sequence")
 	is_game_transitioning = true
 	input_manager.disable_input()
 	
 	_track_game_end(true)
+	
+	var start_time = Time.get_ticks_msec() / 1000.0
 	await _wait_for_actions_to_complete()
+	var actions_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
+	print("Actions wait completed in: ", actions_wait_time, "s")
+	
 	game_manager.finalize_game_end()
+	
+	start_time = Time.get_ticks_msec() / 1000.0
 	await _wait_for_celebrations_to_complete()
+	var celebrations_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
+	print("Celebrations wait completed in: ", celebrations_wait_time, "s")
 	
 	cleanup_notifications()
 
@@ -722,10 +755,8 @@ func _on_card_clicked(card: Card):
 	if not is_player_turn or not player.can_play_card(card.card_data) or is_game_transitioning:
 		return
 	
-	# Additional check to prevent playing more cards than allowed
 	if not player.can_play_more_cards():
-		print("Cannot play more cards this turn - limit reached")
-		card.animate_mana_insufficient()  # Show feedback
+		card.animate_mana_insufficient()
 		return
 
 	var card_data = card.card_data

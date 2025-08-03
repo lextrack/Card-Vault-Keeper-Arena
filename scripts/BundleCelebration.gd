@@ -31,6 +31,9 @@ func clear_all_celebrations():
 		if is_instance_valid(overlay):
 			overlay.queue_free()
 
+func is_celebrations_complete() -> bool:
+	return not is_showing_celebration and celebration_queue.size() == 0
+
 func _process_queue():
 	if celebration_queue.size() == 0:
 		is_showing_celebration = false
@@ -43,7 +46,7 @@ func _process_queue():
 	await _show_celebration(celebration_data.bundle_info, celebration_data.cards)
 	
 	if celebration_queue.size() > 0:
-		await main_scene.get_tree().create_timer(0.5).timeout
+		await main_scene.get_tree().create_timer(0.3).timeout
 		_process_queue()
 	else:
 		is_showing_celebration = false
@@ -60,19 +63,19 @@ func _show_celebration(bundle_info: Dictionary, cards: Array):
 	_spawn_particles(overlay)
 	
 	var timer = Timer.new()
-	timer.wait_time = 2.0
+	timer.wait_time = 1.5 
 	timer.one_shot = true
 	overlay.add_child(timer)
 	
 	timer.timeout.connect(_close_celebration_safely.bind(overlay))
 	timer.start()
 
-	var max_wait = 3.0
+	var max_wait = 2.0
 	var wait_time = 0.0
 	
 	while is_instance_valid(overlay) and wait_time < max_wait:
-		await main_scene.get_tree().create_timer(0.1).timeout
-		wait_time += 0.1
+		await main_scene.get_tree().create_timer(0.05).timeout
+		wait_time += 0.05
 	
 	if is_instance_valid(overlay):
 		overlay.queue_free()
@@ -82,7 +85,7 @@ func _close_celebration_safely(overlay: Control):
 		return
 		
 	var fade_tween = main_scene.create_tween()
-	fade_tween.tween_property(overlay, "modulate:a", 0.0, 0.3)
+	fade_tween.tween_property(overlay, "modulate:a", 0.0, 0.2)
 	await fade_tween.finished
 	
 	if is_instance_valid(overlay):
@@ -157,16 +160,16 @@ func _animate_entrance(overlay: Control, panel: Panel):
 	
 	var tween = main_scene.create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(overlay, "modulate:a", 1.0, 0.5)
-	tween.tween_property(panel, "scale", Vector2(1.1, 1.1), 0.4)
-	tween.tween_property(panel, "scale", Vector2(1.0, 1.0), 0.2)
+	tween.tween_property(overlay, "modulate:a", 1.0, 0.3)
+	tween.tween_property(panel, "scale", Vector2(1.1, 1.1), 0.25)
+	tween.tween_property(panel, "scale", Vector2(1.0, 1.0), 0.15)
 	
 	await tween.finished
 
 func _spawn_particles(overlay: Control):
 	var particles = ["✨", "🎉", "⭐", "💫", "🌟"]
 	
-	for i in range(10):
+	for i in range(6): 
 		var particle = Label.new()
 		particle.text = particles[randi() % particles.size()]
 		particle.add_theme_font_size_override("font_size", 24)
@@ -178,8 +181,8 @@ func _spawn_particles(overlay: Control):
 		
 		var tween = main_scene.create_tween()
 		tween.set_parallel(true)
-		tween.tween_property(particle, "position:y", particle.position.y - 100, 2.0)
-		tween.tween_property(particle, "modulate:a", 0.0, 2.0)
+		tween.tween_property(particle, "position:y", particle.position.y - 100, 1.5)
+		tween.tween_property(particle, "modulate:a", 0.0, 1.5)
 		
 		var cleanup_callable = func(): _cleanup_particle(particle)
 		tween.finished.connect(cleanup_callable)
@@ -193,19 +196,29 @@ func _close_celebration(overlay: Control):
 		return
 		
 	var fade_tween = main_scene.create_tween()
-	fade_tween.tween_property(overlay, "modulate:a", 0.0, 0.3)
+	fade_tween.tween_property(overlay, "modulate:a", 0.0, 0.2)
 	await fade_tween.finished
 	
 	if is_instance_valid(overlay):
 		overlay.queue_free()
 
 func wait_for_celebrations_to_complete() -> void:
-	var max_wait = 5.0
+	var max_wait = 3.0
 	var wait_time = 0.0
 	
 	while is_showing_celebration and wait_time < max_wait:
-		await main_scene.get_tree().create_timer(0.1).timeout
-		wait_time += 0.1
+		await main_scene.get_tree().create_timer(0.05).timeout
+		wait_time += 0.05
 	
 	if celebration_queue.size() > 0:
-		await main_scene.get_tree().create_timer(0.5).timeout
+		await main_scene.get_tree().create_timer(0.3).timeout
+
+func force_complete_celebrations():
+	celebration_queue.clear()
+	is_showing_celebration = false
+	clear_all_celebrations()
+	celebration_completed.emit()
+
+func skip_celebrations_for_game_end():
+	if is_showing_celebration or celebration_queue.size() > 0:
+		force_complete_celebrations()

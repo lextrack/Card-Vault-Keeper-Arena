@@ -52,10 +52,14 @@ func create_player_deck_by_difficulty() -> Array:
 		
 func play_card_without_hand_removal(card: CardData, target: Player = null, audio_helper: AudioHelper = null) -> bool:
 	if not can_play_card(card):
+		print("Cannot play card: ", card.card_name, " | Mana: ", current_mana, "/", card.cost, " | Cards played: ", cards_played_this_turn, "/", get_max_cards_per_turn())
 		return false
 	
 	if cards_played_this_turn >= get_max_cards_per_turn():
+		print("Card limit exceeded! Cards played: ", cards_played_this_turn, "/", get_max_cards_per_turn())
 		return false
+	
+	print("Playing card: ", card.card_name, " (", card.card_type, ") | Cost: ", card.cost, " | Turn: ", turn_number)
 	
 	spend_mana(card.cost)
 	discard_pile.append(card)
@@ -125,6 +129,9 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 				
 				if not is_ai and UnlockManagers:
 					UnlockManagers.track_progress("damage_blocked", card.shield)
+	
+	print("   Cards played after: ", cards_played_this_turn, "/", get_max_cards_per_turn())
+	print("   Mana after card: ", current_mana)
 	
 	if cards_played_this_turn >= get_max_cards_per_turn():
 		print("CARD LIMIT REACHED - No more cards can be played this turn")
@@ -199,7 +206,6 @@ func take_damage(damage: int, from_ai: bool = false):
 
 func heal(amount: int):
 	if amount <= 0:
-		print("Invalid heal amount: ", amount)
 		return
 	
 	var old_hp = current_hp
@@ -212,7 +218,6 @@ func heal(amount: int):
 
 func add_shield(amount: int):
 	if amount <= 0:
-		print("Invalid shield amount: ", amount)
 		return
 	
 	var old_shield = current_shield
@@ -374,7 +379,7 @@ func get_deck_suggestions() -> Array:
 		
 func play_card_with_audio(card: CardData, target: Player = null, audio_helper: AudioHelper = null) -> bool:
 	if not can_play_card(card):
-		print("❌ Cannot play card: ", card.card_name, " | Mana: ", current_mana, "/", card.cost, " | Cards played: ", cards_played_this_turn, "/", get_max_cards_per_turn())
+		print("Cannot play card: ", card.card_name, " | Mana: ", current_mana, "/", card.cost, " | Cards played: ", cards_played_this_turn, "/", get_max_cards_per_turn())
 		return false
 	
 	print("Playing card: ", card.card_name, " (", card.card_type, ") | Cost: ", card.cost, " | Turn: ", turn_number)
@@ -601,12 +606,10 @@ func ai_turn(opponent: Player):
 	
 	ai_turn_active = false
 	should_stop_ai_turn = false
-	print("AI: Turn completed naturally")
 	
 func stop_ai_turn():
 	if is_ai and ai_turn_active:
 		should_stop_ai_turn = true
-		print("AI: Turn stop requested")
 
 func is_ai_turn_active() -> bool:
 	return is_ai and ai_turn_active
