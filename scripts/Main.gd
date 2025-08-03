@@ -567,8 +567,10 @@ func _on_player_card_drawn(cards_count: int, from_deck: bool):
 	await get_tree().create_timer(0.2).timeout
 	audio_helper.play_card_draw_sound()
 	
-	if cards_count > 0 and ui_manager.has_method("update_hand_display_with_new_cards_animation"):
-		ui_manager.update_hand_display_with_new_cards_animation(player, card_scene, hand_container, cards_count)
+	if cards_count > 0:
+		ui_manager.update_hand_display_with_new_cards_animation(
+			player, card_scene, hand_container, cards_count
+		)
 	else:
 		ui_manager.update_hand_display(player, card_scene, hand_container)
 

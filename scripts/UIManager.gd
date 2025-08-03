@@ -201,6 +201,13 @@ func start_ai_turn(ai: Player):
 		end_turn_button.disabled = true
 		end_turn_button.release_focus()
 
+	_darken_player_cards_for_ai_turn()
+
+func _darken_player_cards_for_ai_turn():
+	for card in card_instances:
+		if is_instance_valid(card):
+			card.set_playable(false)
+
 func animate_turn_transition(is_player_turn: bool):
 	var text = "Your turn" if is_player_turn else "AI turn"
 	var color = Color(0.3, 1.0, 0.8, 1.0) if is_player_turn else Color(1.0, 0.4, 0.4, 1.0)
@@ -228,17 +235,8 @@ func animate_turn_transition(is_player_turn: bool):
 	settle_tween.tween_property(turn_label, "modulate", color, 0.15)
 
 func update_hand_display(player: Player, card_scene: PackedScene, hand_container: Container):
-	if not player:
-		push_error("Player is null in update_hand_display")
-		return
-	if not card_scene:
-		push_error("Card scene is null in update_hand_display")
-		return
-	if not hand_container:
-		push_error("Hand container is null in update_hand_display")
-		return
-	if not player.hand:
-		push_error("Player hand is null in update_hand_display")
+	if not player or not card_scene or not hand_container or not player.hand:
+		push_error("Invalid parameters in update_hand_display")
 		return
 	
 	if not _has_hand_changed(player) and card_instances.size() == player.hand.size():
@@ -253,12 +251,10 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 	for i in range(player.hand.size()):
 		var card_data = player.hand[i]
 		if not card_data:
-			print("Warning: Card data is null at index ", i)
 			continue
 			
 		var card_instance = card_scene.instantiate()
 		if not card_instance:
-			print("Warning: Failed to instantiate card at index ", i)
 			continue
 		
 		card_instance.set_card_data(card_data)
@@ -509,17 +505,8 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 					card.modulate = Color(0.4, 0.4, 0.4, 0.7)
 
 func update_hand_display_no_animation(player: Player, card_scene: PackedScene, hand_container: Container):
-	if not player:
-		push_error("Player is null in update_hand_display_no_animation")
-		return
-	if not card_scene:
-		push_error("Card scene is null in update_hand_display_no_animation")
-		return
-	if not hand_container:
-		push_error("Hand container is null in update_hand_display_no_animation")
-		return
-	if not player.hand:
-		push_error("Player hand is null in update_hand_display_no_animation")
+	if not player or not card_scene or not hand_container or not player.hand:
+		push_error("Invalid parameters in update_hand_display_no_animation")
 		return
 
 	for child in hand_container.get_children():
@@ -531,15 +518,11 @@ func update_hand_display_no_animation(player: Player, card_scene: PackedScene, h
 	for i in range(player.hand.size()):
 		var card_data = player.hand[i]
 		if not card_data:
-			print("Warning: Card data is null at index ", i)
 			continue
 			
 		var card_instance = card_scene.instantiate()
 		if not card_instance:
-			print("Warning: Failed to instantiate card at index ", i)
 			continue
-
-		card_instance.disable_entrance_animation()
 		
 		card_instance.set_card_data(card_data)
 		card_instance.card_clicked.connect(main_scene._on_card_clicked)
@@ -560,45 +543,31 @@ func update_hand_display_no_animation(player: Player, card_scene: PackedScene, h
 		controls_panel.update_cards_available(card_instances.size() > 0)
 	
 func update_hand_display_with_new_cards_animation(player: Player, card_scene: PackedScene, hand_container: Container, new_cards_count: int = 0):
-	if not _has_hand_changed(player):
-		return
+	for child in hand_container.get_children():
+		child.queue_free()
 	
-	update_hand_display(player, card_scene, hand_container)
+	card_instances.clear()
 	
-	if new_cards_count > 0 and card_instances.size() >= new_cards_count:
-		await main_scene.get_tree().process_frame
+	for i in range(player.hand.size()):
+		var card_data = player.hand[i]
+		if not card_data:
+			continue
+			
+		var card_instance = card_scene.instantiate()
+		if not card_instance:
+			continue
+			
+		card_instance.set_card_data(card_data)
+		card_instance.card_clicked.connect(main_scene._on_card_clicked)
 		
-		var start_index = card_instances.size() - new_cards_count
-		for i in range(start_index, card_instances.size()):
-			var card_instance = card_instances[i]
-			if is_instance_valid(card_instance):
-				if card_instance.entrance_tween:
-					card_instance.entrance_tween.kill()
-				
-				card_instance.modulate.a = 0.0
-				card_instance.scale = Vector2(0.9, 0.9)
-				
-				var delay = (i - start_index) * 0.1
-				if delay > 0:
-					main_scene.get_tree().create_timer(delay).timeout.connect(func():
-						if is_instance_valid(card_instance):
-							_animate_simple_card_entrance(card_instance)
-					)
-				else:
-					_animate_simple_card_entrance(card_instance)
-
-func _animate_simple_card_entrance(card_instance: Control):
-	var tween = main_scene.create_tween()
-	tween.set_parallel(true)
-	
-	tween.tween_property(card_instance, "modulate:a", 1.0, 0.15)
-	
-	tween.tween_property(card_instance, "scale", card_instance.original_scale * 1.05, 0.15)
-	tween.tween_property(card_instance, "scale", card_instance.original_scale, 0.1).set_delay(0.15)
-
-	await tween.finished
-	if card_instance.is_playable:
-		card_instance.start_idle_shadow_animation()
+		if card_instance.has_signal("mouse_entered"):
+			card_instance.mouse_entered.connect(_on_card_hover)
+		
+		hand_container.add_child(card_instance)
+		card_instances.append(card_instance)
+		
+		var can_play = main_scene.is_player_turn and player.can_play_card(card_data)
+		card_instance.set_playable(can_play)
 
 func navigate_cards(direction: int, player: Player):
 	if card_instances.size() == 0:

@@ -15,7 +15,6 @@ extends Control
 @onready var rarity_label = $CardBackground/VBox/RarityContainer/RarityLabel
 @onready var rarity_bg = $CardBackground/VBox/RarityContainer/RarityBG
 @onready var art_bg = $CardBackground/VBox/ArtContainer/ArtBG
-@onready var card_shadow = $CardShadow
 
 const ATTACK_VIDEO = preload("res://assets/backgrounds/attack1.ogv")
 const HEAL_VIDEO = preload("res://assets/backgrounds/heal1.ogv")
@@ -27,34 +26,20 @@ signal card_played(card: Card)
 
 var original_scale: Vector2
 var original_position: Vector2
-var original_shadow_position: Vector2
-var original_shadow_color: Color
 var is_hovered: bool = false
 var is_playable: bool = true
 var hover_tween: Tween
-var entrance_tween: Tween
 var epic_border_tween: Tween
 var playable_tween: Tween
-var shadow_tween: Tween
-var idle_shadow_tween: Tween
 var play_tween: Tween
 var selection_tween: Tween
 var has_played_epic_animation: bool = false
-var has_played_entrance: bool = false
-var should_play_entrance: bool = true
 var is_being_played: bool = false
 var animation_in_progress: bool = false
 
 func _ready():
 	original_scale = scale
 	original_position = position
-	
-	if card_shadow:
-		original_shadow_position = Vector2(card_shadow.offset_left, card_shadow.offset_top)
-		original_shadow_color = card_shadow.color
-
-	if should_play_entrance and not has_played_entrance:
-		play_entrance_animation()
 	
 	if card_data:
 		update_display()
@@ -64,175 +49,46 @@ func _ready():
 	mouse_exited.connect(_on_mouse_exited)
 
 	set_mouse_filter_recursive(self)
-	
-	if is_playable and has_played_entrance:
-		start_idle_shadow_animation()
 
 func get_card_data() -> CardData:
 	return card_data
 
-func disable_entrance_animation():
-	should_play_entrance = false
-	has_played_entrance = true
-
-func start_idle_shadow_animation():
-	if not card_shadow or not is_playable or not has_played_entrance:
+func animate_mana_insufficient():
+	if animation_in_progress or is_being_played:
 		return
 	
-	if idle_shadow_tween:
-		idle_shadow_tween.kill()
-	
-	idle_shadow_tween = create_tween()
-	idle_shadow_tween.set_loops()
-	idle_shadow_tween.set_parallel(true)
-
-	var shadow_offset = 1.5
-	var base_x = original_shadow_position.x
-	var base_y = original_shadow_position.y
-	
-	idle_shadow_tween.tween_method(
-		_update_shadow_idle_position,
-		0.0,
-		2.0 * PI,
-		4.0
-	)
-	
-	idle_shadow_tween.tween_method(
-		_update_shadow_idle_opacity,
-		0.0,
-		2.0 * PI,
-		3.5
-	)
-
-func _update_shadow_idle_position(angle: float):
-	if not card_shadow:
-		return
-	
-	var shadow_offset = 0.8
-	var offset_x = sin(angle) * shadow_offset
-	var offset_y = cos(angle * 0.7) * shadow_offset * 0.5
-	
-	card_shadow.offset_left = original_shadow_position.x + offset_x
-	card_shadow.offset_top = original_shadow_position.y + offset_y
-
-func _update_shadow_idle_opacity(angle: float):
-	if not card_shadow:
-		return
-	
-	var opacity_variation = sin(angle * 1.3) * 0.1
-	var target_alpha = original_shadow_color.a + opacity_variation
-	target_alpha = clamp(target_alpha, 0.3, 0.8)
-	
-	card_shadow.color.a = target_alpha
-
-func stop_idle_shadow_animation():
-	if idle_shadow_tween:
-		idle_shadow_tween.kill()
-		idle_shadow_tween = null
-
-func animate_shadow_on_hover():
-	if not card_shadow:
-		return
-	
-	stop_idle_shadow_animation()
-	
-	if shadow_tween:
-		shadow_tween.kill()
-	
-	shadow_tween = create_tween()
-	shadow_tween.set_parallel(true)
-
-	var hover_offset_x = original_shadow_position.x + 6
-	var hover_offset_y = original_shadow_position.y + 6
-	
-	shadow_tween.tween_property(card_shadow, "offset_left", hover_offset_x, 0.15)
-	shadow_tween.tween_property(card_shadow, "offset_top", hover_offset_y, 0.15)
-	
-	var hover_color = original_shadow_color
-	hover_color.a = 0.4
-	shadow_tween.tween_property(card_shadow, "color", hover_color, 0.15)
-
-	shadow_tween.tween_property(card_shadow, "scale", Vector2(1.05, 1.05), 0.15)
-
-func animate_shadow_on_unhover():
-	if not card_shadow:
-		return
-	
-	if shadow_tween:
-		shadow_tween.kill()
-	
-	shadow_tween = create_tween()
-	shadow_tween.set_parallel(true)
-	shadow_tween.tween_property(card_shadow, "offset_left", original_shadow_position.x, 0.2)
-	shadow_tween.tween_property(card_shadow, "offset_top", original_shadow_position.y, 0.2)
-	shadow_tween.tween_property(card_shadow, "color", original_shadow_color, 0.2)
-	shadow_tween.tween_property(card_shadow, "scale", Vector2(1.0, 1.0), 0.2)
-	
-	await shadow_tween.finished
-
-	if is_playable:
-		start_idle_shadow_animation()
-
-func animate_shadow_on_click():
-	if not card_shadow:
-		return
-	
-	stop_idle_shadow_animation()
-	
-	if shadow_tween:
-		shadow_tween.kill()
-	
-	shadow_tween = create_tween()
-	shadow_tween.set_parallel(true)
-
-	var click_offset_x = original_shadow_position.x + 2
-	var click_offset_y = original_shadow_position.y + 2
-	
-	shadow_tween.tween_property(card_shadow, "offset_left", click_offset_x, 0.06)
-	shadow_tween.tween_property(card_shadow, "offset_top", click_offset_y, 0.06)
-	
-	var click_color = original_shadow_color
-	click_color.a = 0.8
-	shadow_tween.tween_property(card_shadow, "color", click_color, 0.06)
-	
-	await shadow_tween.finished
-	
-	if is_hovered:
-		animate_shadow_on_hover()
-	else:
-		animate_shadow_on_unhover()
-
-func play_entrance_animation():
-	if has_played_entrance or not should_play_entrance or is_being_played:
-		return
-		
-	has_played_entrance = true
 	animation_in_progress = true
 	
-	modulate.a = 0.0
-	scale = Vector2(0.7, 0.7)
+	if selection_tween:
+		selection_tween.kill()
 	
-	if card_shadow:
-		card_shadow.modulate.a = 0.0
+	selection_tween = create_tween()
+	selection_tween.set_parallel(true)
 	
-	if entrance_tween:
-		entrance_tween.kill()
+	var shake_positions = [
+		original_position + Vector2(4, 0),
+		original_position + Vector2(-4, 0),
+		original_position + Vector2(3, 0),
+		original_position + Vector2(-3, 0),
+		original_position + Vector2(2, 0),
+		original_position + Vector2(-2, 0),
+		original_position
+	]
 	
-	entrance_tween = create_tween()
-	entrance_tween.set_parallel(true)
+	for i in range(shake_positions.size()):
+		var delay = i * 0.03
+		selection_tween.tween_property(self, "position", shake_positions[i], 0.03).set_delay(delay)
 	
-	entrance_tween.tween_property(self, "modulate:a", 1.0, 0.25)
-	entrance_tween.tween_property(self, "scale", original_scale, 0.2).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-
-	if card_shadow:
-		entrance_tween.tween_property(card_shadow, "modulate:a", 1.0, 0.3)
+	selection_tween.tween_property(cost_bg, "color", Color.RED, 0.1)
+	selection_tween.tween_property(cost_label, "modulate", Color(1.5, 0.3, 0.3, 1.0), 0.1)
+	selection_tween.tween_property(card_border, "modulate", Color(1.3, 0.5, 0.5, 1.0), 0.1)
 	
-	await entrance_tween.finished
+	selection_tween.tween_property(cost_bg, "color", get_card_type_colors(card_data.card_type).cost_bg, 0.15).set_delay(0.1)
+	selection_tween.tween_property(cost_label, "modulate", Color.WHITE, 0.15).set_delay(0.1)
+	selection_tween.tween_property(card_border, "modulate", Color.WHITE, 0.15).set_delay(0.1)
 	
+	await selection_tween.finished
 	animation_in_progress = false
-	
-	if is_playable and not is_being_played:
-		start_idle_shadow_animation()
 		
 func apply_gamepad_selection_style():
 	if selection_tween:
@@ -265,34 +121,6 @@ func remove_gamepad_selection_style():
 		selection_tween.tween_property(self, "modulate", Color.WHITE, 0.2)
 	else:
 		selection_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.2)
-
-func play_selection_animation():
-	if is_being_played or animation_in_progress:
-		return
-		
-	if not is_playable:
-		play_disabled_animation()
-		return
-	
-	animate_shadow_on_click()
-	
-	if selection_tween:
-		selection_tween.kill()
-	
-	selection_tween = create_tween()
-	selection_tween.set_parallel(true)
-
-	selection_tween.tween_property(self, "scale", original_scale * 0.95, 0.05)
-	selection_tween.tween_property(self, "scale", original_scale * 1.1, 0.08).set_delay(0.05)
-	selection_tween.tween_property(self, "scale", original_scale, 0.12).set_delay(0.13)
-	
-	var original_modulate = modulate
-	selection_tween.tween_property(self, "modulate", Color(1.3, 1.3, 1.2, 1.0), 0.05)
-	selection_tween.tween_property(self, "modulate", original_modulate, 0.15).set_delay(0.05)
-
-	selection_tween.tween_property(self, "rotation", deg_to_rad(-2), 0.05)
-	selection_tween.tween_property(self, "rotation", deg_to_rad(2), 0.08).set_delay(0.05)
-	selection_tween.tween_property(self, "rotation", 0.0, 0.12).set_delay(0.13)
 
 func play_disabled_animation():
 	if is_being_played or animation_in_progress:
@@ -337,16 +165,11 @@ func play_card_animation():
 	play_tween.tween_property(self, "scale", Vector2(0.7, 0.7), 0.1)
 	play_tween.tween_property(self, "modulate:a", 0.0, 0.15)
 	
-	if card_shadow:
-		play_tween.tween_property(card_shadow, "modulate:a", 0.0, 0.1)
-	
 	await play_tween.finished
 	queue_free()
 
 func _cleanup_tweens():
-	stop_idle_shadow_animation()
-	
-	var tweens_to_kill = [hover_tween, entrance_tween, epic_border_tween, playable_tween, shadow_tween, selection_tween]
+	var tweens_to_kill = [hover_tween, epic_border_tween, playable_tween, selection_tween]
 	for tween in tweens_to_kill:
 		if tween and tween.is_valid():
 			tween.kill()
@@ -482,22 +305,22 @@ func get_rarity_colors() -> Dictionary:
 		"epic": 4.0
 	}
 
+func _can_animate() -> bool:
+	return not is_being_played and not animation_in_progress
+
 func _on_card_input(event: InputEvent):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if is_being_played or animation_in_progress:
-			print("Card input ignored - animation in progress or card being played")
+		if not _can_animate():
 			return
 			
-		if is_playable and not is_being_played:
+		if is_playable:
 			card_clicked.emit(self)
-
-		play_selection_animation()
+		else:
+			animate_mana_insufficient()
 
 func _on_mouse_entered():
-	if not is_hovered and is_playable and not is_being_played and not animation_in_progress:
+	if not is_hovered and is_playable and _can_animate():
 		is_hovered = true
-   	
-		animate_shadow_on_hover()
    	
 		if hover_tween:
 			hover_tween.kill()
@@ -505,7 +328,6 @@ func _on_mouse_entered():
 		hover_tween = create_tween()
 		hover_tween.set_parallel(true)
    	
-		hover_tween.tween_property(card_background, "rotation", deg_to_rad(1), 1.0).set_ease(Tween.EASE_OUT)
 		hover_tween.tween_property(self, "scale", original_scale * 1.06, 0.12).set_ease(Tween.EASE_OUT)
 		hover_tween.tween_property(self, "z_index", 10, 0.05)
    	
@@ -515,8 +337,6 @@ func _on_mouse_entered():
 func _on_mouse_exited():
 	if is_hovered and not is_being_played:
 		is_hovered = false
-   	
-		animate_shadow_on_unhover()
    	
 		if hover_tween:
 			hover_tween.kill()
@@ -537,8 +357,6 @@ func set_card_data(data: CardData):
 	card_data = data
 	if is_inside_tree():
 		update_display()
-		if not has_played_epic_animation:
-			call_deferred("play_epic_entrance_animation")
 
 func set_playable(playable: bool):
 	if is_being_played:
@@ -554,19 +372,9 @@ func set_playable(playable: bool):
 	if playable:
 		playable_tween.tween_property(self, "modulate", Color.WHITE, 0.2)
 		mouse_filter = Control.MOUSE_FILTER_PASS
-		if has_played_entrance and not is_being_played:
-			start_idle_shadow_animation()
 	else:
 		playable_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.15)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
-		stop_idle_shadow_animation()
-
-		if card_shadow:
-			var restore_tween = create_tween()
-			restore_tween.set_parallel(true)
-			restore_tween.tween_property(card_shadow, "offset_left", original_shadow_position.x, 0.2)
-			restore_tween.tween_property(card_shadow, "offset_top", original_shadow_position.y, 0.2)
-			restore_tween.tween_property(card_shadow, "color", original_shadow_color * Color(1, 1, 1, 0.3), 0.2)
 		
 		if is_hovered:
 			is_hovered = false
@@ -613,28 +421,8 @@ func apply_rarity_effects(rarity: String):
 			epic_border_tween.tween_property(card_border, "modulate", Color(1.2, 1.1, 1.3, 1.0), 0.6)
 		_:
 			pass
-			
-func play_epic_entrance_animation():
-	if not card_data or has_played_epic_animation:
-		return
-	
-	var rarity = CardProbability.calculate_card_rarity(card_data.damage, card_data.heal, card_data.shield)
-	if rarity == "epic":
-		has_played_epic_animation = true
-		
-		var epic_tween = create_tween()
-		epic_tween.set_loops(3)
-		epic_tween.set_parallel(true)
-		
-		epic_tween.tween_property(self, "scale", original_scale * 1.12, 0.18)
-		epic_tween.tween_property(self, "scale", original_scale, 0.18)
-		
-		var original_modulate = modulate
-		epic_tween.tween_property(self, "modulate", Color(1.25, 1.08, 1.3, 1.0), 0.18)
-		epic_tween.tween_property(self, "modulate", original_modulate, 0.18)
 
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
 		is_being_played = true
-		stop_idle_shadow_animation()
 		_cleanup_tweens()

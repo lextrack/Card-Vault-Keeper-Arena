@@ -186,7 +186,6 @@ func _handle_gamepad_navigation(event: InputEvent):
 	elif event.is_action_pressed("game_select"):
 		var selected_card = main_scene.ui_manager.get_selected_card()
 		if selected_card:
-			selected_card.play_selection_animation()
 			main_scene._on_card_clicked(selected_card)
 	elif event.is_action_pressed("game_back"):
 		var end_turn_button = main_scene.end_turn_button
