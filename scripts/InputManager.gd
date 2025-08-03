@@ -30,24 +30,52 @@ func _setup_button_navigation():
 
 func enable_input():
 	input_enabled = true
+	if last_input_was_gamepad:
+		gamepad_mode = true
+		CursorManager.set_gamepad_mode(true)
+		_update_ui_for_gamepad_mode()
 
 func disable_input():
 	input_enabled = false
 	gamepad_mode = false
 
 func is_input_enabled() -> bool:
-	return input_enabled and not _is_menu_blocking_input()
+	return input_enabled and not _is_menu_blocking_input() and not _is_game_transitioning()
 
 func _is_menu_blocking_input() -> bool:
 	if options_menu and options_menu.visible:
 		return true
 	return false
 
+func _is_game_transitioning() -> bool:
+	if main_scene and main_scene.has_method("get") and main_scene.get("is_game_transitioning"):
+		return main_scene.is_game_transitioning
+	return false
+	
+func force_gamepad_state_update():
+	if last_input_was_gamepad:
+		gamepad_mode = true
+		CursorManager.set_gamepad_mode(true)
+		_update_ui_for_gamepad_mode()
+
+func force_gamepad_mode_activation():
+	if last_input_was_gamepad and is_input_enabled():
+		gamepad_mode = true
+		CursorManager.set_gamepad_mode(true)
+		_update_ui_for_gamepad_mode()
+		print("Gamepad mode forcefully activated after transition")
+
 func start_player_turn():
-	if not is_input_enabled():
+	if not is_input_enabled() or _is_game_transitioning():
 		return
 		
-	gamepad_mode = last_input_was_gamepad
+	if last_input_was_gamepad:
+		gamepad_mode = true
+		CursorManager.set_gamepad_mode(true)
+	else:
+		gamepad_mode = false
+		CursorManager.set_gamepad_mode(false)
+	
 	var end_turn_button = main_scene.end_turn_button
 	
 	if end_turn_button:
@@ -59,6 +87,8 @@ func start_player_turn():
 	
 	if end_turn_button and main_scene.player:
 		main_scene.ui_manager.update_turn_button_text(main_scene.player, end_turn_button, gamepad_mode)
+	
+	print("Player turn started - Gamepad mode: ", gamepad_mode, " | Last input gamepad: ", last_input_was_gamepad)
 
 func start_ai_turn():
 	gamepad_mode = false
@@ -69,6 +99,9 @@ func handle_input(event: InputEvent):
 		return
 		
 	_detect_input_method(event)
+
+	if _is_game_transitioning():
+		return
 	
 	if event.is_action_pressed("show_options") or event.is_action_pressed("ui_menu"):
 		_handle_options_menu_toggle()
@@ -76,10 +109,12 @@ func handle_input(event: InputEvent):
 	elif event.is_action_pressed("game_controls"):
 		_handle_controls_toggle()
 	elif event.is_action_pressed("game_restart"):
-		main_scene.restart_game()
+		if not _is_game_transitioning():
+			main_scene.restart_game()
 	elif event.is_action_pressed("game_exit"):
-		main_scene.show_exit_confirmation()
-	elif main_scene.is_player_turn and gamepad_mode and main_scene.player:
+		if not _is_game_transitioning():
+			main_scene.show_exit_confirmation()
+	elif main_scene.is_player_turn and gamepad_mode and main_scene.player and not _is_game_transitioning():
 		_handle_gamepad_navigation(event)
 
 func _handle_options_menu_toggle():
@@ -130,7 +165,7 @@ func _update_controls_panel():
 		controls_panel.update_gamepad_mode(gamepad_mode)
 
 func _handle_controls_toggle():
-	if not is_input_enabled() or not main_scene.is_player_turn:
+	if not is_input_enabled() or not main_scene.is_player_turn or _is_game_transitioning():
 		return
 		
 	var controls_panel = main_scene.controls_panel
@@ -139,7 +174,7 @@ func _handle_controls_toggle():
 		main_scene.audio_helper.play_card_hover_sound()
 
 func _handle_gamepad_navigation(event: InputEvent):
-	if not is_input_enabled():
+	if not is_input_enabled() or _is_game_transitioning():
 		return
 		
 	if event.is_action_pressed("ui_left"):

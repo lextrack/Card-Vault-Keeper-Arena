@@ -37,31 +37,25 @@ func setup_new_game(difficulty: String):
 	
 	main_scene.game_over_label.visible = false
 	
-	# Conectar las señales centralizadamente
 	connect_all_signals()
 	
 	print("Game setup complete - Turn numbers reset to 0")
 
 func connect_all_signals():
-	"""Conecta todas las señales del player y AI de forma centralizada"""
 	connect_player_signals()
 	connect_ai_signals()
 
 func connect_player_signals():
-	"""Conecta todas las señales del player"""
 	if not player or not main_scene:
 		push_error("Cannot connect player signals: player or main_scene is null")
 		return
 	
-	# Desconectar primero para evitar conexiones duplicadas
 	disconnect_player_signals()
 	
-	# Conectar señales del UI
 	player.hp_changed.connect(main_scene.ui_manager.update_player_hp)
 	player.mana_changed.connect(main_scene.ui_manager.update_player_mana)
 	player.shield_changed.connect(main_scene.ui_manager.update_player_shield)
 	
-	# Conectar señales de eventos del juego
 	player.player_died.connect(main_scene._on_player_died)
 	player.hand_changed.connect(main_scene._on_player_hand_changed)
 	player.cards_played_changed.connect(main_scene._on_player_cards_played_changed)
@@ -70,46 +64,34 @@ func connect_player_signals():
 	player.damage_taken.connect(main_scene._on_player_damage_taken)
 	player.hp_changed.connect(main_scene._on_player_hp_changed)
 	player.shield_changed.connect(main_scene._on_player_shield_changed)
-	
-	print("Player signals connected successfully")
 
 func connect_ai_signals():
-	"""Conecta todas las señales del AI"""
 	if not ai or not main_scene:
 		push_error("Cannot connect AI signals: ai or main_scene is null")
 		return
 	
-	# Desconectar primero para evitar conexiones duplicadas
 	disconnect_ai_signals()
 	
-	# Conectar señales del UI
 	ai.hp_changed.connect(main_scene.ui_manager.update_ai_hp)
 	ai.mana_changed.connect(main_scene.ui_manager.update_ai_mana)
 	ai.shield_changed.connect(main_scene.ui_manager.update_ai_shield)
 	
-	# Conectar señales de eventos del juego
 	ai.player_died.connect(main_scene._on_ai_died)
 	ai.ai_card_played.connect(main_scene._on_ai_card_played)
-	
-	print("AI signals connected successfully")
 
 func disconnect_all_signals():
-	"""Desconecta todas las señales del player y AI"""
 	disconnect_player_signals()
 	disconnect_ai_signals()
 
 func disconnect_player_signals():
-	"""Desconecta todas las señales del player"""
 	if not player:
 		return
 	
 	var signals_to_disconnect = [
-		# Señales del UI
 		["hp_changed", main_scene.ui_manager.update_player_hp],
 		["mana_changed", main_scene.ui_manager.update_player_mana],
 		["shield_changed", main_scene.ui_manager.update_player_shield],
 		
-		# Señales de eventos del juego
 		["player_died", main_scene._on_player_died],
 		["hand_changed", main_scene._on_player_hand_changed],
 		["cards_played_changed", main_scene._on_player_cards_played_changed],
@@ -123,17 +105,13 @@ func disconnect_player_signals():
 	_disconnect_signals_from_list(player, signals_to_disconnect)
 
 func disconnect_ai_signals():
-	"""Desconecta todas las señales del AI"""
 	if not ai:
 		return
 	
 	var signals_to_disconnect = [
-		# Señales del UI
 		["hp_changed", main_scene.ui_manager.update_ai_hp],
 		["mana_changed", main_scene.ui_manager.update_ai_mana],
 		["shield_changed", main_scene.ui_manager.update_ai_shield],
-		
-		# Señales de eventos del juego
 		["player_died", main_scene._on_ai_died],
 		["ai_card_played", main_scene._on_ai_card_played]
 	]
@@ -141,7 +119,6 @@ func disconnect_ai_signals():
 	_disconnect_signals_from_list(ai, signals_to_disconnect)
 
 func _disconnect_signals_from_list(source_object: Object, signals_list: Array):
-	"""Función helper para desconectar señales de una lista"""
 	if not source_object or not main_scene:
 		return
 		
@@ -167,7 +144,6 @@ func _cleanup_existing_players():
 		await main_scene.get_tree().process_frame
 		await main_scene.get_tree().process_frame
 
-# Resto de funciones de GameManager permanecen igual...
 func restart_game(game_count: int, difficulty: String):
 	if restart_in_progress:
 		return
@@ -175,6 +151,9 @@ func restart_game(game_count: int, difficulty: String):
 	restart_in_progress = true
 	game_ended = false
 	pending_game_end = false
+	
+	if main_scene and main_scene.input_manager:
+		main_scene.input_manager.disable_input()
 	
 	main_scene.turn_label.text = "New game!"
 	main_scene.ui_manager.selected_card_index = 0
@@ -200,6 +179,9 @@ func restart_for_no_cards():
 	if game_ended or restart_in_progress:
 		print("Cannot restart for no cards: game ended or restart in progress")
 		return
+	
+	if main_scene and main_scene.input_manager:
+		main_scene.input_manager.disable_input()
 	
 	restart_in_progress = true
 	game_ended = true
@@ -272,11 +254,15 @@ func end_turn_no_cards():
 	main_scene.game_info_label.text = "Ending turn automatically..."
 	await main_scene.get_tree().create_timer(GameBalance.get_timer_delay("turn_end")).timeout
 
+
 func handle_game_over(message: String, end_turn_button: Button):
 	if game_ended or restart_in_progress:
 		return
 		
 	game_ended = true
+	
+	if main_scene and main_scene.input_manager:
+		main_scene.input_manager.disable_input()
 	
 	if main_scene.has_method("cleanup_notifications"):
 		main_scene.cleanup_notifications()
@@ -288,3 +274,11 @@ func handle_game_over(message: String, end_turn_button: Button):
 		end_turn_button.disabled = true
 	
 	await main_scene.get_tree().create_timer(GameBalance.get_timer_delay("death_restart")).timeout
+	
+func is_safe_to_process_actions() -> bool:
+	return not game_ended and not pending_game_end and not restart_in_progress and not _is_game_transitioning()
+
+func _is_game_transitioning() -> bool:
+	if main_scene and main_scene.has_method("get") and main_scene.get("is_game_transitioning"):
+		return main_scene.is_game_transitioning
+	return false

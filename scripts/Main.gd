@@ -33,6 +33,7 @@ var controls_panel: ControlsPanel
 var is_player_turn: bool = true
 var difficulty: String = "normal"
 var game_count: int = 1
+var is_game_transitioning: bool = false
 
 var card_scene = preload("res://scenes/Card.tscn")
 var ai_notification_scene = preload("res://scenes/AICardNotification.tscn")
@@ -83,7 +84,7 @@ func _on_options_menu_closed():
 		controls_panel.update_cards_available(player.hand.size() > 0)
 		
 func show_options_menu():
-	if not options_menu:
+	if not options_menu or is_game_transitioning:
 		return
 	
 	if is_player_turn:
@@ -422,6 +423,9 @@ func start_player_turn():
 	controls_panel.update_player_turn(true)
 	controls_panel.update_cards_available(player.hand.size() > 0)
 	
+	if input_manager.last_input_was_gamepad:
+		input_manager.force_gamepad_mode_activation()
+	
 	if cards_actually_drawn > 0:
 		player.card_drawn.emit(cards_actually_drawn, true)
 
@@ -477,6 +481,10 @@ func restart_game():
 	if game_manager.is_restart_in_progress():
 		return
 	
+	is_game_transitioning = true
+	input_manager.disable_input()
+	controls_panel.force_hide()
+	
 	cleanup_notifications()
 	
 	game_count += 1
@@ -485,6 +493,14 @@ func restart_game():
 	await get_tree().create_timer(GameBalance.get_timer_delay("new_game") + 0.5).timeout
 	
 	setup_game_with_new_music()
+
+	await get_tree().process_frame
+	await get_tree().process_frame
+	
+	is_game_transitioning = false
+	if is_player_turn:
+		input_manager.enable_input()
+		input_manager.force_gamepad_state_update()
 
 func setup_game_with_new_music():
 	verify_and_startup_deck()
@@ -573,6 +589,9 @@ func _on_player_died():
 	if not game_manager.mark_game_ended():
 		return
 	
+	is_game_transitioning = true
+	input_manager.disable_input()
+	
 	_track_game_end(false)
 	
 	await _wait_for_actions_to_complete()
@@ -597,12 +616,16 @@ func _on_player_died():
 	await game_manager.handle_game_over("YOU LOST! Restarting...", end_turn_button)
 	restart_game()
 
+
 func _on_ai_card_played(card: CardData):
 	ai_notification.show_card_notification(card, "AI")
 
 func _on_ai_died():
 	if not game_manager.mark_game_ended():
 		return
+	
+	is_game_transitioning = true
+	input_manager.disable_input()
 	
 	_track_game_end(true)
 	await _wait_for_actions_to_complete()
@@ -685,7 +708,7 @@ func _notification(what):
 		get_tree().quit()
 
 func _on_card_clicked(card: Card):
-	if not is_player_turn or not player.can_play_card(card.card_data):
+	if not is_player_turn or not player.can_play_card(card.card_data) or is_game_transitioning:
 		return
 
 	var card_data = card.card_data
@@ -726,7 +749,7 @@ func _on_card_clicked(card: Card):
 	player.remove_card_from_hand(card_data)
 
 func _on_end_turn_pressed():
-	if not is_player_turn or game_manager.is_game_ended():
+	if not is_player_turn or game_manager.is_game_ended() or is_game_transitioning:
 		return
 	
 	if game_manager.should_restart_for_no_cards():
@@ -736,6 +759,9 @@ func _on_end_turn_pressed():
 	start_ai_turn()
 
 func _input(event):
+	if is_game_transitioning:
+		return
+		
 	if confirmation_dialog.is_showing:
 		confirmation_dialog.handle_input(event)
 		return
@@ -745,22 +771,23 @@ func _input(event):
 	elif event is InputEventMouse:
 		CursorManager.set_gamepad_mode(false)
 		
-	if event.is_action_pressed("show_options") and is_player_turn and not options_menu.visible:
+	if event.is_action_pressed("show_options") and is_player_turn and not options_menu.visible and not is_game_transitioning:
 		show_options_menu()
 		return
 		
-	if event.is_action_pressed("ui_accept") and is_player_turn and not end_turn_button.disabled and not input_manager.gamepad_mode:
+	if event.is_action_pressed("ui_accept") and is_player_turn and not end_turn_button.disabled and not input_manager.gamepad_mode and not is_game_transitioning:
 		_on_end_turn_pressed()
 		return
 		
-	if event.is_action_pressed("ChallengeHub_access") and is_player_turn:
+	if event.is_action_pressed("ChallengeHub_access") and is_player_turn and not is_game_transitioning:
 		open_challengehub()
 		return
 		
 	if OS.is_debug_build() and event.is_action_pressed("ui_home"):
 		debug_show_deck_info()
 		
-	input_manager.handle_input(event)
+	if not is_game_transitioning:
+		input_manager.handle_input(event)
 	
 func debug_show_deck_info():
 	if not player or not ai:
@@ -813,7 +840,7 @@ func debug_show_deck_info():
 			print("  ", card_name)
 	
 func open_challengehub():
-	if not is_player_turn or confirmation_dialog.is_showing:
+	if not is_player_turn or confirmation_dialog.is_showing or is_game_transitioning:
 		return
 	
 	if not GameStateManager.save_game_state(self):
@@ -827,9 +854,13 @@ func open_challengehub():
 	TransitionManager.fade_to_scene("res://scenes/ChallengeHub.tscn", 1.0)
 
 func show_exit_confirmation():
+	if is_game_transitioning:
+		return
 	confirmation_dialog.show()
 
 func return_to_menu():
+	if is_game_transitioning:
+		return
 	cleanup_notifications()
 	stop_game_music(0.8)
 	await get_tree().create_timer(0.5).timeout
