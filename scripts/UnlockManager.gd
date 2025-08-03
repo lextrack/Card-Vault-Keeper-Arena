@@ -24,9 +24,9 @@ var bundles: Dictionary = {
 	"warrior_arsenal": {
 		"name": "Warrior's Arsenal",
 		"description": "Powerful offensive capabilities",
-		"requirement_text": "Win 5 Normal difficulty games",
+		"requirement_text": "Win 10 Normal difficulty games",
 		"requirement_type": "wins_normal",
-		"requirement_value": 5,
+		"requirement_value": 10,
 		"cards": ["Piercing Blow", "Berserker Fury", "Steel Wall"],
 		"rarity_info": "1 Rare Attack, 1 Epic Attack, 1 Rare Shield"
 	},
@@ -64,7 +64,7 @@ var bundles: Dictionary = {
 	"tactical_master": {
 		"name": "Tactical Master",
 		"description": "Rewards for strategic excellence",
-		"requirement_text": "Win 10 games with 10+ HP remaining",
+		"requirement_text": "Win 10 games with 15+ HP remaining",
 		"requirement_type": "high_hp_victories",
 		"requirement_value": 10,
 		"cards": ["Execution", "Regeneration", "Fortress"],
@@ -84,9 +84,9 @@ var bundles: Dictionary = {
 	"learning_fighter": {
 		"name": "Learning Fighter",
 		"description": "For those who persist through trial and error",
-		"requirement_text": "Complete 3 games (win or lose)",
+		"requirement_text": "Complete 5 games (win or lose)",
 		"requirement_type": "games_completed",
-		"requirement_value": 3,
+		"requirement_value": 5,
 		"cards": ["Sharp Sword", "Potion", "Basic Shield"],
 		"rarity_info": "3 Uncommon"
 	},
@@ -113,9 +113,9 @@ var bundles: Dictionary = {
 	"fortress_defender": {
 		"name": "Fortress Defender",
 		"description": "Ultimate protection and tactical strikes",
-		"requirement_text": "Block 200+ total damage with shields",
+		"requirement_text": "Block 300+ total damage with shields",
 		"requirement_type": "total_damage_blocked",
-		"requirement_value": 200,
+		"requirement_value": 300,
 		"cards": ["Shield", "Reinforced Shield", "Shield Bash"],
 		"rarity_info": "1 Uncommon Shield, 1 Rare Shield, 1 Uncommon Hybrid"
 	}
@@ -318,7 +318,7 @@ func _calculate_progress(bundle: Dictionary, progress_type: String, value: int, 
 		"high_hp_victories":
 			if progress_type == "game_won":
 				var final_hp = extra_data.get("final_hp", 0)
-				if final_hp >= 10:
+				if final_hp >= 15:
 					return min(old_progress + 1, bundle.requirement_value)
 				
 		"games_completed":

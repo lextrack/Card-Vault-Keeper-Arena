@@ -153,7 +153,7 @@ func update_rarity_info_display(is_unlocked: bool):
 			rarity_text = bundle_info.get("rarity_info", "Unknown cards")
 			rarity_color = Color(0.9, 1, 0.9, 1)
 	else:
-		rarity_text = "??? Mystery Cards ???"
+		rarity_text = "Meet the requirements to unlock them"
 		rarity_color = Color(0.7, 0.7, 0.8, 0.8)
 		
 		if mystery_text:

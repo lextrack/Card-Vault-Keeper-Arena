@@ -496,8 +496,6 @@ func screen_shake(intensity: float, duration: float):
 	is_screen_shaking = false
 
 func update_card_selection(gamepad_mode: bool, player: Player):
-	print("update_card_selection called - gamepad_mode: ", gamepad_mode, " | player_turn: ", main_scene.is_player_turn, " | selection_active: ", gamepad_selection_active)
-	
 	if not main_scene.is_player_turn or not gamepad_mode:
 		gamepad_selection_active = false
 		_clear_all_gamepad_selection_styles()
