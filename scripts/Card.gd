@@ -233,6 +233,38 @@ func play_entrance_animation():
 	
 	if is_playable and not is_being_played:
 		start_idle_shadow_animation()
+		
+func apply_gamepad_selection_style():
+	if selection_tween:
+		selection_tween.kill()
+	
+	selection_tween = create_tween()
+	selection_tween.set_parallel(true)
+	
+	selection_tween.tween_property(self, "scale", original_scale * 1.08, 0.15).set_ease(Tween.EASE_OUT)
+	selection_tween.tween_property(self, "z_index", 15, 0.05)
+
+	var selected_modulate = modulate * Color(1.12, 1.12, 1.1, 1.0)
+	selection_tween.tween_property(self, "modulate", selected_modulate, 0.15)
+	
+	selection_tween.tween_property(self, "scale", original_scale * 1.06, 0.8).set_delay(0.15)
+	selection_tween.tween_property(self, "scale", original_scale * 1.08, 0.8).set_delay(0.95)
+	selection_tween.set_loops()
+
+func remove_gamepad_selection_style():
+	if selection_tween:
+		selection_tween.kill()
+	
+	selection_tween = create_tween()
+	selection_tween.set_parallel(true)
+	
+	selection_tween.tween_property(self, "scale", original_scale, 0.2).set_ease(Tween.EASE_OUT)
+	selection_tween.tween_property(self, "z_index", 0, 0.15)
+	
+	if is_playable:
+		selection_tween.tween_property(self, "modulate", Color.WHITE, 0.2)
+	else:
+		selection_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.2)
 
 func play_selection_animation():
 	if is_being_played or animation_in_progress:
@@ -249,13 +281,18 @@ func play_selection_animation():
 	
 	selection_tween = create_tween()
 	selection_tween.set_parallel(true)
-	
-	selection_tween.tween_property(self, "scale", original_scale * 1.1, 0.06)
-	selection_tween.tween_property(self, "scale", original_scale, 0.08).set_delay(0.06)
+
+	selection_tween.tween_property(self, "scale", original_scale * 0.95, 0.05)
+	selection_tween.tween_property(self, "scale", original_scale * 1.1, 0.08).set_delay(0.05)
+	selection_tween.tween_property(self, "scale", original_scale, 0.12).set_delay(0.13)
 	
 	var original_modulate = modulate
-	selection_tween.tween_property(self, "modulate", Color(1.15, 1.15, 1.15, 1.0), 0.06)
-	selection_tween.tween_property(self, "modulate", original_modulate, 0.08).set_delay(0.06)
+	selection_tween.tween_property(self, "modulate", Color(1.3, 1.3, 1.2, 1.0), 0.05)
+	selection_tween.tween_property(self, "modulate", original_modulate, 0.15).set_delay(0.05)
+
+	selection_tween.tween_property(self, "rotation", deg_to_rad(-2), 0.05)
+	selection_tween.tween_property(self, "rotation", deg_to_rad(2), 0.08).set_delay(0.05)
+	selection_tween.tween_property(self, "rotation", 0.0, 0.12).set_delay(0.13)
 
 func play_disabled_animation():
 	if is_being_played or animation_in_progress:
@@ -459,40 +496,42 @@ func _on_card_input(event: InputEvent):
 func _on_mouse_entered():
 	if not is_hovered and is_playable and not is_being_played and not animation_in_progress:
 		is_hovered = true
-		
+   	
 		animate_shadow_on_hover()
-		
+   	
 		if hover_tween:
 			hover_tween.kill()
-		
+   	
 		hover_tween = create_tween()
 		hover_tween.set_parallel(true)
-		
-		hover_tween.tween_property(self, "scale", original_scale * 1.03, 0.1).set_ease(Tween.EASE_OUT)
-		hover_tween.tween_property(self, "z_index", 5, 0.05)
-		
-		var hover_modulate = modulate * Color(1.05, 1.05, 1.05, 1.0)
-		hover_tween.tween_property(self, "modulate", hover_modulate, 0.1)
+   	
+		hover_tween.tween_property(card_background, "rotation", deg_to_rad(1), 1.0).set_ease(Tween.EASE_OUT)
+		hover_tween.tween_property(self, "scale", original_scale * 1.06, 0.12).set_ease(Tween.EASE_OUT)
+		hover_tween.tween_property(self, "z_index", 10, 0.05)
+   	
+		var hover_modulate = modulate * Color(1.08, 1.08, 1.08, 1.0)
+		hover_tween.tween_property(self, "modulate", hover_modulate, 0.12)
 
 func _on_mouse_exited():
 	if is_hovered and not is_being_played:
 		is_hovered = false
-		
+   	
 		animate_shadow_on_unhover()
-		
+   	
 		if hover_tween:
 			hover_tween.kill()
-		
+   	
 		hover_tween = create_tween()
 		hover_tween.set_parallel(true)
-		
-		hover_tween.tween_property(self, "scale", original_scale, 0.15).set_ease(Tween.EASE_OUT)
-		hover_tween.tween_property(self, "z_index", 0, 0.1)
-		
+   	
+		hover_tween.tween_property(card_background, "rotation", 0.0, 0.18).set_ease(Tween.EASE_OUT)
+		hover_tween.tween_property(self, "scale", original_scale, 0.18).set_ease(Tween.EASE_OUT)
+		hover_tween.tween_property(self, "z_index", 0, 0.12)
+   	
 		if is_playable:
-			hover_tween.tween_property(self, "modulate", Color.WHITE, 0.15)
+			hover_tween.tween_property(self, "modulate", Color.WHITE, 0.18)
 		else:
-			hover_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.15)
+			hover_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.18)
 
 func set_card_data(data: CardData):
 	card_data = data

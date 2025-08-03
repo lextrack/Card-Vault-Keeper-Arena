@@ -18,19 +18,17 @@ var card_instances: Array = []
 var selected_card_index: int = 0
 var original_ui_position: Vector2
 var is_screen_shaking: bool = false
-var original_turn_label_y: float
+var turn_button_tween: Tween
 
 var current_hand_hash: String = ""
 
 var player_turn_color = Color(0.08, 0.13, 0.18, 0.9)
 var ai_turn_color = Color(0.15, 0.08, 0.08, 0.9)
-var transition_time = 0.8
 
 func setup(main: Control):
 	main_scene = main
 	_get_ui_references()
 	original_ui_position = ui_layer.position
-	original_turn_label_y = turn_label.position.y
 
 func _get_ui_references():
 	player_hp_label = main_scene.player_hp_label
@@ -299,13 +297,34 @@ func _on_card_hover():
 		if audio_helper:
 			audio_helper.play_card_hover_sound()
 
+func _animate_card_navigation_transition(old_index: int, new_index: int, player: Player):
+	if old_index < card_instances.size():
+		var old_card = card_instances[old_index]
+		if is_instance_valid(old_card) and old_card.has_method("remove_gamepad_selection_style"):
+			old_card.remove_gamepad_selection_style()
+
+	main_scene.get_tree().create_timer(0.05).timeout.connect(func():
+		if new_index < card_instances.size():
+			var new_card = card_instances[new_index]
+			if is_instance_valid(new_card):
+				if new_card.has_method("apply_gamepad_selection_style"):
+					new_card.apply_gamepad_selection_style()
+				
+				var bounce_tween = main_scene.create_tween()
+				bounce_tween.tween_property(new_card, "scale", new_card.original_scale * 1.15, 0.08)
+				bounce_tween.tween_property(new_card, "scale", new_card.original_scale * 1.08, 0.12)
+	)
+
 func update_turn_button_text(player: Player, end_turn_button: Button, gamepad_mode: bool):
 	if not end_turn_button or not player:
 		return
 
+	_stop_button_animation(end_turn_button)
+
 	if not main_scene.is_player_turn:
 		end_turn_button.text = "AI Turn"
 		end_turn_button.disabled = true
+		end_turn_button.modulate = Color(0.6, 0.6, 0.6, 1.0)
 		return
 		
 	var cards_played = player.get_cards_played()
@@ -315,29 +334,49 @@ func update_turn_button_text(player: Player, end_turn_button: Button, gamepad_mo
 	end_turn_button.disabled = false
 	
 	if cards_played >= max_cards:
-		end_turn_button.text = "Waiting"
+		end_turn_button.text = "Turn Ending..."
 		end_turn_button.disabled = true
+		_animate_button_waiting_state(end_turn_button)
 	elif playable_cards.size() == 0:
-		end_turn_button.text = "No playable cards"
+		end_turn_button.text = "No Playable Cards"
+		end_turn_button.modulate = Color(0.8, 0.8, 0.8, 1.0)
 	elif player.get_hand_size() == 0:
-		end_turn_button.text = "No cards in hand"
+		end_turn_button.text = "No Cards in Hand"
+		end_turn_button.modulate = Color(0.8, 0.8, 0.8, 1.0)
 	else:
+		end_turn_button.modulate = Color.WHITE
 		if gamepad_mode:
 			end_turn_button.text = "🎮 End Turn"
 		else:
 			end_turn_button.text = "End Turn"
-			
+
+func _animate_button_waiting_state(button: Button):
+	if turn_button_tween:
+		turn_button_tween.kill()
+	
+	turn_button_tween = main_scene.create_tween()
+	turn_button_tween.set_loops()
+	turn_button_tween.tween_property(button, "modulate", Color(0.7, 0.7, 0.7, 1.0), 1.0)
+	turn_button_tween.tween_property(button, "modulate", Color(0.5, 0.5, 0.5, 1.0), 1.0)
+
+func _stop_button_animation(button: Button):
+	if turn_button_tween and turn_button_tween.is_valid():
+		turn_button_tween.kill()
+		turn_button_tween = null
+	
+	button.modulate = Color.WHITE
+
 func reset_turn_button(end_turn_button: Button, gamepad_mode: bool = false):
 	if not end_turn_button:
 		return
+	
+	_stop_button_animation(end_turn_button)
 	
 	end_turn_button.disabled = false
 	if gamepad_mode:
 		end_turn_button.text = "🎮 End Turn"
 	else:
 		end_turn_button.text = "End Turn"
-	
-	print("Turn button reset to initial state")
 
 func update_cards_played_info(cards_played: int, max_cards: int, difficulty: String):
 	var difficulty_name = difficulty.to_upper()
@@ -373,16 +412,13 @@ func update_damage_bonus_indicator(player: Player, damage_bonus_label: Label):
 		damage_bonus_label.text = bonus_text
 		damage_bonus_label.modulate = bonus_color
 		damage_bonus_label.visible = true
-		print("UI: Damage bonus indicator updated: ", bonus_text)
 	else:
 		damage_bonus_label.visible = false
-		print("UI: Damage bonus indicator hidden (no bonus)")
 
 func reset_damage_bonus_indicator(damage_bonus_label: Label):
 	if damage_bonus_label:
 		damage_bonus_label.visible = false
 		damage_bonus_label.text = ""
-		print("UI: Damage bonus indicator reset")
 
 func show_damage_bonus_info(turn_num: int, damage_bonus: int):
 	turn_label.text = "Turn " + str(turn_num)
@@ -437,13 +473,16 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 			if i >= player.hand.size():
 				continue
 			
-			card.z_index = 0
-			if player.can_play_card(player.hand[i]):
-				card.modulate = Color.WHITE
+			if card.has_method("remove_gamepad_selection_style"):
+				card.remove_gamepad_selection_style()
 			else:
-				card.modulate = Color(0.4, 0.4, 0.4, 0.7)
+				card.z_index = 0
+				if player.can_play_card(player.hand[i]):
+					card.modulate = Color.WHITE
+				else:
+					card.modulate = Color(0.4, 0.4, 0.4, 0.7)
 		return
-		
+
 	for i in range(card_instances.size()):
 		var card = card_instances[i]
 
@@ -453,17 +492,21 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 			continue
 			
 		if i == selected_card_index:
-			card.z_index = 15
-			if player.can_play_card(player.hand[i]):
-				card.modulate = Color(1.5, 1.5, 1.2, 1.0)
+			if card.has_method("apply_gamepad_selection_style"):
+				card.apply_gamepad_selection_style()
 			else:
-				card.modulate = Color(0.8, 0.8, 0.6, 0.8)
+				card.z_index = 15
+				var intensity = 1.12 if player.can_play_card(player.hand[i]) else 0.8
+				card.modulate = Color(intensity, intensity, intensity * 0.9, 1.0)
 		else:
-			card.z_index = 0
-			if player.can_play_card(player.hand[i]):
-				card.modulate = Color.WHITE
+			if card.has_method("remove_gamepad_selection_style"):
+				card.remove_gamepad_selection_style()
 			else:
-				card.modulate = Color(0.4, 0.4, 0.4, 0.7)
+				card.z_index = 0
+				if player.can_play_card(player.hand[i]):
+					card.modulate = Color.WHITE
+				else:
+					card.modulate = Color(0.4, 0.4, 0.4, 0.7)
 
 func update_hand_display_no_animation(player: Player, card_scene: PackedScene, hand_container: Container):
 	if not player:
@@ -565,11 +608,16 @@ func navigate_cards(direction: int, player: Player):
 	
 	if card_instances.size() == 0:
 		return false
-		
+	
+	var old_index = selected_card_index
+	
 	selected_card_index = (selected_card_index + direction) % card_instances.size()
 	if selected_card_index < 0:
 		selected_card_index = card_instances.size() - 1
-		
+
+	if old_index != selected_card_index:
+		_animate_card_navigation_transition(old_index, selected_card_index, player)
+	
 	update_card_selection(true, player)
 	return true
 
@@ -590,7 +638,3 @@ func _clean_invalid_card_instances():
 	
 	if selected_card_index >= card_instances.size():
 		selected_card_index = max(0, card_instances.size() - 1)
-
-func force_recreate_hand(player: Player, card_scene: PackedScene, hand_container: Container):
-	current_hand_hash = "" 
-	update_hand_display(player, card_scene, hand_container)

@@ -36,14 +36,76 @@ var expert_colors = {
 }
 
 func _ready():
+	load_difficulty_data()
 	setup_cards()
 	setup_buttons()
-
 	_setup_default_selection()
 	
 	await handle_scene_entrance()
-	
 	_ensure_normal_selected()
+
+func load_difficulty_data():
+	update_difficulty_card("normal")
+	update_difficulty_card("hard")
+	update_difficulty_card("expert")
+
+func update_difficulty_card(difficulty: String):
+	var player_config = GameBalance.get_player_config(difficulty)
+	var ai_config = GameBalance.get_ai_config(difficulty)
+	
+	var card_content = get_difficulty_content_node(difficulty)
+	if not card_content:
+		print("Warning: Could not find content node for difficulty: ", difficulty)
+		return
+	
+	var header_label = get_node_by_partial_name(card_content, "Header")
+	if header_label:
+		header_label.text = difficulty.to_upper()
+	
+	var player_details = get_node_by_partial_name(card_content, "PlayerDetails")
+	if player_details:
+		var player_text = str(player_config.hp) + " HP | " + str(player_config.mana) + " Mana\n"
+		player_text += str(player_config.cards_per_turn) + " cards per turn | " + str(player_config.hand_size) + " in hand"
+		player_details.text = player_text
+	
+	var ai_details = get_node_by_partial_name(card_content, "AIDetails")
+	if ai_details:
+		var ai_behavior = get_ai_behavior_description(ai_config)
+		var ai_text = str(ai_config.hp) + " HP | " + str(ai_config.mana) + " Mana\n"
+		ai_text += str(ai_config.cards_per_turn) + " cards per turn | " + ai_behavior
+		ai_details.text = ai_text
+
+func get_ai_behavior_description(ai_config: Dictionary) -> String:
+	var aggression = ai_config.get("aggression", 0.5)
+	var heal_threshold = ai_config.get("heal_threshold", 0.3)
+	
+	if aggression >= 0.7:
+		return "Aggressive"
+	elif aggression <= 0.5:
+		return "Defensive"
+	elif heal_threshold >= 0.4:
+		return "Brutal" 
+	else:
+		return "Balanced"
+
+func get_difficulty_content_node(difficulty: String) -> Node:
+	var container_name = difficulty.capitalize() + "Container"
+	var card_name = difficulty.capitalize() + "Card"
+	var content_name = difficulty.capitalize() + "Content"
+	
+	var path = "MenuContainer/DifficultyContainer/" + container_name + "/" + card_name + "/" + content_name
+	if has_node(path):
+		return get_node(path)
+	
+	var container_node = get_node("MenuContainer/DifficultyContainer/" + container_name)
+	if container_node:
+		var card_node = container_node.get_node(card_name)
+		if card_node:
+			for child in card_node.get_children():
+				if "content" in child.name.to_lower() or "vbox" in child.name.to_lower():
+					return child
+	
+	return null
 
 func _setup_default_selection():
 	selected_difficulty = "normal"
@@ -383,3 +445,17 @@ func _input(event):
 	
 	elif event.is_action_pressed("game_back"):
 		_on_back_pressed()
+
+func get_node_by_partial_name(parent: Node, partial_name: String) -> Node:
+	if not parent:
+		return null
+		
+	for child in parent.get_children():
+		if partial_name.to_lower() in child.name.to_lower():
+			return child
+		
+		var nested_result = get_node_by_partial_name(child, partial_name)
+		if nested_result:
+			return nested_result
+	
+	return null
