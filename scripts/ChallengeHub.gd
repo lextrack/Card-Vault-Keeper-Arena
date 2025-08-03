@@ -38,6 +38,10 @@ var max_columns: int = 3
 var dialog_timer: Timer
 var current_dialog_queue: Array = []
 
+var robot_current_mood: String = "normal"
+var robot_speaking_timer: Timer
+var dialog_duration_per_word: float = 0.15
+
 var intro_dialogs = [
 	"Welcome to my collection vault!",
 	"I am the keeper of these powerful card bundles...",
@@ -141,7 +145,7 @@ func load_first_visit_status() -> bool:
 	if FileAccess.file_exists("user://challenge_visited.save"):
 		return false
 	else:
-		return true 
+		return true
 
 func save_first_visit_status(is_first_visit: bool):
 	if not is_first_visit:
@@ -369,7 +373,9 @@ func _process_dialog_queue():
 	var next_dialog = current_dialog_queue.pop_front()
 	show_ai_dialog(next_dialog)
 	
-	dialog_timer.wait_time = 3.5
+	var word_count = next_dialog.split(" ").size()
+	var base_time = max(3.0, word_count * 0.2)
+	dialog_timer.wait_time = base_time
 	dialog_timer.start()
 
 func setup_ui():
@@ -416,13 +422,26 @@ func setup_ai_character():
 	robot_head_instance.offset_right = 100
 	robot_head_instance.offset_top = -80
 	robot_head_instance.offset_bottom = 40
+	
+	setup_robot_speaking_timer()
+	
+func setup_robot_speaking_timer():
+	robot_speaking_timer = Timer.new()
+	robot_speaking_timer.one_shot = true
+	robot_speaking_timer.timeout.connect(_on_robot_speaking_finished)
+	add_child(robot_speaking_timer)
+
+func _on_robot_speaking_finished():
+	if robot_head_instance:
+		robot_head_instance.set_speaking(false)
+		robot_head_instance.set_mood(robot_current_mood)
 
 func handle_scene_entrance():
 	await get_tree().process_frame
 	
 	if TransitionManager and TransitionManager.current_overlay:
-		if (TransitionManager.current_overlay.has_method("is_ready") and 
-			TransitionManager.current_overlay.is_ready() and 
+		if (TransitionManager.current_overlay.has_method("is_ready") and
+			TransitionManager.current_overlay.is_ready() and
 			TransitionManager.current_overlay.has_method("is_covering") and
 			TransitionManager.current_overlay.is_covering()):
 			
@@ -454,7 +473,7 @@ func update_stats_display():
 	var percentage = "%.1f" % stats.completion_percentage
 	stats_label.text = "Collection Progress: %d/%d bundles unlocked (%s%% complete)" % [
 		stats.unlocked_bundles,
-		stats.total_bundles, 
+		stats.total_bundles,
 		percentage
 	]
 
@@ -546,6 +565,11 @@ func show_ai_dialog(text: String):
 		robot_head_instance.set_speaking(true)
 		robot_head_instance.pulse_status_light()
 		
+		var word_count = text.split(" ").size()
+		var speaking_duration = max(2.0, word_count * dialog_duration_per_word)
+		robot_speaking_timer.wait_time = speaking_duration
+		robot_speaking_timer.start()
+		
 		if status_light:
 			status_light.color = Color(0.2, 0.8, 1.0, 1.0)
 			var light_tween = create_tween()
@@ -574,10 +598,6 @@ func show_ai_dialog(text: String):
 	
 	await tween.finished
 	start_float_animation()
-
-	await get_tree().create_timer(1.5).timeout
-	if robot_head_instance:
-		robot_head_instance.set_speaking(false)
 	
 	if status_light:
 		status_light.color = Color(0.2, 0.8, 0.4, 0.8)
@@ -615,12 +635,23 @@ func _on_bundle_unlock_requested(bundle_id: String):
 
 func _on_bundle_hovered(bundle_info: Dictionary):
 	if robot_head_instance:
+		var new_mood = "normal"
+		
 		if bundle_info.can_unlock:
-			robot_head_instance.set_mood("alert")
+			new_mood = "alert"
 		elif bundle_info.unlocked:
-			robot_head_instance.set_mood("happy")
+			new_mood = "happy"
 		else:
-			robot_head_instance.set_mood("normal")
+			new_mood = "normal"
+		
+		if not robot_speaking_timer.time_left > 0:
+			robot_head_instance.set_mood(new_mood)
+		
+		robot_current_mood = new_mood
+		
+		if randf() < 0.3:
+			var hover_message = _get_hover_message(bundle_info)
+			queue_dialog_sequence([hover_message])
 
 func _get_hover_message(bundle_info: Dictionary) -> String:
 	if bundle_info.unlocked:
@@ -632,7 +663,10 @@ func _get_hover_message(bundle_info: Dictionary) -> String:
 		return "The " + bundle_info.name + " awaits... " + progress_text
 
 func _on_bundle_unhovered():
-	pass
+	if robot_head_instance:
+		if not robot_speaking_timer.time_left > 0:
+			robot_head_instance.set_mood("normal")
+		robot_current_mood = "normal"
 
 func _on_bundle_unlocked(bundle_id: String, cards: Array):
 	var bundle_info = UnlockManagers.get_bundle_info(bundle_id)
@@ -642,14 +676,61 @@ func _on_bundle_unlocked(bundle_id: String, cards: Array):
 	if robot_head_instance:
 		robot_head_instance.set_mood("happy")
 		robot_head_instance.flash_neck_lights()
-	
+		robot_current_mood = "happy"
+		
+		var happiness_timer = Timer.new()
+		happiness_timer.wait_time = 5.0
+		happiness_timer.one_shot = true
+		happiness_timer.timeout.connect(func():
+			robot_current_mood = "normal"
+			if not robot_speaking_timer.time_left > 0:
+				robot_head_instance.set_mood("normal")
+		)
+		add_child(happiness_timer)
+		happiness_timer.start()
+
 	if status_light:
 		var celebration_tween = create_tween()
-		celebration_tween.set_loops(5)
+		celebration_tween.set_loops(8)
 		celebration_tween.tween_property(status_light, "color", Color.GOLD, 0.2)
 		celebration_tween.tween_property(status_light, "color", Color(0.2, 0.8, 0.4, 0.8), 0.2)
 	
 	load_shop_data()
+	
+func get_contextual_robot_reaction(bundle_info: Dictionary) -> Dictionary:
+	var reactions = {
+		"can_unlock": [
+			"This bundle calls to you...",
+			"I sense you're ready for this challenge.",
+			"The cards within are eager to serve."
+		],
+		"unlocked": [
+			"You've mastered this collection.",
+			"These cards recognize their owner.",
+			"Well earned, warrior."
+		],
+		"locked": [
+			"Patience... prove yourself first.",
+			"These cards await a worthy master.",
+			"The challenge beckons..."
+		]
+	}
+	
+	var mood = "normal"
+	var messages = reactions["locked"]
+	
+	if bundle_info.unlocked:
+		mood = "happy"
+		messages = reactions["unlocked"]
+	elif bundle_info.can_unlock:
+		mood = "alert"
+		messages = reactions["can_unlock"]
+	
+	return {
+		"mood": mood,
+		"message": messages[randi() % messages.size()]
+	}
+
 
 func _on_progress_updated(bundle_id: String, current: int, required: int):
 	if current == required - 1 and required > 1:
@@ -807,6 +888,8 @@ func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
 		if dialog_timer:
 			dialog_timer.stop()
+		if robot_speaking_timer:
+			robot_speaking_timer.stop()
 
 		if GlobalMusicManager and GlobalMusicManager.is_challenge_music_playing():
 			GlobalMusicManager.stop_all_music(0.3)
