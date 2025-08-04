@@ -97,17 +97,24 @@ func start_player_turn():
 	if gamepad_mode:
 		main_scene.ui_manager.gamepad_selection_active = true
 	
+	await main_scene.get_tree().process_frame
+	
 	main_scene.ui_manager.update_card_selection(gamepad_mode, main_scene.player)
 	
 	if end_turn_button and main_scene.player:
 		main_scene.ui_manager.update_turn_button_text(main_scene.player, end_turn_button, gamepad_mode)
+
 
 func start_ai_turn():
 	gamepad_mode = false
 	input_processing = false
 
 	main_scene.ui_manager.gamepad_selection_active = false
+
 	main_scene.ui_manager.update_card_selection(false, main_scene.player)
+
+	await main_scene.get_tree().process_frame
+	
 	main_scene.ui_manager.update_hand_display(main_scene.player, main_scene.card_scene, main_scene.hand_container)
 
 func handle_input(event: InputEvent):

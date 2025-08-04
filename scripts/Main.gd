@@ -539,12 +539,24 @@ func restart_game():
 	message_label.position = get_viewport_rect().size / 2 - Vector2(200, 36)
 	add_child(message_label)
 
+	var restart_sound = load("res://audio/sfx/CardMoving.wav")
+	if restart_sound:
+		var audio_player = AudioStreamPlayer.new()
+		audio_player.stream = restart_sound
+		audio_player.volume_db = 3.0
+		add_child(audio_player)
+		audio_player.play()
+		
+		audio_player.finished.connect(func(): audio_player.queue_free())
+
 	var tween = create_tween().set_parallel(true)
-	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 1), 0.7)
-	tween.tween_property(message_label, "modulate:a", 1.0, 1.0).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.0).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 1), 1.2).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(message_label, "modulate:a", 1.0, 1.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	
 	await tween.finished
+	
+	await get_tree().create_timer(0.7).timeout
 	
 	setup_game_with_new_music()
 	
@@ -553,9 +565,9 @@ func restart_game():
 			card.z_index = 50 
 	
 	tween = create_tween().set_parallel(true)
-	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 0), 0.9)
-	tween.tween_property(message_label, "modulate:a", 0, 0.7).set_delay(0.3)
-	tween.tween_property(message_label, "position:y", message_label.position.y - 50, 0.7).set_delay(0.3)
+	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 0), 1.5).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(message_label, "modulate:a", 0, 1.0).set_delay(0.5).set_ease(Tween.EASE_IN)
+	tween.tween_property(message_label, "position:y", message_label.position.y - 60, 1.0).set_delay(0.5).set_ease(Tween.EASE_IN)
 	
 	await tween.finished
 

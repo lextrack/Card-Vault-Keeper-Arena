@@ -139,15 +139,27 @@ func update_player_mana(new_mana: int):
 	
 	if new_mana > old_mana:
 		var tween = main_scene.create_tween()
-		tween.tween_property(player_mana_label, "modulate", Color(0.5, 0.8, 1.5, 1.0), 0.2)
-		tween.tween_property(player_mana_label, "modulate", Color(0.4, 0.6, 1.0, 1.0), 0.3)
+		tween.tween_property(player_mana_label, "modulate", Color(0.7, 0.9, 1.2, 1.0), 0.2)
+		tween.tween_property(player_mana_label, "modulate", Color(0.8, 0.9, 1.0, 1.0), 0.3)
 	elif new_mana < old_mana:
 		var tween = main_scene.create_tween()
-		tween.tween_property(player_mana_label, "modulate", Color(0.6, 0.6, 0.6, 1.0), 0.2)
-		tween.tween_property(player_mana_label, "modulate", Color(0.4, 0.6, 1.0, 1.0), 0.5)
+		tween.tween_property(player_mana_label, "modulate", Color(0.7, 0.7, 0.8, 1.0), 0.2)
+		tween.tween_property(player_mana_label, "modulate", Color(0.8, 0.9, 1.0, 1.0), 0.5) 
 
 func update_ai_mana(new_mana: int):
+	var old_text = ai_mana_label.text
+	var old_mana = int(old_text) if old_text.is_valid_int() else new_mana
+	
 	ai_mana_label.text = str(new_mana)
+	
+	if new_mana > old_mana:
+		var tween = main_scene.create_tween()
+		tween.tween_property(ai_mana_label, "modulate", Color(0.7, 0.9, 1.2, 1.0), 0.2)
+		tween.tween_property(ai_mana_label, "modulate", Color(0.8, 0.9, 1.0, 1.0), 0.3)
+	elif new_mana < old_mana:
+		var tween = main_scene.create_tween()
+		tween.tween_property(ai_mana_label, "modulate", Color(0.7, 0.7, 0.8, 1.0), 0.2)
+		tween.tween_property(ai_mana_label, "modulate", Color(0.8, 0.9, 1.0, 1.0), 0.5) 
 
 func update_player_shield(new_shield: int):
 	var old_text = player_shield_label.text
@@ -192,12 +204,10 @@ func start_player_turn(player: Player, difficulty: String):
 func start_ai_turn(ai: Player):
 	animate_turn_transition(false)
 	gamepad_selection_active = false
-	
-	_clear_all_gamepad_selection_styles()
-	
+	_force_clear_all_gamepad_effects()
+	await main_scene.get_tree().process_frame
 	var tween = main_scene.create_tween()
 	tween.tween_property(top_panel_bg, "color", ai_turn_color, 0.4)
-	
 	game_info_label.text = "AI is playing..."
 	
 	var end_turn_button = main_scene.end_turn_button
@@ -207,17 +217,48 @@ func start_ai_turn(ai: Player):
 
 	_darken_player_cards_for_ai_turn()
 
+func _force_clear_all_gamepad_effects():
+	for card in card_instances:
+		if is_instance_valid(card):
+			if card.has_method("force_reset_visual_state"):
+				card.force_reset_visual_state()
+			else:
+				# Fallback manual
+				if card.has_method("remove_gamepad_selection_style"):
+					card.remove_gamepad_selection_style()
+				
+				if card.has_method("_cleanup_all_tweens"):
+					card._cleanup_all_tweens()
+				
+				# Reseteo manual de propiedades
+				card.z_index = 0
+				if card.has_method("get") and card.get("original_scale"):
+					card.scale = card.original_scale
+				else:
+					card.scale = Vector2(1.0, 1.0)
+				card.modulate = Color.WHITE
+				card.rotation = 0.0
+				
+				if card.has_method("get") and card.get("card_border"):
+					card.card_border.modulate = Color.WHITE
+
 func _darken_player_cards_for_ai_turn():
 	for card in card_instances:
 		if is_instance_valid(card):
-			if card.has_method("remove_gamepad_selection_style"):
-				card.remove_gamepad_selection_style()
 			card.set_playable(false)
+			
+			var darken_tween = main_scene.create_tween()
+			darken_tween.tween_property(card, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.2)
 
 func _clear_all_gamepad_selection_styles():
 	for card in card_instances:
-		if is_instance_valid(card) and card.has_method("remove_gamepad_selection_style"):
-			card.remove_gamepad_selection_style()
+		if is_instance_valid(card):
+			if card.has_method("force_reset_visual_state"):
+				card.force_reset_visual_state()
+			elif card.has_method("remove_gamepad_selection_style"):
+				# Solo remover si realmente tiene selección aplicada
+				if card.has_method("has_gamepad_selection_applied") and card.has_gamepad_selection_applied():
+					card.remove_gamepad_selection_style()
 
 func animate_turn_transition(is_player_turn: bool):
 	var text = "Your turn" if is_player_turn else "AI turn"
@@ -252,7 +293,7 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 	
 	var should_preserve_gamepad_selection = gamepad_selection_active and main_scene.is_player_turn
 	var old_selected_index = selected_card_index
-	
+
 	if not _has_hand_changed(player) and card_instances.size() == player.hand.size():
 		_update_existing_cards_playability(player)
 		if should_preserve_gamepad_selection:
@@ -275,7 +316,11 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 		
 		card_instance.set_card_data(card_data)
 		card_instance.card_clicked.connect(main_scene._on_card_clicked)
-		
+
+		if card_instance.has_signal("card_hovered"):
+			card_instance.card_hovered.connect(_on_card_gamepad_hovered)
+		if card_instance.has_signal("card_unhovered"):
+			card_instance.card_unhovered.connect(_on_card_gamepad_unhovered)
 		if card_instance.has_signal("mouse_entered"):
 			card_instance.mouse_entered.connect(_on_card_hover)
 		
@@ -304,11 +349,28 @@ func _update_existing_cards_playability(player: Player):
 		if is_instance_valid(card_instance) and card_data:
 			var can_play = main_scene.is_player_turn and player.can_play_card(card_data)
 			card_instance.set_playable(can_play)
+			
+			if i == selected_card_index and gamepad_selection_active:
+				if card_instance.has_method("has_gamepad_selection_applied") and card_instance.has_gamepad_selection_applied():
+					card_instance.remove_gamepad_selection_style()
+					await main_scene.get_tree().process_frame
+					card_instance.apply_gamepad_selection_style()
+					
+func _on_card_gamepad_hovered(card: Card):
+	if not gamepad_selection_active:
+		var audio_helper = main_scene.audio_helper
+		if audio_helper:
+			audio_helper.play_card_hover_sound()
+
+func _on_card_gamepad_unhovered(card: Card):
+	# Placeholder
+	pass
 
 func _restore_gamepad_selection_after_update(player: Player):
 	if not gamepad_selection_active or not main_scene.is_player_turn:
 		return
 	
+	await main_scene.get_tree().process_frame
 	await main_scene.get_tree().process_frame
 	
 	if selected_card_index < card_instances.size():
@@ -317,11 +379,9 @@ func _restore_gamepad_selection_after_update(player: Player):
 			if selected_card.has_method("has_gamepad_selection_applied"):
 				if not selected_card.has_gamepad_selection_applied() and selected_card.has_method("apply_gamepad_selection_style"):
 					selected_card.apply_gamepad_selection_style()
-				else:
-					print("Card already has selection applied during restore, skipping")
-			elif selected_card.has_method("apply_gamepad_selection_style") and selected_card.z_index != 15:
+			elif selected_card.has_method("apply_gamepad_selection_style"):
 				selected_card.apply_gamepad_selection_style()
-
+				
 func _on_card_hover():
 	var input_manager = main_scene.input_manager
 	if input_manager and not input_manager.gamepad_mode:
@@ -500,6 +560,7 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 		gamepad_selection_active = false
 		_clear_all_gamepad_selection_styles()
 		
+		# Aplicar estados normales sin gamepad
 		for i in range(card_instances.size()):
 			var card = card_instances[i]
 			if not is_instance_valid(card) or i >= player.hand.size():
@@ -512,9 +573,15 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 				card.modulate = Color(0.4, 0.4, 0.4, 0.7)
 		return
 	
-	var was_already_active = gamepad_selection_active
 	gamepad_selection_active = true
 
+	# CRITICAL: Limpiar TODAS las selecciones antes de aplicar la nueva
+	_clear_all_gamepad_selection_styles()
+	
+	# Esperar un frame para asegurar que las limpiezas se han procesado
+	await main_scene.get_tree().process_frame
+	
+	# Aplicar selección solo a la carta correcta
 	for i in range(card_instances.size()):
 		var card = card_instances[i]
 
@@ -524,24 +591,28 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 			continue
 			
 		if i == selected_card_index:
+			# Aplicar selección de gamepad solo a la carta seleccionada
 			if card.has_method("apply_gamepad_selection_style"):
 				if not card.has_method("has_gamepad_selection_applied") or not card.has_gamepad_selection_applied():
 					card.apply_gamepad_selection_style()
-				else:
-					print("Card index ", i, " already has selection applied, skipping")
 			else:
-				card.z_index = 15
-				var intensity = 1.12 if player.can_play_card(player.hand[i]) else 0.8
+				# Fallback para cartas sin el método
+				card.z_index = 10
+				var intensity = 1.15 if player.can_play_card(player.hand[i]) else 0.8
 				card.modulate = Color(intensity, intensity, intensity * 0.9, 1.0)
 		else:
+			# Asegurar que las otras cartas NO tienen selección
 			if card.has_method("remove_gamepad_selection_style"):
-				card.remove_gamepad_selection_style()
+				# Solo remover si realmente tiene selección aplicada
+				if card.has_method("has_gamepad_selection_applied") and card.has_gamepad_selection_applied():
+					card.remove_gamepad_selection_style()
+			
+			# Aplicar estado normal
+			card.z_index = 0
+			if player.can_play_card(player.hand[i]):
+				card.modulate = Color.WHITE
 			else:
-				card.z_index = 0
-				if player.can_play_card(player.hand[i]):
-					card.modulate = Color.WHITE
-				else:
-					card.modulate = Color(0.4, 0.4, 0.4, 0.7)
+				card.modulate = Color(0.4, 0.4, 0.4, 0.7)
 
 func update_hand_display_no_animation(player: Player, card_scene: PackedScene, hand_container: Container):
 	if not player or not card_scene or not hand_container or not player.hand:
@@ -622,7 +693,7 @@ func update_hand_display_with_new_cards_animation(player: Player, card_scene: Pa
 	if should_preserve_gamepad_selection:
 		_restore_gamepad_selection_after_update(player)
 
-func navigate_cards(direction: int, player: Player):
+func navigate_cards(direction: int, player: Player) -> bool:
 	if card_instances.size() == 0:
 		return false
 	
@@ -638,18 +709,76 @@ func navigate_cards(direction: int, player: Player):
 		selected_card_index = card_instances.size() - 1
 
 	if old_index != selected_card_index:
-		_animate_card_navigation_transition(old_index, selected_card_index, player)
+		_animate_card_navigation_transition_improved(old_index, selected_card_index, player)
+	else:
+		return false
 	
 	gamepad_selection_active = true
-	update_card_selection(true, player)
+	# NO llamar update_card_selection aquí ya que _animate_card_navigation_transition_improved ya maneja la selección
 	return true
+	
+func _animate_card_navigation_transition_improved(old_index: int, new_index: int, player: Player):
+	# Primero remover la selección antigua
+	if old_index < card_instances.size():
+		var old_card = card_instances[old_index]
+		if is_instance_valid(old_card) and old_card.has_method("remove_gamepad_selection_style"):
+			# Solo remover si realmente tiene selección aplicada
+			if old_card.has_method("has_gamepad_selection_applied") and old_card.has_gamepad_selection_applied():
+				old_card.remove_gamepad_selection_style()
 
-func get_selected_card():
+	# Esperar un poco más para asegurar que la transición visual se procese
+	await main_scene.get_tree().create_timer(0.08).timeout
+	
+	# Aplicar nueva selección
+	if new_index < card_instances.size():
+		var new_card = card_instances[new_index]
+		if is_instance_valid(new_card):
+			if new_card.has_method("apply_gamepad_selection_style"):
+				# Verificar que no tenga ya selección aplicada
+				if not new_card.has_method("has_gamepad_selection_applied") or not new_card.has_gamepad_selection_applied():
+					new_card.apply_gamepad_selection_style()
+			
+			# Efecto de bounce adicional
+			var bounce_tween = main_scene.create_tween()
+			bounce_tween.set_parallel(true)
+
+			var current_scale = new_card.scale
+			bounce_tween.tween_property(new_card, "scale", current_scale * 1.08, 0.08).set_ease(Tween.EASE_OUT)
+			bounce_tween.tween_property(new_card, "scale", current_scale * 1.06, 0.12).set_ease(Tween.EASE_IN_OUT)
+
+			var original_modulate = new_card.modulate
+			bounce_tween.tween_property(new_card, "modulate", original_modulate * Color(1.3, 1.3, 1.2, 1.0), 0.08)
+			bounce_tween.tween_property(new_card, "modulate", original_modulate, 0.12)
+
+
+func get_selected_card() -> Card:
 	if card_instances.size() > 0 and selected_card_index < card_instances.size():
 		var selected_card = card_instances[selected_card_index]
 		if is_instance_valid(selected_card):
 			return selected_card
 	return null
+	
+func is_card_selected(card: Card) -> bool:
+	if not is_instance_valid(card):
+		return false
+	
+	var selected_card = get_selected_card()
+	return selected_card == card
+
+func select_card_by_index(index: int, player: Player) -> bool:
+	if index < 0 or index >= card_instances.size():
+		return false
+	
+	var old_index = selected_card_index
+	selected_card_index = index
+	
+	if old_index != selected_card_index:
+		_animate_card_navigation_transition_improved(old_index, selected_card_index, player)
+		gamepad_selection_active = true
+		update_card_selection(true, player)
+		return true
+	
+	return false
 
 func _clean_invalid_card_instances():
 	var valid_instances = []
