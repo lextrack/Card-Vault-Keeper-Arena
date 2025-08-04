@@ -215,28 +215,42 @@ func _on_bundle_unlocked(bundle_id: String, cards: Array):
 	audio_helper.play_bonus_sound()
 
 func _wait_for_celebrations_to_complete():
+	print("Starting celebration wait check...")
+	
+	if not bundle_celebration_system:
+		print("No bundle celebration system, skipping wait")
+		return
+	
 	var max_wait_time = 2.0
 	var wait_time = 0.0
 	var check_interval = 0.05
 	
 	while wait_time < max_wait_time:
-		if not bundle_celebration_system or bundle_celebration_system.is_celebrations_complete():
+		if bundle_celebration_system.is_celebrations_complete():
+			print("Celebrations completed after ", wait_time, "s")
 			return
 
 		await get_tree().create_timer(check_interval).timeout
 		wait_time += check_interval
+	
+	print("Celebration wait timed out after ", max_wait_time, "s")
 
 func _wait_for_actions_to_complete():
+	print("Starting actions wait check...")
+	
 	var max_wait_time = 3.0
 	var wait_time = 0.0
 	var check_interval = 0.05
 	
 	while wait_time < max_wait_time:
 		if game_manager.can_end_game():
+			print("Actions completed after ", wait_time, "s")
 			return
 
 		await get_tree().create_timer(check_interval).timeout
 		wait_time += check_interval
+
+	print("Actions wait timed out after ", max_wait_time, "s")
 
 func _on_card_unlocked(card_name: String):
 	pass
@@ -270,21 +284,32 @@ func _setup_notifications():
 	add_child(game_notification)
 
 func cleanup_notifications():
+	print("Cleanup: Starting notification cleanup...")
+	
 	if ai_notification:
+		print("Cleanup: Closing AI notification")
 		ai_notification.force_close()
 	
 	if game_notification:
+		print("Cleanup: Clearing game notifications")
 		game_notification.clear_all_notifications()
 	
 	if controls_panel:
+		print("Cleanup: Hiding controls panel")
 		controls_panel.force_hide()
 		
 	if options_menu:
+		print("Cleanup: Hiding options menu")
 		options_menu.hide_options()
 	
-	bundle_celebration_system.clear_all_celebrations()
+	if bundle_celebration_system:
+		print("Cleanup: Clearing celebrations")
+		bundle_celebration_system.clear_all_celebrations()
 	
+	print("Cleanup: Waiting for process frames...")
 	await get_tree().process_frame
+	await get_tree().process_frame
+	print("Cleanup: Notification cleanup completed")
 
 func _setup_controls_panel():
 	controls_panel = controls_panel_scene.instantiate()
@@ -513,11 +538,11 @@ func restart_game():
 	message_label.z_index = 101
 	message_label.position = get_viewport_rect().size / 2 - Vector2(200, 36)
 	add_child(message_label)
-	
+
 	var tween = create_tween().set_parallel(true)
 	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 1), 0.7)
 	tween.tween_property(message_label, "modulate:a", 1.0, 1.0).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.0).set_trans(Tween.TRANS_BACK)  # Efecto de flotación
+	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.0).set_trans(Tween.TRANS_BACK)
 	
 	await tween.finished
 	
@@ -536,6 +561,7 @@ func restart_game():
 
 	fade_rect.queue_free()
 	message_label.queue_free()
+	
 	is_game_transitioning = false
 	input_manager.enable_input()
 
@@ -640,7 +666,6 @@ func _on_player_died():
 	if not game_manager.mark_game_ended():
 		return
 	
-	print("PLAYER DIED. Starting end sequence")
 	is_game_transitioning = true
 	input_manager.disable_input()
 	
@@ -649,16 +674,14 @@ func _on_player_died():
 	var start_time = Time.get_ticks_msec() / 1000.0
 	await _wait_for_actions_to_complete()
 	var actions_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
-	print("Actions wait completed in: ", actions_wait_time, "s")
 
 	game_manager.finalize_game_end()
 	
 	start_time = Time.get_ticks_msec() / 1000.0
 	await _wait_for_celebrations_to_complete()
 	var celebrations_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
-	print("Celebrations wait completed in: ", celebrations_wait_time, "s")
 	
-	cleanup_notifications()
+	await cleanup_notifications()
 	
 	if audio_manager and audio_manager.lose_player:
 		audio_manager.lose_player.play()
@@ -667,13 +690,22 @@ func _on_player_died():
 		StatisticsManagers.end_game(false, difficulty, player.turn_number)
 		
 	GameState.add_game_result(false)
+	
 	game_notification.show_game_end_notification("Defeat", "hp_zero")
 	
 	await get_tree().create_timer(1.5).timeout
 	
-	await game_manager.handle_game_over("YOU LOST! Restarting...", end_turn_button)
+	game_over_label.text = "YOU LOST! Restarting..."
+	game_over_label.visible = true
+	
+	if end_turn_button:
+		end_turn_button.disabled = true
+	
+	await get_tree().create_timer(2.0).timeout
+	is_game_transitioning = false
+	
 	restart_game()
-
+	
 func _on_ai_card_played(card: CardData):
 	ai_notification.show_card_notification(card, "AI")
 
@@ -681,7 +713,6 @@ func _on_ai_died():
 	if not game_manager.mark_game_ended():
 		return
 	
-	print("AI DIED. Starting end sequence")
 	is_game_transitioning = true
 	input_manager.disable_input()
 	
@@ -690,29 +721,36 @@ func _on_ai_died():
 	var start_time = Time.get_ticks_msec() / 1000.0
 	await _wait_for_actions_to_complete()
 	var actions_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
-	print("Actions wait completed in: ", actions_wait_time, "s")
 	
 	game_manager.finalize_game_end()
 	
 	start_time = Time.get_ticks_msec() / 1000.0
 	await _wait_for_celebrations_to_complete()
 	var celebrations_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
-	print("Celebrations wait completed in: ", celebrations_wait_time, "s")
 	
-	cleanup_notifications()
+	await cleanup_notifications()
 
 	if audio_manager and audio_manager.win_player:
 		audio_manager.win_player.play()
 	
 	if StatisticsManagers:
 		StatisticsManagers.end_game(true, difficulty, player.turn_number)
-		
+	
 	GameState.add_game_result(true)
+	
 	game_notification.show_game_end_notification("Victory!", "hp_zero")
 	
 	await get_tree().create_timer(1.5).timeout
 	
-	await game_manager.handle_game_over("YOU WON! Restarting...", end_turn_button)
+	game_over_label.text = "YOU WON! Restarting..."
+	game_over_label.visible = true
+	
+	if end_turn_button:
+		end_turn_button.disabled = true
+	
+	await get_tree().create_timer(2.0).timeout
+
+	is_game_transitioning = false
 	restart_game()
 
 func _track_game_end(player_won: bool):

@@ -264,29 +264,6 @@ func end_turn_no_cards():
 	main_scene.turn_label.text = "No cards!"
 	main_scene.game_info_label.text = "Ending turn automatically..."
 	await main_scene.get_tree().create_timer(GameBalance.get_timer_delay("turn_end")).timeout
-
-func handle_game_over(message: String, end_turn_button: Button):
-	if game_ended or restart_in_progress:
-		return
-		
-	game_ended = true
-	
-	if main_scene and main_scene.input_manager:
-		main_scene.input_manager.disable_input()
-	
-	if main_scene.has_method("cleanup_notifications"):
-		main_scene.cleanup_notifications()
-	
-	main_scene.game_over_label.text = message
-	main_scene.game_over_label.visible = true
-	
-	if end_turn_button:
-		end_turn_button.disabled = true
-
-	var death_delay = GameBalance.get_timer_delay("death_restart")
-	death_delay = min(death_delay, 2.0)
-	print("Death restart delay: ", death_delay, "s")
-	await main_scene.get_tree().create_timer(death_delay).timeout
 	
 func is_safe_to_process_actions() -> bool:
 	return not game_ended and not pending_game_end and not restart_in_progress and not _is_game_transitioning()

@@ -124,6 +124,8 @@ func handle_input(event: InputEvent):
 		return
 	elif event.is_action_pressed("game_controls"):
 		_handle_controls_toggle()
+	elif event.is_action_pressed("end_turn_specific"):
+		_handle_end_turn_input()
 	elif event.is_action_pressed("game_restart"):
 		if not _is_game_transitioning():
 			main_scene.restart_game()
