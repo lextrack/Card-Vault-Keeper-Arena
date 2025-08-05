@@ -97,7 +97,6 @@ func _on_exit_credits():
 	
 	is_transitioning = true
 	
-	# Usar la transición mejorada para regresar al menú principal
 	TransitionManager.fade_to_main_menu(1.0)
 
 func _notification(what):

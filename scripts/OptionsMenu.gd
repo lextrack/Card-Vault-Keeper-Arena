@@ -74,7 +74,7 @@ var window_mode_names: Array = [
 ]
 
 var default_master_volume: float = 1.0
-var default_music_volume: float = 1.0
+var default_music_volume: float = 0.5
 var default_sfx_volume: float = 1.0
 var default_window_mode: int = 2
 var default_resolution_index: int = 0

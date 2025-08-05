@@ -535,7 +535,7 @@ func restart_game():
 		message_label.add_theme_font_size_override("font_size", 72)
 	
 	message_label.modulate.a = 0
-	message_label.z_index = 101
+	message_label.z_index = 105
 	message_label.position = get_viewport_rect().size / 2 - Vector2(200, 36)
 	add_child(message_label)
 
@@ -543,7 +543,7 @@ func restart_game():
 	if restart_sound:
 		var audio_player = AudioStreamPlayer.new()
 		audio_player.stream = restart_sound
-		audio_player.volume_db = 3.0
+		audio_player.volume_db = 5.0
 		add_child(audio_player)
 		audio_player.play()
 		
@@ -565,9 +565,9 @@ func restart_game():
 			card.z_index = 50 
 	
 	tween = create_tween().set_parallel(true)
-	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 0), 1.5).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(message_label, "modulate:a", 0, 1.0).set_delay(0.5).set_ease(Tween.EASE_IN)
-	tween.tween_property(message_label, "position:y", message_label.position.y - 60, 1.0).set_delay(0.5).set_ease(Tween.EASE_IN)
+	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 0), 1.8).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(message_label, "modulate:a", 0, 1.0).set_delay(0.8).set_ease(Tween.EASE_IN)
+	tween.tween_property(message_label, "position:y", message_label.position.y - 60, 1.0).set_delay(0.8).set_ease(Tween.EASE_IN)
 	
 	await tween.finished
 

@@ -47,7 +47,7 @@ volume_db = 5.0
 
 [node name="HealPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("7_lhr70")
-volume_db = -3.0
+volume_db = -2.0
 
 [node name="ShieldPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("8_wp0k4")
@@ -59,7 +59,7 @@ volume_db = -10.0
 
 [node name="HybridPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("4_wp0k4")
-volume_db = 4.0
+volume_db = 5.0
 
 [node name="GameSounds" type="Node" parent="AudioManager"]
 
@@ -93,7 +93,7 @@ volume_db = -9.0
 
 [node name="AIHealPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
 stream = ExtResource("7_lhr70")
-volume_db = -3.0
+volume_db = -2.0
 pitch_scale = 1.15
 
 [node name="AIShieldPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
