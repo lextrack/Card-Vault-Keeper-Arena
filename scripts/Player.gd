@@ -20,7 +20,7 @@ var discard_pile: Array = []
 var cards_played_this_turn: int = 0
 var turn_number: int = 0
 var was_at_low_hp_this_game: bool = false
-
+var total_damage_this_game: int = 0
 var ai_turn_active: bool = false
 var should_stop_ai_turn: bool = false
 
@@ -83,6 +83,9 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 				damage_dealt = total_damage
 				print("    FINAL Attack: ", card.damage, " base + ", bonus_damage, " bonus = ", total_damage, " total damage")
 				target.take_damage(total_damage)
+				
+				if not is_ai:
+					total_damage_this_game += total_damage
 				
 				if not is_ai and UnlockManagers:
 					UnlockManagers.track_progress("damage_dealt", total_damage)
@@ -356,6 +359,7 @@ func reset_player():
 	current_shield = 0
 	cards_played_this_turn = 0
 	turn_number = 0
+	total_damage_this_game = 0
 	was_at_low_hp_this_game = false
 	hand.clear()
 	discard_pile.clear()

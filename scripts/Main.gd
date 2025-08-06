@@ -806,7 +806,8 @@ func _track_game_end(player_won: bool):
 		"damage_taken": damage_taken,
 		"final_hp": final_hp,
 		"cards_played": player.cards_played_this_turn if player else 0,
-		"was_at_low_hp": player.was_at_low_hp_this_game if player else false
+		"was_at_low_hp": player.was_at_low_hp_this_game if player else false,
+		"total_damage_this_game": player.total_damage_this_game if player else 0
 	}
 	
 	if player_won:
@@ -863,7 +864,8 @@ func _on_card_clicked(card: Card):
 			"card_name": card_name,
 			"card_cost": card_cost,
 			"turn": player.turn_number,
-			"difficulty": difficulty
+			"difficulty": difficulty,
+			"shield_value": card_data.shield
 		}
 		UnlockManagers.track_progress("card_played", 1, extra_data)
 		

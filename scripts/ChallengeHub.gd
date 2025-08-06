@@ -247,7 +247,7 @@ func update_bundle_selection():
 	var selected_bundle = bundle_card_instances[selected_bundle_index]
 	if is_instance_valid(selected_bundle):
 		selected_bundle.modulate = Color(1.05, 1.05, 1.0, 1.0)
-		selected_bundle.z_index = 5
+		selected_bundle.z_index = 10
 		selected_bundle.scale = Vector2(1.02, 1.02)
 		
 		ensure_bundle_visible(selected_bundle_index)
@@ -466,12 +466,12 @@ func handle_scene_entrance():
 
 func play_entrance_animation():
 	modulate.a = 0.0
-	scale = Vector2(0.95, 0.95)
+	scale = Vector2(0.90, 0.90)
 	
 	var tween = create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(self, "modulate:a", 1.0, 0.5)
-	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.4)
+	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 5.4)
 
 func load_shop_data():
 	if not UnlockManagers:

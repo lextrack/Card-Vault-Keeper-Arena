@@ -54,9 +54,9 @@ var bundles: Dictionary = {
 	"hybrid_mastery": {
 		"name": "Hybrid Mastery",
 		"description": "Versatile combination effects",
-		"requirement_text": "Play 30 hybrid cards total",
+		"requirement_text": "Play 40 hybrid cards total",
 		"requirement_type": "hybrid_cards_played",
-		"requirement_value": 30,
+		"requirement_value": 40,
 		"cards": ["Paladin's Resolve", "Divine Retribution", "Fortress Guard"],
 		"rarity_info": "3 Rare Hybrid"
 	},
@@ -77,8 +77,8 @@ var bundles: Dictionary = {
 		"requirement_text": "Win 3 Expert difficulty games",
 		"requirement_type": "wins_expert",
 		"requirement_value": 3,
-		"cards": ["Warrior Saint", "Divine Champion", "Sacred Guardian"],
-		"rarity_info": "3 Epic Hybrid"
+		"cards": ["Divine Champion", "Sacred Guardian"],
+		"rarity_info": "2 Epic"
 	},
 	
 	"learning_fighter": {
@@ -97,27 +97,57 @@ var bundles: Dictionary = {
 		"requirement_text": "Win 3 games after being reduced to 5 HP or less",
 		"requirement_type": "low_hp_recoveries",
 		"requirement_value": 3,
-		"cards": ["Life Strike", "Major Healing", "Critical Strike", "Deep Cut", "Annihilation", "Guardian's Touch", "Blessed Strike"],
-		"rarity_info": "3 Uncommon, 3 Rare, 1 Epic"
+		"cards": ["Life Strike", "Major Healing", "Critical Strike"],
+		"rarity_info": "1 Uncommon, 2 Rare"
 	},
 	"berserker_warrior": {
 		"name": "Berserker Warrior",
 		"description": "Devastating attacks for the fearless fighter",
 		"requirement_text": "Deal 500+ total damage across all games",
 		"requirement_type": "total_damage_dealt",
-		"requirement_value": 500,
-		"cards": ["War Axe", "Fierce Attack", "Devastating Blow", "Healing"],
-		"rarity_info": "2 Uncommon Attacks, 1 Epic Attack, 1 Uncommon"
+		"requirement_value": 400,
+		"cards": ["War Axe", "Fierce Attack", "Devastating Blow"],
+		"rarity_info": "2 Uncommon, 1 Epic"
 	},
 
 	"fortress_defender": {
 		"name": "Fortress Defender",
 		"description": "Ultimate protection and tactical strikes",
-		"requirement_text": "Block 300+ total damage with shields",
+		"requirement_text": "Block 250+ total damage with shields",
 		"requirement_type": "total_damage_blocked",
-		"requirement_value": 300,
+		"requirement_value": 250,
 		"cards": ["Shield", "Reinforced Shield", "Shield Bash"],
-		"rarity_info": "1 Uncommon Shield, 1 Rare Shield, 1 Uncommon Hybrid"
+		"rarity_info": "2 Uncommon, 1 Rare"
+	},
+	
+	"cards_tester": {
+		"name": "Cards tester",
+		"description": "No card moves away from you",
+		"requirement_text": "Play 300 cards of any type",
+		"requirement_type": "total_cards_played",
+		"requirement_value": 300,
+		"cards": ["Healing", "Annihilation"],
+		"rarity_info": "1 Uncommon, 1 Epic"
+	},
+
+	"damage_dealer": {
+		"name": "Damage Dealer", 
+		"description": "Specialized in pure offensive power",
+		"requirement_text": "Deal 50+ damage in a single game",
+		"requirement_type": "single_game_damage",
+		"requirement_value": 50,
+		"cards": ["Deep Cut", "Warrior Saint"],
+		"rarity_info": "1 Epic, 1 Rare"
+	},
+
+	"shield_master": {
+		"name": "Shield Master",
+		"description": "Defensive specialist who knows when to protect",
+		"requirement_text": "Use 100 shield cards total",
+		"requirement_type": "shield_cards_played",
+		"requirement_value": 100,
+		"cards": ["Guardian's Touch", "Blessed Strike"],
+		"rarity_info": "2 Uncommon"
 	}
 }
 
@@ -342,6 +372,26 @@ func _calculate_progress(bundle: Dictionary, progress_type: String, value: int, 
 		"total_damage_blocked":
 			if progress_type == "damage_blocked":
 				return min(old_progress + value, bundle.requirement_value)
+				
+		"total_cards_played":
+			if progress_type == "card_played":
+				return min(old_progress + value, bundle.requirement_value)
+
+		"single_game_damage":
+			if progress_type == "game_ended":
+				var total_damage = extra_data.get("total_damage_this_game", 0)
+				if total_damage >= bundle.requirement_value:
+					return bundle.requirement_value
+
+		"shield_cards_played":
+			if progress_type == "card_played":
+				var card_type = extra_data.get("card_type", "")
+				if card_type == "shield":
+					return min(old_progress + value, bundle.requirement_value)
+				elif card_type == "hybrid":
+					var shield_value = extra_data.get("shield_value", 0)
+					if shield_value > 0:
+						return min(old_progress + value, bundle.requirement_value)
 	
 	return old_progress
 
@@ -394,6 +444,18 @@ func get_progress_text(bundle_id: String) -> String:
 			return str(displayed_current) + "/" + str(required) + " damage dealt"
 		"total_damage_blocked":
 			return str(displayed_current) + "/" + str(required) + " damage blocked"
+			
+		"total_cards_played":
+			return str(displayed_current) + "/" + str(required) + " cards played"
+
+		"single_game_damage":
+			if current >= required:
+				return "COMPLETED"
+			else:
+				return "0/1 high damage games"
+
+		"shield_cards_played":
+			return str(displayed_current) + "/" + str(required) + " shield cards"
 		_:
 			return str(displayed_current) + "/" + str(required)
 

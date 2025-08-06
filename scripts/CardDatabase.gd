@@ -105,7 +105,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 			"damage": 22,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.RARE,
-			"weight": 15
+			"weight": 11
 		},
 		{
 			"name": "Piercing Blow",
@@ -113,7 +113,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 			"damage": 9,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.RARE,
-			"weight": 18
+			"weight": 19
 		},
 		{
 			"name": "Devastating Blow",
