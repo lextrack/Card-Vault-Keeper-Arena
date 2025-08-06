@@ -129,7 +129,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.1, 0.12, 0.18, 0.9)
+color = Color(0.14902, 0.14902, 0.25098, 0.901961)
 
 [node name="BundlesScrollContainer" type="ScrollContainer" parent="MainContainer/ContentContainer/BundlesPanel"]
 layout_mode = 1

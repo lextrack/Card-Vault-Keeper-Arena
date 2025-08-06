@@ -381,13 +381,12 @@ grow_vertical = 0
 
 [node name="BottomPanelBG" type="ColorRect" parent="UILayer/BottomPanel"]
 layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
-grow_vertical = 0
-color = Color(0.1, 0.15, 0.25, 0.9)
+grow_vertical = 2
+color = Color(0.101961, 0.14902, 0.25098, 0.392157)
 
 [node name="TurnButtonsContainer" type="HBoxContainer" parent="UILayer/BottomPanel"]
 layout_mode = 1
@@ -407,7 +406,7 @@ alignment = 1
 [node name="EndTurnButton" type="Button" parent="UILayer/BottomPanel/TurnButtonsContainer"]
 layout_mode = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
 text = "End Turn"
 
 [node name="GameOverLabel" type="Label" parent="UILayer"]
