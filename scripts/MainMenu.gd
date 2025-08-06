@@ -19,19 +19,16 @@ extends Control
 @onready var card_rain_background = $BackgroundLayer/CardRainBackground
 
 var options_menu: OptionsMenu
-@export var options_menu_scene: PackedScene = preload("res://scenes/OptionsMenu.tscn")
-
 var is_transitioning: bool = false
 var music_fade_tween: Tween
 var gamepad_mode: bool = false
 var last_input_was_gamepad: bool = false
 var popup_active: bool = false
-
 var focusable_buttons: Array[Button] = []
 var current_focus_index: int = 0
-
-# Variable para controlar si venimos de regreso de otro menú
 var returning_from_menu: bool = false
+
+@export var options_menu_scene: PackedScene = preload("res://scenes/OptionsMenu.tscn")
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -41,7 +38,6 @@ func _ready():
 	
 	_apply_initial_video_settings()
 	
-	# Detectar si venimos de regreso de otro menú
 	if TransitionManager and TransitionManager.current_overlay:
 		if TransitionManager.current_overlay.is_covering():
 			returning_from_menu = true
@@ -209,10 +205,8 @@ func handle_scene_entrance():
 			TransitionManager.current_overlay.has_method("is_covering") and
 			TransitionManager.current_overlay.is_covering()):
 
-			# Si venimos de regreso de otro menú, hacer una transición más suave
 			if returning_from_menu:
 				await TransitionManager.current_overlay.fade_out(0.5)
-				# Resetear el estado para evitar conflictos futuros
 				_reset_menu_state()
 			else:
 				await TransitionManager.current_overlay.fade_out(0.8)
@@ -221,17 +215,14 @@ func handle_scene_entrance():
 	else:
 		play_entrance_animation()
 
-# Nueva función para resetear el estado del menú
 func _reset_menu_state():
 	returning_from_menu = false
 	is_transitioning = false
 	popup_active = false
 	_reset_all_button_effects()
 	
-	# Asegurar que el card rain esté activo
 	set_card_rain_active(true)
-	
-	# Resetear el foco
+
 	if gamepad_mode:
 		_focus_first_button()
 
@@ -549,7 +540,6 @@ func _notification(what):
 func set_background_color(color: Color):
 	$BackgroundLayer/BackgroundGradient.color = color
 
-# Función que será llamada cuando se regrese al menú principal
 func _on_scene_entered():
 	returning_from_menu = true
 	_reset_menu_state()

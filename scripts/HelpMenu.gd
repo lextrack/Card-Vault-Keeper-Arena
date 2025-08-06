@@ -103,21 +103,21 @@ Reduce your opponent's health to 0 to win the match.
 
 [font_size=18][color=orange]🎯 IN-GAME CONTROLS:[/color][/font_size]
 [font_size=16][color=white]With Controller (Xbox):[/color][/font_size]
-- [color=lime]Left/Right:[/color] Navigate between cards
-- [color=lime]A:[/color] Play selected card
-- [color=lime]B:[/color] End turn
-- [color=lime]X:[/color] Restart match
-- [color=lime]Back/View:[/color] Return to main menu
-- [color=lime]START:[/color] Options menu
-- [color=lime]RB:[/color] View complete key mapping during gameplay
+- [color=lime]Left/Right (D-pad):[/color] Navigate between cards
+- [color=lime]A:[/color] Play the selected card
+- [color=lime]B:[/color] End your turn
+- [color=lime]X:[/color] Restart the match
+- [color=lime]Back/View:[/color]  Return to the main menu
+- [color=lime]START:[/color] Open the options menu
+- [color=lime]RB:[/color] View full key mapping during gameplay
 
 [font_size=16][color=white]With Keyboard/Mouse:[/color][/font_size]
-- [color=lime]Click on card:[/color] Play card
-- [color=lime]Click "End Turn":[/color] End turn
-- [color=lime]R:[/color] Restart match
-- [color=lime]ESC:[/color] Return to main menu
-- [color=lime]TAB:[/color] Options menu
-- [color=lime]H:[/color] View complete key mapping during gameplay""",
+- [color=lime]Click on card:[/color] Play the card
+- [color=lime]Click "End Turn":[/color] End your turn
+- [color=lime]R:[/color] Restart the match
+- [color=lime]ESC:[/color] Return to the main menu
+- [color=lime]TAB:[/color] Open the options menu
+- [color=lime]H:[/color] View full key mapping during gameplay""",
 
 	"🏪 Challenge Hub": """[font_size=24][color=yellow]🏆 CHALLENGE HUB[/color][/font_size]
 
@@ -213,12 +213,9 @@ func _on_back_pressed():
 	is_transitioning = true
 	play_ui_sound("button_click")
 	
-	# Usar fade_to_scene_with_return_signal para avisar al MainMenu
 	_transition_to_main_menu()
 
-# Nueva función para manejar la transición de regreso al menú principal
 func _transition_to_main_menu():
-	# Usar el nuevo método del TransitionManager
 	TransitionManager.fade_to_main_menu(0.8)
 
 func _on_button_hover(button: Button):

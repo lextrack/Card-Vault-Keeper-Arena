@@ -12,6 +12,7 @@ extends Control
 @onready var challenge_hint = $Panel/VBoxContainer/MenuSection/ChallengeHint
 @onready var options_hint = $Panel/VBoxContainer/MenuSection/OptionsHint
 @onready var main_menu_hint = $Panel/VBoxContainer/MenuSection/MainMenuHint
+@onready var show_controls_hint = $Panel/VBoxContainer/MenuSection/ShowControlsHint
 
 @onready var play_icon = $Panel/VBoxContainer/GameplaySection/PlayHint/PlayIcon
 @onready var play_label = $Panel/VBoxContainer/GameplaySection/PlayHint/PlayLabel
@@ -26,6 +27,8 @@ extends Control
 @onready var options_icon = $Panel/VBoxContainer/MenuSection/OptionsHint/OptionsIcon
 @onready var main_menu_icon = $Panel/VBoxContainer/MenuSection/MainMenuHint/MainMenuIcon
 @onready var main_menu_label = $Panel/VBoxContainer/MenuSection/MainMenuHint/MainMenuLabel
+@onready var show_controls_icon = $Panel/VBoxContainer/MenuSection/ShowControlsHint/ShowControlsIcon
+@onready var show_controls_label = $Panel/VBoxContainer/MenuSection/ShowControlsHint/ShowControlsLabel
 
 var gamepad_mode: bool = false
 var is_player_turn: bool = true
@@ -37,14 +40,16 @@ var xbox_a_texture = preload("res://assets/ui/buttons/xbox_a.png")
 var xbox_b_texture = preload("res://assets/ui/buttons/xbox_b.png")
 var xbox_x_texture = preload("res://assets/ui/buttons/xbox_x.png")
 var xbox_y_texture = preload("res://assets/ui/buttons/xbox_y.png")
-var key_c_texture = preload("res://assets/ui/buttons/key_c_texture.png")
+var key_c_texture = preload("res://assets/ui/buttons/key_c.png")
 var key_r_texture = preload("res://assets/ui/buttons/key_r.png")
 var mouse_click_texture = preload("res://assets/ui/buttons/mouse_click.png")
 var key_space_texture = preload("res://assets/ui/buttons/key_space.png")
 var xbox_menu_texture = preload("res://assets/ui/buttons/xbox_button_menu.png")
-var key_tab_texture = preload("res://assets/ui/buttons/key_tab_texture.png")
+var key_tab_texture = preload("res://assets/ui/buttons/key_tab.png")
 var xbox_back_texture = preload("res://assets/ui/buttons/xbox_button_back.png")
 var key_esc_texture = preload("res://assets/ui/buttons/key_esc.png")
+var key_h_texture = preload("res://assets/ui/buttons/key_h.png")
+var xbox_rb_texture = preload("res://assets/ui/buttons/xbox_rb.png")
 
 func _ready():
 	visible = false
@@ -80,24 +85,30 @@ func update_display():
 		
 		main_menu_icon.texture = xbox_back_texture
 		main_menu_label.text = "Main menu"
+
+		show_controls_icon.texture = xbox_rb_texture
+		show_controls_label.text = "Show/Hide assigned controls panel"
 	else:
 		play_icon.texture = mouse_click_texture
-		play_label.text = "Play card (Click)"
+		play_label.text = "Play card"
 		
 		end_icon.texture = key_space_texture
-		end_label.text = "End turn (Space)"
+		end_label.text = "End turn"
 		
 		restart_icon.texture = key_r_texture
-		restart_label.text = "Restart game (R)"
+		restart_label.text = "Restart game"
 		
 		challenge_icon.texture = key_c_texture
-		challenge_label.text = "Challenge Hub (C)"
+		challenge_label.text = "Challenge Hub"
 		
 		options_icon.texture = key_tab_texture
-		options_label.text = "Options menu (Tab)"
+		options_label.text = "Options menu"
 		
 		main_menu_icon.texture = key_esc_texture
-		main_menu_label.text = "Main menu (Esc)"
+		main_menu_label.text = "Main menu"
+		
+		show_controls_icon.texture = key_h_texture
+		show_controls_label.text = "Show/Hide assigned controls panel"
 	
 	play_hint.visible = is_player_turn and has_cards
 	end_hint.visible = is_player_turn
@@ -105,6 +116,7 @@ func update_display():
 	challenge_hint.visible = true
 	options_hint.visible = true
 	main_menu_hint.visible = true
+	show_controls_hint.visible = true
 
 func toggle_visibility():
 	is_panel_hidden = !is_panel_hidden
