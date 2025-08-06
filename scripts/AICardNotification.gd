@@ -8,7 +8,6 @@ extends Control
 
 var tween: Tween
 var is_showing: bool = false
-var notification_id: int = 0
 
 signal ai_notification_shown(card_name: String)
 signal ai_notification_hidden
@@ -59,7 +58,6 @@ func show_card_notification(card: CardData, player_name: String = "IA"):
 		await hide_notification()
 	
 	is_showing = true
-	notification_id += 1
 	
 	_setup_card_display(card, player_name)
 	_setup_card_colors(card)
@@ -164,47 +162,3 @@ func force_close():
 
 func is_notification_showing() -> bool:
 	return is_showing
-
-func get_current_notification_id() -> int:
-	return notification_id
-
-func show_custom_ai_notification(title: String, effect: String, cost: String, color: Color = Color.WHITE):
-	if is_showing:
-		await hide_notification()
-	
-	is_showing = true
-	
-	card_name.text = title
-	card_effect.text = effect
-	card_cost.text = cost
-	background.color = color
-	
-	if tween:
-		tween.kill()
-	
-	visible = true
-	modulate.a = 0.0
-	scale = Vector2(0.7, 0.7)
-	rotation = deg_to_rad(5)
-	
-	tween = create_tween()
-	tween.set_parallel(true)
-	
-	tween.tween_property(self, "modulate:a", 1.0, 0.35).set_trans(Tween.TRANS_QUINT)
-	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_ELASTIC)
-	tween.tween_property(self, "rotation", deg_to_rad(0), 0.25)
-	
-	await tween.finished
-	
-	ai_notification_shown.emit(title)
-	
-	await get_tree().create_timer(GameBalance.get_timer_delay("ai_card_popup")).timeout
-	await hide_notification()
-
-func get_notification_info() -> Dictionary:
-	return {
-		"is_showing": is_showing,
-		"notification_id": notification_id,
-		"visible": visible,
-		"modulate_alpha": modulate.a
-	}

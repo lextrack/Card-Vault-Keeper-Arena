@@ -427,7 +427,6 @@ func start_player_turn():
 	player.current_mana = player.max_mana
 	player.cards_played_this_turn = 0
 	
-	# Verificar si hay bonus de daño ANTES de actualizar UI
 	var current_bonus = player.get_damage_bonus()
 	var is_bonus_turn = GameBalance.is_damage_bonus_turn(player.turn_number)
 	
@@ -445,8 +444,6 @@ func start_player_turn():
 	
 	player.mana_changed.emit(player.current_mana)
 	player.cards_played_changed.emit(player.cards_played_this_turn, player.get_max_cards_per_turn())
-	
-	# Emitir señal de cambio de turno
 	player.turn_changed.emit(player.turn_number, current_bonus)
 	
 	audio_helper.play_turn_change_sound(true)
@@ -480,8 +477,7 @@ func start_ai_turn():
 	ai.turn_number += 1
 	ai.current_mana = ai.max_mana
 	ai.cards_played_this_turn = 0
-	
-	# Verificar si hay bonus de daño ANTES de que la IA empiece a jugar
+
 	var current_bonus = ai.get_damage_bonus()
 	var is_bonus_turn = GameBalance.is_damage_bonus_turn(ai.turn_number)
 	
@@ -499,16 +495,13 @@ func start_ai_turn():
 	
 	ai.mana_changed.emit(ai.current_mana)
 	ai.cards_played_changed.emit(ai.cards_played_this_turn, ai.get_max_cards_per_turn())
-	
-	# Si es un turno de bonus, mostrar la notificación ANTES de que la IA juegue
+
 	if is_bonus_turn and current_bonus > 0 and last_bonus_notification_turn != ai.turn_number:
 		last_bonus_notification_turn = ai.turn_number
 		audio_helper.play_bonus_sound()
 		game_notification.show_damage_bonus_notification(ai.turn_number, current_bonus)
-		# Esperar a que la notificación se muestre antes de continuar
 		await get_tree().create_timer(0.5).timeout
-	
-	# Emitir señal de cambio de turno para la IA (SIN mostrar notificación)
+
 	ai.turn_changed.emit(ai.turn_number, current_bonus)
 	
 	if StatisticsManagers:
@@ -657,11 +650,10 @@ func _on_player_hand_changed():
 		player.cards_played_this_turn > 0
 	)
 	
-	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
+	ui_manager.update_hand_display(player, card_scene, hand_container)
 	ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
 	
 	if was_gamepad_selection_active:
-		await get_tree().process_frame
 		ui_manager.gamepad_selection_active = true
 		ui_manager.update_card_selection(true, player)
 	
@@ -670,30 +662,23 @@ func _on_player_hand_changed():
 		start_ai_turn()
 
 func _on_player_card_drawn(cards_count: int, from_deck: bool):
-	await get_tree().create_timer(0.2).timeout
-	audio_helper.play_card_draw_sound()
-	
 	if cards_count > 0:
-		ui_manager.update_hand_display_with_new_cards_animation(
-			player, card_scene, hand_container, cards_count
-		)
-	else:
 		ui_manager.update_hand_display(player, card_scene, hand_container)
+	
+	await get_tree().create_timer(0.1).timeout
+	audio_helper.play_card_draw_sound()
 
 func _on_turn_changed(turn_num: int, damage_bonus: int):
 	ui_manager.update_all_labels(player, ai)
 	ui_manager.update_damage_bonus_indicator(player, damage_bonus_label)
 	
-	# Solo mostrar notificación para el jugador si es su turno Y no se mostró ya para este turno
 	if is_player_turn and damage_bonus > 0 and GameBalance.is_damage_bonus_turn(turn_num) and last_bonus_notification_turn != turn_num:
 		last_bonus_notification_turn = turn_num
 		audio_helper.play_bonus_sound()
 		game_notification.show_damage_bonus_notification(turn_num, damage_bonus)
 	elif is_player_turn and damage_bonus > 0:
-		# Solo mostrar info básica si es turno del jugador pero no es turno de bonus nuevo
 		ui_manager.show_damage_bonus_info(turn_num, damage_bonus)
 	else:
-		# Solo actualizar UI, no mostrar notificaciones para la IA
 		if damage_bonus_label:
 			if damage_bonus > 0:
 				ui_manager.update_damage_bonus_indicator(player, damage_bonus_label)
@@ -883,7 +868,7 @@ func _on_card_clicked(card: Card):
 	
 	card.play_card_animation()
 
-	await get_tree().create_timer(0.2).timeout
+	await get_tree().create_timer(0.15).timeout
 	
 	match card_type:
 		"attack":

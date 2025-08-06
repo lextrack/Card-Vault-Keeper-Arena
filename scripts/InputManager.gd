@@ -65,8 +65,6 @@ func force_gamepad_mode_activation():
 	if last_input_was_gamepad and is_input_enabled():
 		gamepad_mode = true
 		CursorManager.set_gamepad_mode(true)
-		await main_scene.get_tree().process_frame
-		await main_scene.get_tree().process_frame
 		
 		if not main_scene.ui_manager.gamepad_selection_active:
 			_update_ui_for_gamepad_mode()
@@ -97,24 +95,17 @@ func start_player_turn():
 	if gamepad_mode:
 		main_scene.ui_manager.gamepad_selection_active = true
 	
-	await main_scene.get_tree().process_frame
-	
 	main_scene.ui_manager.update_card_selection(gamepad_mode, main_scene.player)
 	
 	if end_turn_button and main_scene.player:
 		main_scene.ui_manager.update_turn_button_text(main_scene.player, end_turn_button, gamepad_mode)
-
 
 func start_ai_turn():
 	gamepad_mode = false
 	input_processing = false
 
 	main_scene.ui_manager.gamepad_selection_active = false
-
 	main_scene.ui_manager.update_card_selection(false, main_scene.player)
-
-	await main_scene.get_tree().process_frame
-	
 	main_scene.ui_manager.update_hand_display(main_scene.player, main_scene.card_scene, main_scene.hand_container)
 
 func handle_input(event: InputEvent):
@@ -155,9 +146,6 @@ func _handle_options_menu_toggle():
 func _on_options_menu_closed():
 	enable_input()
 
-	await main_scene.get_tree().process_frame
-	await main_scene.get_tree().process_frame
-	
 	if main_scene.is_player_turn and gamepad_mode:
 		var end_turn_button = main_scene.end_turn_button
 		if end_turn_button:
@@ -205,7 +193,7 @@ func _handle_controls_toggle():
 		main_scene.audio_helper.play_card_hover_sound()
 
 func _handle_keyboard_and_gamepad_navigation(event: InputEvent):
-	if not is_input_enabled() or _is_game_transitioning() or input_processing:
+	if not is_input_enabled() or _is_game_transitioning():
 		return
 	
 	if event.is_action_pressed("ui_left"):
@@ -241,7 +229,7 @@ func _handle_card_selection():
 		input_processing = true
 		main_scene._on_card_clicked(selected_card)
 
-		main_scene.get_tree().create_timer(0.2).timeout.connect(func():
+		main_scene.get_tree().create_timer(0.1).timeout.connect(func():
 			input_processing = false
 		)
 
