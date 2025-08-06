@@ -33,7 +33,7 @@ Reduce your opponent's health to 0 to win the match.
 [font_size=18][color=lightblue]💎 RESOURCES:[/color][/font_size]
 • [color=red]HEALTH[/color]: If it reaches 0, you lose the match
 • [color=cyan]MANA[/color]: Used to play cards, regenerates each turn
-• [color=orange]CARDS[/color]: Your arsenal: depending on difficulty, you can use up to 4 or 5 cards per turn. Special cards shine brighter
+• [color=orange]CARDS[/color]: This is your arsenal. Its availability varies depending on the cards you have unlocked in Challenge Hub
 • [color=white]DECKS[/color]: Available card count (automatically replenished, you'll never run out)""",
 
 	"🃏  Card Types": """[font_size=24][color=yellow]🗂️ CARD TYPES[/color][/font_size]
@@ -41,43 +41,43 @@ Reduce your opponent's health to 0 to win the match.
 [font_size=18][color=red]⚔️ ATTACK CARDS:[/color][/font_size]
 • Deal direct damage to the opponent
 • First affects shield, then health
-• Examples: Basic Strike (1 damage), Sharp Sword (5 damage)
+• Examples: Basic Strike (1 damage)
 
 [font_size=18][color=green]💚 HEALING CARDS:[/color][/font_size]
 • Restore your lost health
 • Can be used even exceeding your max health
-• Examples: Bandage (2 health), Major Potion (8 health)
+• Examples: Bandage (2 health)
 
 [font_size=18][color=cyan]🛡️ SHIELD CARDS:[/color][/font_size]
 • Absorb incoming damage
 • Stack if used consecutively
 • Don't regenerate automatically
-• Examples: Block (2 shield), Reinforced Shield (6 shield)""",
+• Examples: Block (2 shield)""",
 
 	"⭐ Rarity System": """[font_size=24][color=yellow]💎 CARD RARITY[/color][/font_size]
 
-[font_size=18][color=white]⚪ COMMON (White):[/color][/font_size]
+[font_size=18][color=white]⚪ COMMON:[/color][/font_size]
 • Basic balanced cards
 • Appear frequently
 • Simple but useful effects
 • Example: Basic Strike, Bandage
 
-[font_size=18][color=green]🟢 UNCOMMON (Green):[/color][/font_size]
+[font_size=18][color=green]🟢 UNCOMMON:[/color][/font_size]
 • More powerful effects than common cards
 • Appear occasionally
 • More visual shine
 • Example: Sharp Sword, Potion
 
-[font_size=18][color=cyan]🔵 RARE (Blue):[/color][/font_size]
+[font_size=18][color=cyan]🔵 RARE:[/color][/font_size]
 • Very powerful cards
 • Only appear sometimes
 • Distinctive blue glow
 • Example: Critical Strike, Major Heal
 
-[font_size=18][color=magenta]🟣 EPIC (Purple):[/color][/font_size]
+[font_size=18][color=magenta]🟣 EPIC:[/color][/font_size]
 • Most powerful in the game
 • Devastating effects
-• Example: Annihilation (20 damage), Regeneration (12 health)""",
+• Example: Annihilation (20 damage)""",
 
 	"⚔️ Combat System": """[font_size=24][color=yellow]🎲 COMBAT MECHANICS[/color][/font_size]
 
@@ -87,17 +87,17 @@ Reduce your opponent's health to 0 to win the match.
 • Stack shields using multiple cards
 
 [font_size=18][color=red]🔥 DAMAGE BONUS:[/color][/font_size]
-• [color=orange]Turn 4:[/color] +1 damage to all attacks
-• [color=orange]Turn 7:[/color] +2 damage to all attacks  
-• [color=orange]Turn 10:[/color] +3 damage to all attacks
-• [color=orange]Turn 15+:[/color] +4 damage to all attacks
+• [color=orange]Turn 5:[/color] +1 damage to all attacks
+• [color=orange]Turn 8:[/color] +2 damage to all attacks  
+• [color=orange]Turn 12:[/color] +3 damage to all attacks
+• [color=orange]Turn 16+:[/color] +4 damage to all attacks
 • After reaching these thresholds, the bonus applies automatically to all combatants
 
 [font_size=18][color=green]🔄 CARD RECYCLING:[/color][/font_size]
 • When the deck is empty, used cards are reshuffled
 • You'll never run completely out of options
 • Strategy changes based on available cards
-• Generally, card recycling and drawing is automatic, no action required""",
+• Card recycling and drawing is automatic, no action required""",
 
 	"🎮 Controls": """[font_size=24][color=yellow]🕹️ GAME CONTROLS[/color][/font_size]
 
@@ -121,7 +121,7 @@ Reduce your opponent's health to 0 to win the match.
 
 	"🏪 Challenge Hub": """[font_size=24][color=yellow]🏆 CHALLENGE HUB[/color][/font_size]
 
-[font_size=18][color=cyan]🤖 THE CARD COLLECTOR:[/color][/font_size]
+[font_size=18][color=cyan]🤖 THE CARD CURATOR:[/color][/font_size]
 • An AI that guards powerful card bundles
 • Complete challenges to prove your worth
 • She will be your final opponent in combat

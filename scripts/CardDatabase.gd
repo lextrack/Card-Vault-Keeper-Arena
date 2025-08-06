@@ -101,7 +101,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Critical Strike",
-			"cost": 6,
+			"cost": 9,
 			"damage": 22,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.RARE,
@@ -141,7 +141,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Annihilation",
-			"cost": 7,
+			"cost": 8,
 			"damage": 20,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.EPIC,
