@@ -422,6 +422,15 @@ func start_player_turn():
 		return
 		
 	is_player_turn = true
+	
+	if input_manager.last_input_was_gamepad:
+		await get_tree().process_frame
+		await get_tree().process_frame
+		input_manager.start_player_turn()
+	else:
+		ui_manager.gamepad_selection_active = false
+		ui_manager._clear_all_gamepad_selection_styles()
+		input_manager.start_player_turn()
 
 	player.turn_number += 1
 	player.current_mana = player.max_mana

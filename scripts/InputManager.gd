@@ -173,6 +173,9 @@ func _update_ui_for_gamepad_mode():
 		
 	if gamepad_mode:
 		main_scene.ui_manager.gamepad_selection_active = true
+	else:
+		main_scene.ui_manager.gamepad_selection_active = false
+		main_scene.ui_manager._clear_all_gamepad_selection_styles()
 	
 	main_scene.ui_manager.update_card_selection(gamepad_mode, main_scene.player)
 	main_scene.ui_manager.update_turn_button_text(main_scene.player, main_scene.end_turn_button, gamepad_mode)

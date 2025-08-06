@@ -214,7 +214,12 @@ func play_card_animation():
 	queue_free()
 	
 func _on_mouse_entered():
-	if is_being_played or gamepad_hover_active or gamepad_selection_applied:
+	if is_being_played or mouse_filter == Control.MOUSE_FILTER_IGNORE:
+		return
+		
+	var main_scene_node = get_tree().get_first_node_in_group("main_scene")
+	var input_manager = main_scene_node.input_manager if main_scene_node else null
+	if input_manager and input_manager.gamepad_mode and gamepad_selection_applied:
 		return
 	
 	if not is_hovered and is_playable and _can_animate():
@@ -223,13 +228,17 @@ func _on_mouse_entered():
 		_apply_hover_effects()
 
 func _on_mouse_exited():
-	if is_being_played or gamepad_hover_active or gamepad_selection_applied:
+	if is_being_played or not is_hovered:
+		return
+
+	var main_scene_node = get_tree().get_first_node_in_group("main_scene")
+	var input_manager = main_scene_node.input_manager if main_scene_node else null
+	if input_manager and input_manager.gamepad_mode and gamepad_selection_applied:
 		return
 		
-	if is_hovered:
-		is_hovered = false
-		card_unhovered.emit(self)
-		_remove_hover_effects()
+	is_hovered = false
+	card_unhovered.emit(self)
+	_remove_hover_effects()
 
 func _apply_hover_effects():
 	_kill_current_tween()
@@ -268,9 +277,11 @@ func set_playable(playable: bool):
 	if playable:
 		current_tween.tween_property(self, "modulate", Color.WHITE, 0.2)
 		mouse_filter = Control.MOUSE_FILTER_PASS
+		set_mouse_filter_recursive(self)
 	else:
 		current_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.15)
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if not gamepad_selection_applied:
+			mouse_filter = Control.MOUSE_FILTER_IGNORE
 		
 		if is_hovered:
 			_remove_hover_effects()
@@ -295,7 +306,6 @@ func force_reset_visual_state():
 	
 	gamepad_selection_applied = false
 	gamepad_hover_active = false
-	is_hovered = false
 	animation_in_progress = false
 	
 	scale = original_scale
@@ -304,8 +314,12 @@ func force_reset_visual_state():
 	
 	if is_playable:
 		modulate = Color.WHITE
+		mouse_filter = Control.MOUSE_FILTER_PASS
+		set_mouse_filter_recursive(self)
 	else:
 		modulate = Color(0.4, 0.4, 0.4, 0.7)
+		if not is_hovered:
+			mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
 	if card_border:
 		card_border.modulate = Color.WHITE

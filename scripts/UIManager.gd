@@ -496,10 +496,8 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 				continue
 			
 			card.z_index = 0
-			if main_scene.is_player_turn and player.can_play_card(player.hand[i]):
-				card.modulate = Color.WHITE
-			else:
-				card.modulate = Color(0.4, 0.4, 0.4, 0.7)
+			var can_play = player.can_play_card(player.hand[i])
+			card.set_playable(can_play)
 		return
 	
 	gamepad_selection_active = true
@@ -507,25 +505,21 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 	
 	for i in range(card_instances.size()):
 		var card = card_instances[i]
-
 		if not is_instance_valid(card) or i >= player.hand.size():
 			continue
 			
 		if i == selected_card_index:
 			if card.has_method("apply_gamepad_selection_style"):
-				if not card.has_method("has_gamepad_selection_applied") or not card.has_gamepad_selection_applied():
-					card.apply_gamepad_selection_style()
+				card.apply_gamepad_selection_style()
 		else:
 			card.z_index = 0
-			if player.can_play_card(player.hand[i]):
-				card.modulate = Color.WHITE
-			else:
-				card.modulate = Color(0.4, 0.4, 0.4, 0.7)
+			var can_play = player.can_play_card(player.hand[i])
+			card.set_playable(can_play)
 
 func _clear_all_gamepad_selection_styles():
 	for card in card_instances:
-		if is_instance_valid(card) and card.has_method("force_reset_visual_state"):
-			card.force_reset_visual_state()
+		if is_instance_valid(card) and card.has_method("remove_gamepad_selection_style"):
+			card.remove_gamepad_selection_style()
 
 func update_hand_display_no_animation(player: Player, card_scene: PackedScene, hand_container: Container):
 	if not player or not card_scene or not hand_container or not player.hand:
