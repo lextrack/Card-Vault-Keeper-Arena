@@ -9,53 +9,91 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -255.0
-offset_top = -153.0
+offset_left = -280.0
+offset_top = -120.0
 offset_right = -15.0
-offset_bottom = -73.0
+offset_bottom = -15.0
 grow_horizontal = 0
 grow_vertical = 0
 script = ExtResource("1_game_notification")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
-anchors_preset = -1
-anchor_left = -0.092
-anchor_top = 0.025
-anchor_right = 1.033
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 0.0800018
-offset_right = 0.0800018
-offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.15, 0.15, 0.25, 0.95)
+color = Color(0.08, 0.12, 0.2, 0.95)
+
+[node name="BorderHighlight" type="ColorRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.3, 0.5, 0.8, 0.6)
+
+[node name="InnerBackground" type="ColorRect" parent="Background/BorderHighlight"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.18, 0.28, 0.95)
 
 [node name="VBox" type="VBoxContainer" parent="Background"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_right = -8.0
-offset_bottom = -1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="NotificationTitle" type="Label" parent="Background/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.9, 0.9, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 18
 text = "Título"
 horizontal_alignment = 1
 
 [node name="NotificationText" type="Label" parent="Background/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 16
 text = "📥 Texto principal"
 horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="NotificationDetail" type="Label" parent="Background/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.6, 0.7, 0.8, 0.9)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 16
 text = "Detalle adicional"
 horizontal_alignment = 1
+
+[node name="ParticleEffect" type="GPUParticles2D" parent="."]
+position = Vector2(129, 1)
