@@ -121,11 +121,6 @@ func play_ui_click_sound() -> bool:
 		return false
 	return audio_manager.play_ui_click_sound()
 
-func play_notification_sound() -> bool:
-	if not is_initialized or sfx_muted:
-		return false
-	return audio_manager.play_notification_sound()
-
 func play_bonus_sound() -> bool:
 	if not is_initialized or sfx_muted:
 		return false
@@ -150,11 +145,6 @@ func stop_music_for_exit() -> bool:
 	if not is_initialized:
 		return false
 	return audio_manager.stop_music()
-
-func play_deck_shuffle_sound() -> bool:
-	if not is_initialized or sfx_muted:
-		return false
-	return audio_manager.play_deck_shuffle_sound()
 
 func play_background_music() -> bool:
 	if not is_initialized:

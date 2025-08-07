@@ -32,8 +32,6 @@ script = ExtResource("2_vcsgt")
 
 [node name="CardDrawPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
 
-[node name="CardPlaySound" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
-
 [node name="CardHoverPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
 stream = ExtResource("3_q8u5g")
 volume_db = -4.0
@@ -71,10 +69,6 @@ volume_db = 6.0
 stream = ExtResource("14_mwfav")
 
 [node name="LosePlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
-
-[node name="DeckShufflePlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
-
-[node name="NotificationPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
 
 [node name="BonusPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
 stream = ExtResource("11_qmy6f")

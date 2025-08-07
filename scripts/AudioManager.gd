@@ -19,8 +19,6 @@ extends Node
 @onready var turn_change_player = $GameSounds/TurnChangePlayer
 @onready var win_player = $GameSounds/WinPlayer
 @onready var lose_player = $GameSounds/LosePlayer
-@onready var deck_shuffle_player = $GameSounds/DeckShufflePlayer
-@onready var notification_player = $GameSounds/NotificationPlayer
 @onready var bonus_player = $GameSounds/BonusPlayer
 @onready var music_player = $GameSounds/MusicPlayer
 
@@ -38,8 +36,8 @@ func _assign_base_players_to_sfx_bus():
 		card_play_player, card_draw_player, card_hover_player, hybrid_player,
 		attack_player, heal_player, shield_player, damage_player,
 		ai_attack_player, ai_heal_player, ai_shield_player, ai_card_play_player,
-		turn_change_player, win_player, lose_player, deck_shuffle_player,
-		notification_player, bonus_player, ui_click_player, ui_hover_player
+		turn_change_player, win_player, lose_player,
+		bonus_player, ui_click_player, ui_hover_player
 	]
 	
 	for player in base_players:
@@ -64,8 +62,6 @@ func _create_player_pools():
 	_create_pool("turn_change", turn_change_player, 2)
 	_create_pool("win", win_player, 1)
 	_create_pool("lose", lose_player, 1)
-	_create_pool("deck_shuffle", deck_shuffle_player, 2)
-	_create_pool("notification", notification_player, 4)
 	_create_pool("bonus", bonus_player, 2)
 	
 	_create_pool("ui_click", ui_click_player, 3)
@@ -172,9 +168,6 @@ func play_button_click_sound() -> bool:
 
 func play_button_hover_sound() -> bool:
 	return _play_sound("button_hover")
-
-func play_notification_sound() -> bool:
-	return _play_sound("notification")
 
 func play_bonus_sound() -> bool:
 	return _play_sound("bonus")

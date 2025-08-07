@@ -9,7 +9,7 @@ extends CanvasLayer
 var show_duration = 0.2
 var flip_duration = 0.5
 var float_amplitude = 2.0
-var current_face = "front"  # "front" o "back"
+var current_face = "front"
 
 var rotation_tween: Tween
 var float_tween: Tween
@@ -19,11 +19,6 @@ func _ready():
 	layer = 1000
 	overlay.color.a = 0.0
 	loading_container.modulate.a = 0.0
-	
-	_ensure_card_position()
-
-func _ensure_card_position():
-	pass
 
 func start_loading_animation():
 	_stop_all_tweens()
@@ -189,18 +184,5 @@ func instant_clear():
 func is_covering() -> bool:
 	return overlay.color.a > 0.5
 
-func show_loading():
-	instant_black()
-
-func hide_loading():
-	await fade_out(0.5)
-
 func is_ready() -> bool:
 	return overlay != null and loading_container != null and card_container != null
-
-func set_animation_speed(new_show_duration: float, new_flip_duration: float = 0.6):
-	show_duration = new_show_duration
-	flip_duration = new_flip_duration
-
-func set_float_intensity(amplitude: float):
-	float_amplitude = amplitude
