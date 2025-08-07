@@ -97,15 +97,15 @@ func _setup_particles(color: Color):
 	
 	var material = particle_effect.process_material as ParticleProcessMaterial
 	material.direction = Vector3(0, -1, 0)
-	material.initial_velocity_min = 20.0
-	material.initial_velocity_max = 50.0
-	material.gravity = Vector3(0, 30, 0)
-	material.scale_min = 0.2
-	material.scale_max = 0.8
+	material.initial_velocity_min = 30.0
+	material.initial_velocity_max = 70.0
+	material.gravity = Vector3(0, 20, 0)
+	material.scale_min = 1.0
+	material.scale_max = 2.0
 	material.color = color
 	
-	particle_effect.amount = 30
-	particle_effect.lifetime = 2.0
+	particle_effect.amount = 60
+	particle_effect.lifetime = 1.5
 	particle_effect.emitting = true
 	get_tree().create_timer(0.5).timeout.connect(func(): particle_effect.emitting = false)
 

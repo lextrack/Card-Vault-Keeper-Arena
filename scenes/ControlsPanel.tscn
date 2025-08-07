@@ -5,184 +5,242 @@
 [node name="ControlsPanel" type="Control"]
 z_index = 200
 layout_mode = 3
+anchors_preset = 8
 anchor_left = 0.5
-anchor_top = 1.032
+anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 1.032
+anchor_bottom = 0.5
 offset_left = -175.0
-offset_top = -392.576
+offset_top = -124.0
 offset_right = 175.0
-offset_bottom = -102.576
+offset_bottom = 146.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1_38ays")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+color = Color(0.08, 0.12, 0.2, 0.95)
 
-[node name="PanelBG" type="ColorRect" parent="Panel"]
+[node name="BorderHighlight" type="ColorRect" parent="Background"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0509804, 0.101961, 0.2, 1)
+color = Color(0.4, 0.6, 0.9, 0.7)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+[node name="InnerBackground" type="ColorRect" parent="Background/BorderHighlight"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = 6.0
-offset_right = -12.0
-offset_bottom = -6.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 4
+color = Color(0.12, 0.18, 0.28, 0.95)
 
-[node name="Title" type="Label" parent="Panel/VBoxContainer"]
+[node name="Panel" type="Control" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Background/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = -8.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Background/Panel/VBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.9, 0.9, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 18
 text = "CONTROLS"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="Panel/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="Background/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="GameplaySection" type="VBoxContainer" parent="Background/Panel/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="GameplaySection" type="VBoxContainer" parent="Panel/VBoxContainer"]
+[node name="PlayHint" type="HBoxContainer" parent="Background/Panel/VBoxContainer/GameplaySection"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 8
 
-[node name="PlayHint" type="HBoxContainer" parent="Panel/VBoxContainer/GameplaySection"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="PlayIcon" type="TextureRect" parent="Panel/VBoxContainer/GameplaySection/PlayHint"]
-custom_minimum_size = Vector2(35, 30)
+[node name="PlayIcon" type="TextureRect" parent="Background/Panel/VBoxContainer/GameplaySection/PlayHint"]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="PlayLabel" type="Label" parent="Panel/VBoxContainer/GameplaySection/PlayHint"]
+[node name="PlayLabel" type="Label" parent="Background/Panel/VBoxContainer/GameplaySection/PlayHint"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 15
 vertical_alignment = 1
 
-[node name="EndHint" type="HBoxContainer" parent="Panel/VBoxContainer/GameplaySection"]
+[node name="EndHint" type="HBoxContainer" parent="Background/Panel/VBoxContainer/GameplaySection"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
-[node name="EndIcon" type="TextureRect" parent="Panel/VBoxContainer/GameplaySection/EndHint"]
-custom_minimum_size = Vector2(35, 30)
+[node name="EndIcon" type="TextureRect" parent="Background/Panel/VBoxContainer/GameplaySection/EndHint"]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="EndLabel" type="Label" parent="Panel/VBoxContainer/GameplaySection/EndHint"]
+[node name="EndLabel" type="Label" parent="Background/Panel/VBoxContainer/GameplaySection/EndHint"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 15
 vertical_alignment = 1
 
-[node name="MenuSection" type="VBoxContainer" parent="Panel/VBoxContainer"]
+[node name="MenuSection" type="VBoxContainer" parent="Background/Panel/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
-[node name="RestartHint" type="HBoxContainer" parent="Panel/VBoxContainer/MenuSection"]
+[node name="RestartHint" type="HBoxContainer" parent="Background/Panel/VBoxContainer/MenuSection"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
-[node name="RestartIcon" type="TextureRect" parent="Panel/VBoxContainer/MenuSection/RestartHint"]
-custom_minimum_size = Vector2(35, 30)
+[node name="RestartIcon" type="TextureRect" parent="Background/Panel/VBoxContainer/MenuSection/RestartHint"]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="RestartLabel" type="Label" parent="Panel/VBoxContainer/MenuSection/RestartHint"]
+[node name="RestartLabel" type="Label" parent="Background/Panel/VBoxContainer/MenuSection/RestartHint"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 0.9)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 15
 vertical_alignment = 1
 
-[node name="ChallengeHint" type="HBoxContainer" parent="Panel/VBoxContainer/MenuSection"]
+[node name="ChallengeHint" type="HBoxContainer" parent="Background/Panel/VBoxContainer/MenuSection"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
-[node name="ChallengeIcon" type="TextureRect" parent="Panel/VBoxContainer/MenuSection/ChallengeHint"]
-custom_minimum_size = Vector2(35, 30)
+[node name="ChallengeIcon" type="TextureRect" parent="Background/Panel/VBoxContainer/MenuSection/ChallengeHint"]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ChallengeLabel" type="Label" parent="Panel/VBoxContainer/MenuSection/ChallengeHint"]
+[node name="ChallengeLabel" type="Label" parent="Background/Panel/VBoxContainer/MenuSection/ChallengeHint"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 0.9)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 15
 vertical_alignment = 1
 
-[node name="OptionsHint" type="HBoxContainer" parent="Panel/VBoxContainer/MenuSection"]
+[node name="OptionsHint" type="HBoxContainer" parent="Background/Panel/VBoxContainer/MenuSection"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
-[node name="OptionsIcon" type="TextureRect" parent="Panel/VBoxContainer/MenuSection/OptionsHint"]
-custom_minimum_size = Vector2(35, 30)
+[node name="OptionsIcon" type="TextureRect" parent="Background/Panel/VBoxContainer/MenuSection/OptionsHint"]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="OptionsLabel" type="Label" parent="Panel/VBoxContainer/MenuSection/OptionsHint"]
+[node name="OptionsLabel" type="Label" parent="Background/Panel/VBoxContainer/MenuSection/OptionsHint"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 0.9)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 15
 vertical_alignment = 1
 
-[node name="MainMenuHint" type="HBoxContainer" parent="Panel/VBoxContainer/MenuSection"]
+[node name="MainMenuHint" type="HBoxContainer" parent="Background/Panel/VBoxContainer/MenuSection"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
-[node name="MainMenuIcon" type="TextureRect" parent="Panel/VBoxContainer/MenuSection/MainMenuHint"]
-custom_minimum_size = Vector2(35, 30)
+[node name="MainMenuIcon" type="TextureRect" parent="Background/Panel/VBoxContainer/MenuSection/MainMenuHint"]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="MainMenuLabel" type="Label" parent="Panel/VBoxContainer/MenuSection/MainMenuHint"]
+[node name="MainMenuLabel" type="Label" parent="Background/Panel/VBoxContainer/MenuSection/MainMenuHint"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 0.9)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 15
 vertical_alignment = 1
 
-[node name="ShowControlsHint" type="HBoxContainer" parent="Panel/VBoxContainer/MenuSection"]
+[node name="ShowControlsHint" type="HBoxContainer" parent="Background/Panel/VBoxContainer/MenuSection"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
-[node name="ShowControlsIcon" type="TextureRect" parent="Panel/VBoxContainer/MenuSection/ShowControlsHint"]
-custom_minimum_size = Vector2(35, 30)
+[node name="ShowControlsIcon" type="TextureRect" parent="Background/Panel/VBoxContainer/MenuSection/ShowControlsHint"]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ShowControlsLabel" type="Label" parent="Panel/VBoxContainer/MenuSection/ShowControlsHint"]
+[node name="ShowControlsLabel" type="Label" parent="Background/Panel/VBoxContainer/MenuSection/ShowControlsHint"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 0.9)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 15
 vertical_alignment = 1
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+position = Vector2(175, 145)

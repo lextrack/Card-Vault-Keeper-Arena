@@ -8,9 +8,9 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 15.0
-offset_top = -120.0
+offset_top = -168.0
 offset_right = 280.0
-offset_bottom = -15.0
+offset_bottom = -63.0
 grow_vertical = 0
 script = ExtResource("1_notification")
 
@@ -51,13 +51,15 @@ color = Color(0.15, 0.12, 0.18, 0.95)
 
 [node name="VBox" type="VBoxContainer" parent="Background"]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = 8.0
-offset_right = -12.0
-offset_bottom = -8.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -28.5
+offset_top = -33.5
+offset_right = 28.5
+offset_bottom = 33.5
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -68,7 +70,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 18
-text = "IA jugó: Usó"
+text = "IA card"
 horizontal_alignment = 1
 
 [node name="CardEffect" type="Label" parent="Background/VBox"]
@@ -78,7 +80,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 16
-text = "💥 Efecto"
+text = "Effect"
 horizontal_alignment = 1
 autowrap_mode = 2
 
@@ -89,7 +91,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 16
-text = "Costo: X maná"
+text = "Mana"
 horizontal_alignment = 1
 
 [node name="ParticleEffect" type="GPUParticles2D" parent="."]

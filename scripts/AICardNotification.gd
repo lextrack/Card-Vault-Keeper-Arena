@@ -143,19 +143,19 @@ func _setup_card_particles(card: CardData):
 			material.direction = Vector3(0, -1, 0)
 			material.initial_velocity_min = 30.0
 			material.initial_velocity_max = 60.0
-			material.gravity = Vector3(0, 50, 0)
+			material.gravity = Vector3(0, 20, 0)
 		"heal":
 			material.color = Color(0.3, 0.8, 0.3, 0.8)
 			material.direction = Vector3(0, -1, 0)
 			material.initial_velocity_min = 15.0
 			material.initial_velocity_max = 35.0
-			material.gravity = Vector3(0, -20, 0)
+			material.gravity = Vector3(0, 20, 0)
 		"shield":
 			material.color = Color(0.2, 0.5, 0.9, 0.8)
 			material.direction = Vector3(0, 0, 0)
-			material.initial_velocity_min = 5.0
-			material.initial_velocity_max = 15.0
-			material.gravity = Vector3(0, 0, 0)
+			material.initial_velocity_min = 30.0
+			material.initial_velocity_max = 50.0
+			material.gravity = Vector3(0, 20, 0)
 		"hybrid":
 			material.color = Color(0.8, 0.6, 0.2, 0.8)
 			material.direction = Vector3(0, -0.5, 0)
@@ -169,10 +169,10 @@ func _setup_card_particles(card: CardData):
 			material.initial_velocity_max = 40.0
 			material.gravity = Vector3(0, 30, 0)
 	
-	material.scale_min = 0.3
-	material.scale_max = 0.7
+	material.scale_min = 1.0
+	material.scale_max = 2.0
 	
-	particle_effect.amount = 25
+	particle_effect.amount = 60
 	particle_effect.lifetime = 1.5
 	particle_effect.emitting = true
 	get_tree().create_timer(0.8).timeout.connect(func(): particle_effect.emitting = false)
