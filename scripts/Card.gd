@@ -33,6 +33,7 @@ var is_playable: bool = true
 var is_being_played: bool = false
 var animation_in_progress: bool = false
 var has_played_epic_animation: bool = false
+var input_method_override: String = ""
 
 var gamepad_selection_applied: bool = false
 var gamepad_hover_active: bool = false
@@ -208,7 +209,6 @@ func play_card_animation():
 	current_tween.tween_property(self, "position", position + Vector2(0, -80), 0.12).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
 	current_tween.tween_property(self, "scale", Vector2(0.6, 0.6), 0.12).set_ease(Tween.EASE_IN)
 	current_tween.tween_property(self, "modulate:a", 0.0, 0.18).set_ease(Tween.EASE_IN)
-	#current_tween.tween_property(self, "rotation", deg_to_rad(2), 0.1).set_ease(Tween.EASE_IN)
 	
 	await current_tween.finished
 	queue_free()
@@ -219,8 +219,12 @@ func _on_mouse_entered():
 		
 	var main_scene_node = get_tree().get_first_node_in_group("main_scene")
 	var input_manager = main_scene_node.input_manager if main_scene_node else null
-	if input_manager and input_manager.gamepad_mode and gamepad_selection_applied:
-		return
+	
+	if input_manager:
+		if input_manager.gamepad_mode and gamepad_selection_applied:
+			return
+		elif input_manager.gamepad_mode:
+			input_method_override = "mouse"
 	
 	if not is_hovered and is_playable and _can_animate():
 		is_hovered = true
@@ -230,6 +234,9 @@ func _on_mouse_entered():
 func _on_mouse_exited():
 	if is_being_played or not is_hovered:
 		return
+
+	if input_method_override == "mouse":
+		input_method_override = ""
 
 	var main_scene_node = get_tree().get_first_node_in_group("main_scene")
 	var input_manager = main_scene_node.input_manager if main_scene_node else null
@@ -307,6 +314,7 @@ func force_reset_visual_state():
 	gamepad_selection_applied = false
 	gamepad_hover_active = false
 	animation_in_progress = false
+	input_method_override = ""
 	
 	scale = original_scale
 	z_index = 0

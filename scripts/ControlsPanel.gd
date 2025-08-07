@@ -87,7 +87,7 @@ func update_display():
 		main_menu_label.text = "Main menu"
 
 		show_controls_icon.texture = xbox_rb_texture
-		show_controls_label.text = "Show/Hide assigned controls panel"
+		show_controls_label.text = "Show/Hide controls panel"
 	else:
 		play_icon.texture = mouse_click_texture
 		play_label.text = "Play card"
@@ -108,7 +108,7 @@ func update_display():
 		main_menu_label.text = "Main menu"
 		
 		show_controls_icon.texture = key_h_texture
-		show_controls_label.text = "Show/Hide assigned controls panel"
+		show_controls_label.text = "Show/Hide controls panel"
 	
 	play_hint.visible = is_player_turn and has_cards
 	end_hint.visible = is_player_turn

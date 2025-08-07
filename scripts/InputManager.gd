@@ -7,6 +7,7 @@ var last_input_was_gamepad: bool = false
 var options_menu: OptionsMenu
 var input_enabled: bool = true
 var input_processing: bool = false
+var last_interaction_time: float = 0.0
 
 func setup(main: Control, options: OptionsMenu = null):
 	main_scene = main
@@ -152,20 +153,32 @@ func _on_options_menu_closed():
 			end_turn_button.grab_focus()
 
 func _detect_input_method(event: InputEvent):
+	var current_time = Time.get_ticks_msec() / 1000.0
+	
 	if event is InputEventJoypadButton and event.pressed:
 		if not last_input_was_gamepad:
 			last_input_was_gamepad = true
+			last_interaction_time = current_time
 			CursorManager.set_gamepad_mode(true)
+			
 			if main_scene.is_player_turn and main_scene.player and is_input_enabled():
 				gamepad_mode = true
 				_update_ui_for_gamepad_mode()
-	elif event is InputEventMouse or (event is InputEventKey and event.pressed):
-		if last_input_was_gamepad:
-			last_input_was_gamepad = false
-			CursorManager.set_gamepad_mode(false)
-			if main_scene.is_player_turn and main_scene.player and is_input_enabled():
-				gamepad_mode = false
-				_update_ui_for_gamepad_mode()
+				
+	elif event is InputEventMouse:
+		if current_time - last_interaction_time > 0.2:
+			if last_input_was_gamepad:
+				last_input_was_gamepad = false
+				last_interaction_time = current_time
+				CursorManager.set_gamepad_mode(false)
+				
+				if main_scene.is_player_turn and main_scene.player and is_input_enabled():
+					gamepad_mode = false
+					_update_ui_for_gamepad_mode()
+					
+	elif event is InputEventKey and event.pressed:
+		if not last_input_was_gamepad and current_time - last_interaction_time > 0.5:
+			last_interaction_time = current_time
 
 func _update_ui_for_gamepad_mode():
 	if not is_input_enabled():
@@ -201,11 +214,11 @@ func _handle_keyboard_and_gamepad_navigation(event: InputEvent):
 	
 	if event.is_action_pressed("ui_left"):
 		if main_scene.ui_manager.navigate_cards(-1, main_scene.player):
-			main_scene.audio_helper.play_card_hover_sound()
+			main_scene.ui_manager.handle_card_hover_audio(null, "gamepad_navigation")
 		return
 	elif event.is_action_pressed("ui_right"):
 		if main_scene.ui_manager.navigate_cards(1, main_scene.player):
-			main_scene.audio_helper.play_card_hover_sound()
+			main_scene.ui_manager.handle_card_hover_audio(null, "gamepad_navigation")
 		return
 
 	if main_scene.player.can_play_more_cards():

@@ -73,6 +73,20 @@ func _has_playability_changed(player: Player) -> bool:
 	last_playability_state = new_playability
 	return changed
 
+func handle_card_hover_audio(card: Card, hover_type: String):
+	var audio_helper = main_scene.audio_helper
+	if not audio_helper:
+		return
+	
+	match hover_type:
+		"mouse":
+			if not gamepad_selection_active:
+				audio_helper.play_card_hover_sound()
+		"gamepad_navigation":
+			audio_helper.play_card_hover_sound()
+		"gamepad_selection":
+			audio_helper.play_card_hover_sound()
+
 func update_all_labels(player: Player, ai: Player):
 	update_player_hp(player.current_hp)
 	update_player_mana(player.current_mana)
@@ -332,10 +346,10 @@ func _update_existing_cards_playability(player: Player):
 			card_instance.set_playable(can_play)
 
 func _on_card_gamepad_hovered(card: Card):
-	if not gamepad_selection_active:
-		var audio_helper = main_scene.audio_helper
-		if audio_helper:
-			audio_helper.play_card_hover_sound()
+	if gamepad_selection_active:
+		handle_card_hover_audio(card, "gamepad_selection")
+	else:
+		handle_card_hover_audio(card, "gamepad_navigation")
 
 func _on_card_gamepad_unhovered(card: Card):
 	pass
@@ -351,11 +365,7 @@ func _restore_gamepad_selection_immediate(player: Player):
 				selected_card.apply_gamepad_selection_style()
 				
 func _on_card_hover():
-	var input_manager = main_scene.input_manager
-	if input_manager and not input_manager.gamepad_mode:
-		var audio_helper = main_scene.audio_helper
-		if audio_helper:
-			audio_helper.play_card_hover_sound()
+	handle_card_hover_audio(null, "mouse")
 
 func update_turn_button_text(player: Player, end_turn_button: Button, gamepad_mode: bool):
 	if not end_turn_button or not player:
