@@ -223,9 +223,6 @@ func _reset_menu_state():
 	
 	set_card_rain_active(true)
 
-	if gamepad_mode:
-		_focus_first_button()
-
 func setup_buttons():
 	play_button.pressed.connect(_on_play_pressed)
 	options_button.pressed.connect(_on_options_pressed)
