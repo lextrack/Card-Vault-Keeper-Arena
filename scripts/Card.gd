@@ -31,25 +31,15 @@ var original_position: Vector2
 var is_hovered: bool = false
 var is_playable: bool = true
 var is_being_played: bool = false
-var animation_in_progress: bool = false
-var has_played_epic_animation: bool = false
-var input_method_override: String = ""
-
-var gamepad_selection_applied: bool = false
-var gamepad_hover_active: bool = false
-
+var gamepad_selected: bool = false
 var current_tween: Tween
 
-const HOVER_SCALE_MULTIPLIER = 1.06
-const GAMEPAD_SCALE_MULTIPLIER = 1.08
-const GAMEPAD_SELECTION_SCALE_MULTIPLIER = 1.12
-const ANIMATION_SPEED_FAST = 0.12
-const ANIMATION_SPEED_NORMAL = 0.18
-const ANIMATION_SPEED_SLOW = 0.25
+const HOVER_SCALE = 1.07
+const GAMEPAD_SCALE = 1.07
+const ANIMATION_SPEED = 0.15
 
 func _ready():
 	original_scale = scale
-	original_position = position
 	
 	if card_data:
 		update_display()
@@ -66,219 +56,137 @@ func get_card_data() -> CardData:
 	return card_data
 
 func animate_mana_insufficient():
-	if not _can_animate():
+	if is_being_played:
 		return
 	
-	_start_animation()
-	_kill_current_tween()
-	
+	_stop_current_tween()
 	current_tween = create_tween()
 	current_tween.set_parallel(true)
-
-	var shake_positions = [
-		original_position + Vector2(3, 0),
-		original_position + Vector2(-3, 0),
-		original_position + Vector2(2, 0),
-		original_position + Vector2(-2, 0),
-		original_position
-	]
 	
-	for i in range(shake_positions.size()):
-		var delay = i * 0.04
-		current_tween.tween_property(self, "position", shake_positions[i], 0.04).set_delay(delay)
-	
-	var error_color = Color.RED
-	var original_cost_color = get_card_type_colors(card_data.card_type).cost_bg
-	
-	current_tween.tween_property(cost_bg, "color", error_color, 0.1)
-	current_tween.tween_property(cost_label, "modulate", Color(1.5, 0.3, 0.3, 1.0), 0.1)
-	current_tween.tween_property(card_border, "modulate", Color(1.3, 0.5, 0.5, 1.0), 0.1)
-
-	current_tween.tween_property(cost_bg, "color", original_cost_color, 0.15).set_delay(0.15)
-	current_tween.tween_property(cost_label, "modulate", Color.WHITE, 0.15).set_delay(0.15)
-	current_tween.tween_property(card_border, "modulate", Color.WHITE, 0.15).set_delay(0.15)
-	
-	await current_tween.finished
-	_end_animation()
+	current_tween.tween_property(self, "rotation", deg_to_rad(3), 0.05)
+	current_tween.tween_property(self, "rotation", deg_to_rad(-3), 0.05).set_delay(0.05)
+	current_tween.tween_property(self, "rotation", 0.0, 0.05).set_delay(0.1)
+	current_tween.tween_property(cost_bg, "color", Color.RED, 0.1)
+	current_tween.tween_property(cost_bg, "color", get_card_type_colors(card_data.card_type).cost_bg, 0.1).set_delay(0.1)
 
 func apply_gamepad_selection_style():
-	if gamepad_selection_applied or not _can_animate() or is_being_played:
+	if gamepad_selected or is_being_played:
 		return
 	
-	if is_hovered:
-		_remove_hover_effects()
-		is_hovered = false
+	gamepad_selected = true
+	is_hovered = false
 	
-	gamepad_selection_applied = true
-	gamepad_hover_active = true
-	
-	_kill_current_tween()
-	
+	_stop_current_tween()
 	current_tween = create_tween()
 	current_tween.set_parallel(true)
 	
-	current_tween.tween_property(self, "scale", original_scale * GAMEPAD_SELECTION_SCALE_MULTIPLIER, ANIMATION_SPEED_FAST).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	current_tween.tween_property(self, "z_index", 10, 0.05)
-	
-	var gamepad_modulate = Color(1.15, 1.15, 1.1, 1.0) if is_playable else Color(0.8, 0.8, 0.9, 1.0)
-	current_tween.tween_property(self, "modulate", gamepad_modulate, ANIMATION_SPEED_FAST)
-	
-	var border_glow = Color(1.3, 1.3, 1.2, 1.0)
-	current_tween.tween_property(card_border, "modulate", border_glow, ANIMATION_SPEED_FAST)
-
-	current_tween.finished.connect(func():
-		if gamepad_selection_applied and not animation_in_progress:
-			_start_gamepad_pulse_animation()
-	)
-
-func _start_gamepad_pulse_animation():
-	if not gamepad_selection_applied or animation_in_progress:
-		return
-		
-	_kill_current_tween()
-	current_tween = create_tween()
-	current_tween.set_loops()
-	
-	var pulse_scale_min = original_scale * 1.06
-	var pulse_scale_max = original_scale * 1.10
-	
-	current_tween.tween_property(self, "scale", pulse_scale_max, 0.8).set_ease(Tween.EASE_IN_OUT)
-	current_tween.tween_property(self, "scale", pulse_scale_min, 0.8).set_ease(Tween.EASE_IN_OUT)
+	current_tween.tween_property(self, "scale", original_scale * GAMEPAD_SCALE, ANIMATION_SPEED)
+	current_tween.tween_property(self, "z_index", 10, ANIMATION_SPEED)
+	current_tween.tween_property(self, "modulate", Color(1.1, 1.1, 1.0, 1.0), ANIMATION_SPEED)
+	current_tween.tween_property(card_border, "modulate", Color(1.2, 1.2, 1.0, 1.0), ANIMATION_SPEED)
 
 func remove_gamepad_selection_style():
-	if not gamepad_selection_applied:
+	if not gamepad_selected:
 		return
 	
-	gamepad_selection_applied = false
-	gamepad_hover_active = false
+	gamepad_selected = false
 	
-	_kill_current_tween()
-	
+	_stop_current_tween()
 	current_tween = create_tween()
 	current_tween.set_parallel(true)
 	
-	current_tween.tween_property(self, "scale", original_scale, ANIMATION_SPEED_NORMAL).set_ease(Tween.EASE_OUT)
-	current_tween.tween_property(self, "z_index", 0, ANIMATION_SPEED_FAST)
-	current_tween.tween_property(card_border, "modulate", Color.WHITE, ANIMATION_SPEED_NORMAL)
+	current_tween.tween_property(self, "scale", original_scale, ANIMATION_SPEED)
+	current_tween.tween_property(self, "z_index", 0, ANIMATION_SPEED)
+	current_tween.tween_property(card_border, "modulate", Color.WHITE, ANIMATION_SPEED)
 	
 	var target_modulate = Color.WHITE if is_playable else Color(0.4, 0.4, 0.4, 0.7)
-	current_tween.tween_property(self, "modulate", target_modulate, ANIMATION_SPEED_NORMAL)
+	current_tween.tween_property(self, "modulate", target_modulate, ANIMATION_SPEED)
 
 func play_disabled_animation():
-	if not _can_animate():
+	if is_being_played:
 		return
-		
-	_start_animation()
-	_kill_current_tween()
 	
+	_stop_current_tween()
 	current_tween = create_tween()
 	current_tween.set_parallel(true)
 	
-	var shake_positions = [
-		original_position + Vector2(2, 0),
-		original_position + Vector2(-2, 0),
-		original_position + Vector2(1, 0),
-		original_position + Vector2(-1, 0),
-		original_position
-	]
-	
-	for i in range(shake_positions.size()):
-		var delay = i * 0.05
-		current_tween.tween_property(self, "position", shake_positions[i], 0.05).set_delay(delay)
-	
-	var original_modulate = modulate
-	var disabled_color = Color(1.2, 0.8, 0.8, 1.0)
-	
-	current_tween.tween_property(self, "modulate", disabled_color, 0.1)
-	current_tween.tween_property(self, "modulate", original_modulate, 0.15).set_delay(0.1)
-	
-	await current_tween.finished
-	_end_animation()
+	current_tween.tween_property(self, "rotation", deg_to_rad(2), 0.05)
+	current_tween.tween_property(self, "rotation", deg_to_rad(-2), 0.05).set_delay(0.05)
+	current_tween.tween_property(self, "rotation", 0.0, 0.05).set_delay(0.1)
+	current_tween.tween_property(self, "modulate", Color(1.2, 0.8, 0.8, 1.0), 0.1)
+	current_tween.tween_property(self, "modulate", Color.WHITE if is_playable else Color(0.4, 0.4, 0.4, 0.7), 0.1).set_delay(0.1)
 
 func play_card_animation():
 	if is_being_played:
 		return
-		
+	
 	is_being_played = true
 	card_played.emit(self)
-	_kill_current_tween()
 	
+	_stop_current_tween()
 	current_tween = create_tween()
 	current_tween.set_parallel(true)
 	
-	current_tween.tween_property(self, "position", position + Vector2(0, -80), 0.12).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
-	current_tween.tween_property(self, "scale", Vector2(0.6, 0.6), 0.12).set_ease(Tween.EASE_IN)
-	current_tween.tween_property(self, "modulate:a", 0.0, 0.18).set_ease(Tween.EASE_IN)
+	current_tween.tween_property(self, "scale", Vector2(0.3, 0.3), 0.3)
+	current_tween.tween_property(self, "modulate", Color.TRANSPARENT, 0.3)
+	current_tween.tween_property(self, "rotation", deg_to_rad(1), 0.2)
 	
 	await current_tween.finished
 	queue_free()
-	
+
 func _on_mouse_entered():
-	if is_being_played or mouse_filter == Control.MOUSE_FILTER_IGNORE:
+	if is_being_played or gamepad_selected or mouse_filter == Control.MOUSE_FILTER_IGNORE:
 		return
-		
+	
 	var main_scene_node = get_tree().get_first_node_in_group("main_scene")
 	var input_manager = main_scene_node.input_manager if main_scene_node else null
 	
-	if input_manager:
-		if input_manager.gamepad_mode and gamepad_selection_applied:
-			return
-		elif input_manager.gamepad_mode:
-			input_method_override = "mouse"
+	if input_manager and input_manager.gamepad_mode:
+		return
 	
-	if not is_hovered and is_playable and _can_animate():
+	if not is_hovered and is_playable:
 		is_hovered = true
 		card_hovered.emit(self)
 		_apply_hover_effects()
 
 func _on_mouse_exited():
-	if is_being_played or not is_hovered:
+	if is_being_played or not is_hovered or gamepad_selected:
 		return
-
-	if input_method_override == "mouse":
-		input_method_override = ""
-
-	var main_scene_node = get_tree().get_first_node_in_group("main_scene")
-	var input_manager = main_scene_node.input_manager if main_scene_node else null
-	if input_manager and input_manager.gamepad_mode and gamepad_selection_applied:
-		return
-		
+	
 	is_hovered = false
 	card_unhovered.emit(self)
 	_remove_hover_effects()
 
 func _apply_hover_effects():
-	_kill_current_tween()
+	_stop_current_tween()
 	current_tween = create_tween()
 	current_tween.set_parallel(true)
 	
-	current_tween.tween_property(self, "scale", original_scale * HOVER_SCALE_MULTIPLIER, ANIMATION_SPEED_FAST).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUART)
-	current_tween.tween_property(self, "z_index", 5, 0.05)
-	
-	var hover_modulate = Color(1.08, 1.08, 1.08, 1.0)
-	current_tween.tween_property(self, "modulate", hover_modulate, ANIMATION_SPEED_FAST)
+	current_tween.tween_property(self, "scale", original_scale * HOVER_SCALE, ANIMATION_SPEED)
+	current_tween.tween_property(self, "z_index", 5, ANIMATION_SPEED)
+	current_tween.tween_property(self, "modulate", Color(1.05, 1.05, 1.05, 1.0), ANIMATION_SPEED)
 
 func _remove_hover_effects():
-	_kill_current_tween()
+	_stop_current_tween()
 	current_tween = create_tween()
 	current_tween.set_parallel(true)
 	
-	current_tween.tween_property(self, "scale", original_scale, ANIMATION_SPEED_NORMAL).set_ease(Tween.EASE_OUT)
-	current_tween.tween_property(self, "z_index", 0, ANIMATION_SPEED_FAST)
+	current_tween.tween_property(self, "scale", original_scale, ANIMATION_SPEED)
+	current_tween.tween_property(self, "z_index", 0, ANIMATION_SPEED)
 	
 	var target_modulate = Color.WHITE if is_playable else Color(0.4, 0.4, 0.4, 0.7)
-	current_tween.tween_property(self, "modulate", target_modulate, ANIMATION_SPEED_NORMAL)
+	current_tween.tween_property(self, "modulate", target_modulate, ANIMATION_SPEED)
 
 func has_gamepad_selection_applied() -> bool:
-	return gamepad_selection_applied
+	return gamepad_selected
 
 func set_playable(playable: bool):
 	if is_being_played:
 		return
-		
+	
 	is_playable = playable
 	
-	_kill_current_tween()
+	_stop_current_tween()
 	current_tween = create_tween()
 	
 	if playable:
@@ -286,61 +194,49 @@ func set_playable(playable: bool):
 		mouse_filter = Control.MOUSE_FILTER_PASS
 		set_mouse_filter_recursive(self)
 	else:
-		current_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.15)
-		if not gamepad_selection_applied:
+		current_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.2)
+		if not gamepad_selected:
 			mouse_filter = Control.MOUSE_FILTER_IGNORE
 		
 		if is_hovered:
 			_remove_hover_effects()
 			is_hovered = false
 
-func _can_animate() -> bool:
-	return not is_being_played and not animation_in_progress
-
-func _start_animation():
-	animation_in_progress = true
-
-func _end_animation():
-	animation_in_progress = false
-
-func _kill_current_tween():
-	if current_tween and current_tween.is_valid():
-		current_tween.kill()
-		current_tween = null
-
 func force_reset_visual_state():
-	_kill_current_tween()
+	_stop_current_tween()
 	
-	gamepad_selection_applied = false
-	gamepad_hover_active = false
-	animation_in_progress = false
-	input_method_override = ""
+	gamepad_selected = false
+	is_hovered = false
 	
 	scale = original_scale
 	z_index = 0
 	rotation = 0.0
-	
+
+	if card_border:
+		card_border.modulate = Color.WHITE
+
 	if is_playable:
 		modulate = Color.WHITE
 		mouse_filter = Control.MOUSE_FILTER_PASS
 		set_mouse_filter_recursive(self)
 	else:
 		modulate = Color(0.4, 0.4, 0.4, 0.7)
-		if not is_hovered:
-			mouse_filter = Control.MOUSE_FILTER_IGNORE
-	
-	if card_border:
-		card_border.modulate = Color.WHITE
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _on_card_input(event: InputEvent):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if not _can_animate():
+		if is_being_played:
 			return
-			
+		
 		if is_playable:
 			card_clicked.emit(self)
 		else:
 			animate_mana_insufficient()
+
+func _stop_current_tween():
+	if current_tween and current_tween.is_valid():
+		current_tween.kill()
+		current_tween = null
 
 func update_display():
 	name_label.text = card_data.card_name
@@ -402,7 +298,7 @@ func update_display():
 		_:
 			stat_value.text = "?"
 			stat_value.modulate = Color.GRAY
-			
+
 func load_card_illustration():
 	var video_stream: VideoStream = null
 	match card_data.card_type:
@@ -508,4 +404,4 @@ func apply_rarity_effects(rarity: String):
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
 		is_being_played = true
-		_kill_current_tween()
+		_stop_current_tween()

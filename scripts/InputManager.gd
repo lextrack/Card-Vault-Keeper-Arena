@@ -162,23 +162,30 @@ func _detect_input_method(event: InputEvent):
 			CursorManager.set_gamepad_mode(true)
 			
 			if main_scene.is_player_turn and main_scene.player and is_input_enabled():
-				gamepad_mode = true
-				_update_ui_for_gamepad_mode()
+				_switch_to_gamepad_mode()
 				
 	elif event is InputEventMouse:
-		if current_time - last_interaction_time > 0.2:
+		if current_time - last_interaction_time > 0.1:
 			if last_input_was_gamepad:
 				last_input_was_gamepad = false
 				last_interaction_time = current_time
 				CursorManager.set_gamepad_mode(false)
 				
 				if main_scene.is_player_turn and main_scene.player and is_input_enabled():
-					gamepad_mode = false
-					_update_ui_for_gamepad_mode()
+					_switch_to_mouse_mode()
 					
 	elif event is InputEventKey and event.pressed:
-		if not last_input_was_gamepad and current_time - last_interaction_time > 0.5:
+		if not last_input_was_gamepad and current_time - last_interaction_time > 0.3:
 			last_interaction_time = current_time
+
+func _switch_to_gamepad_mode():
+	gamepad_mode = true
+	_update_ui_for_gamepad_mode()
+	main_scene.audio_helper.play_ui_click_sound()
+
+func _switch_to_mouse_mode():
+	gamepad_mode = false
+	_update_ui_for_gamepad_mode()
 
 func _update_ui_for_gamepad_mode():
 	if not is_input_enabled():
@@ -229,23 +236,25 @@ func _handle_keyboard_and_gamepad_navigation(event: InputEvent):
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("game_back"):
 		_handle_end_turn_input()
 		return
-		
+
 func _handle_card_selection():
 	if input_processing:
 		return
 		
 	if not main_scene.player.can_play_more_cards():
+		main_scene.audio_helper.play_error_sound() if main_scene.audio_helper.has_method("play_error_sound") else main_scene.audio_helper.play_ui_click_sound()
 		return
 		
 	var selected_card = main_scene.ui_manager.get_selected_card()
 	if selected_card:
 		if not main_scene.player.can_play_card(selected_card.card_data):
+			selected_card.animate_mana_insufficient()
 			return
 			
 		input_processing = true
 		main_scene._on_card_clicked(selected_card)
 
-		main_scene.get_tree().create_timer(0.1).timeout.connect(func():
+		main_scene.get_tree().create_timer(0.05).timeout.connect(func():
 			input_processing = false
 		)
 
