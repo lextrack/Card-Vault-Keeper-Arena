@@ -45,7 +45,7 @@ var dialog_duration_per_word: float = 0.15
 var intro_dialogs = [
 	"Welcome to my collection vault...",
 	"I am the keeper of these powerful card bundles.",
-	"Complete the challenges and these cards will be yours."
+	"Complete the challenges and the cards contained in these bundles will be yours."
 ]
 
 var casual_dialogs = [
@@ -59,7 +59,10 @@ var casual_dialogs = [
 	"Every card in my vault has proven its worth in battle.",
 	"The ancient cards whisper secrets of victory...",
 	"Power calls to those who dare to earn it.",
-	"These bundles hold mysteries yet to be unveiled..."
+	"These bundles hold mysteries yet to be unveiled...",
+	"Power is fleeting, but mastery lasts forever.",
+	"Unlock more bundles so we have more cards to play together.",
+	"A single card can turn the tide of battle... if you know when to play it. Make sure to check you mana."
 ]
 
 var mysterious_dialogs = [
