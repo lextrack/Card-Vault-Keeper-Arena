@@ -74,9 +74,9 @@ var bundles: Dictionary = {
 	"endurance_fighter": {
 		"name": "Endurance Fighter",
 		"description": "Built for long battles",
-		"requirement_text": "Win 3 Expert difficulty games",
+		"requirement_text": "Win 5 Expert difficulty games",
 		"requirement_type": "wins_expert",
-		"requirement_value": 3,
+		"requirement_value": 5,
 		"cards": ["Divine Champion", "Sacred Guardian"],
 		"rarity_info": "2 Epic"
 	},
@@ -84,9 +84,9 @@ var bundles: Dictionary = {
 	"learning_fighter": {
 		"name": "Learning Fighter",
 		"description": "For those who persist through trial and error",
-		"requirement_text": "Complete 5 games (win or lose)",
+		"requirement_text": "Complete 10 games (win or lose)",
 		"requirement_type": "games_completed",
-		"requirement_value": 5,
+		"requirement_value": 10,
 		"cards": ["Sharp Sword", "Potion", "Basic Shield"],
 		"rarity_info": "3 Uncommon"
 	},
@@ -105,7 +105,7 @@ var bundles: Dictionary = {
 		"description": "Devastating attacks for the fearless fighter",
 		"requirement_text": "Deal 500+ total damage across all games",
 		"requirement_type": "total_damage_dealt",
-		"requirement_value": 400,
+		"requirement_value": 500,
 		"cards": ["War Axe", "Fierce Attack", "Devastating Blow"],
 		"rarity_info": "2 Uncommon, 1 Epic"
 	},

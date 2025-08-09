@@ -77,7 +77,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Power Strike",
-			"cost": 3,
+			"cost": 4,
 			"damage": 5,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
@@ -254,7 +254,7 @@ static func get_shield_cards() -> Array[Dictionary]:
 		{
 			"name": "Guard",
 			"cost": 3,
-			"shield": 6,
+			"shield": 4,
 			"type": "shield",
 			"rarity": RaritySystem.Rarity.COMMON,
 			"weight": 38

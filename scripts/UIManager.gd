@@ -491,7 +491,7 @@ func play_damage_effects(damage_amount: int):
 	if is_screen_shaking:
 		return
   
-	var shake_intensity = min(damage_amount * 2.0, 8.0)
+	var shake_intensity = min(damage_amount * 1.0, 5.0)
 	screen_shake(shake_intensity, 0.3)
 
 func screen_shake(intensity: float, duration: float):
@@ -504,7 +504,7 @@ func screen_shake(intensity: float, duration: float):
 	var time_per_shake = duration / shake_count
   
 	for i in range(shake_count):
-		var current_intensity = intensity * (0.1 - float(i) / shake_count)
+		var current_intensity = intensity * (1.0 - float(i) / shake_count)
 		var shake_x = randf_range(-current_intensity, current_intensity)
 		var shake_y = randf_range(-current_intensity, current_intensity)
 		var shake_position = original_ui_position + Vector2(shake_x, shake_y)
