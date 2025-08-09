@@ -34,9 +34,9 @@ var bundles: Dictionary = {
 	"mystic_defense": {
 		"name": "Mystic Defense",
 		"description": "Advanced protective magic",
-		"requirement_text": "Survive 12+ turns in any game",
+		"requirement_text": "Survive 16+ turns in any game",
 		"requirement_type": "survive_turns",
-		"requirement_value": 12,
+		"requirement_value": 16,
 		"cards": ["Iron Defense", "Armored Strike", "Battle Healer"],
 		"rarity_info": "1 Uncommon Shield, 1 Uncommon Hybrid, 1 Rare Hybrid"
 	},
@@ -133,9 +133,9 @@ var bundles: Dictionary = {
 	"damage_dealer": {
 		"name": "Damage Dealer", 
 		"description": "Specialized in pure offensive power",
-		"requirement_text": "Deal 50+ damage in a single game",
+		"requirement_text": "Deal 60+ damage in a single game",
 		"requirement_type": "single_game_damage",
-		"requirement_value": 50,
+		"requirement_value": 60,
 		"cards": ["Deep Cut", "Warrior Saint"],
 		"rarity_info": "1 Epic, 1 Rare"
 	},

@@ -84,7 +84,7 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 				print("    FINAL Attack: ", card.damage, " base + ", bonus_damage, " bonus = ", total_damage, " total damage")
 				target.take_damage(total_damage)
 				
-				if not is_ai:
+				if not is_ai and UnlockManager:
 					total_damage_this_game += total_damage
 				
 				if not is_ai and UnlockManagers:
