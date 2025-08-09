@@ -8,6 +8,12 @@ var game_ended: bool = false
 var pending_game_end: bool = false
 var restart_in_progress: bool = false
 
+func print(_value):
+	pass
+
+func _ready():
+	Engine.print_error_messages = false
+
 func setup(main: Control):
 	main_scene = main
 
