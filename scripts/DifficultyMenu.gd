@@ -79,7 +79,7 @@ func get_ai_behavior_description(ai_config: Dictionary) -> String:
 	var heal_threshold = ai_config.get("heal_threshold", 0.3)
 	
 	if aggression >= 0.7:
-		return "Aggressive"
+		return "Balanced"
 	elif aggression <= 0.5:
 		return "Defensive"
 	elif heal_threshold >= 0.4:
