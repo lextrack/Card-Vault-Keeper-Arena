@@ -240,12 +240,10 @@ func start_enhanced_speaking_animation():
 	speak_tween = create_tween()
 	speak_tween.set_loops()
 	
-	# Animación más dramática de la boca con delays manuales
 	for i in range(1, 6):
 		var led = mouth.get_node("LED" + str(i))
 		var delay = i * 0.1
 		
-		# Crear tween separado para cada LED con delay
 		get_tree().create_timer(delay).timeout.connect(func():
 			if is_instance_valid(led):
 				var led_tween = create_tween()
@@ -256,7 +254,6 @@ func start_enhanced_speaking_animation():
 				led_tween.parallel().tween_property(led, "scale", Vector2(1.0, 1.0), 0.2)
 		, CONNECT_ONE_SHOT)
 	
-	# Vibración sutil de la cabeza mientras habla
 	speak_tween.parallel().tween_property(head, "rotation", 0.02, 0.15)
 	speak_tween.parallel().tween_property(head, "rotation", -0.02, 0.15)
 	speak_tween.parallel().tween_property(head, "rotation", 0.0, 0.15)
@@ -273,19 +270,12 @@ func set_active(active: bool):
 			antenna_tween.kill()
 
 func pulse_status_light():
-	# Pulso más dramático del status light
 	var pulse_tween = create_tween()
 	pulse_tween.set_parallel(true)
-	
-	# Color y escala
 	pulse_tween.tween_property(status_light, "modulate", Color.BLUE_VIOLET * 1.5, 0.3)
 	pulse_tween.tween_property(status_light, "scale", Vector2(1.3, 1.3), 0.3)
-	
-	# Vuelta a normal
 	pulse_tween.tween_property(status_light, "modulate", Color.WHITE, 0.8)
 	pulse_tween.tween_property(status_light, "scale", Vector2(1.0, 1.0), 0.8)
-	
-	# Efecto de glow en toda la cabeza
 	pulse_tween.tween_property(head, "modulate", Color(1.1, 1.1, 1.2), 0.3)
 	pulse_tween.tween_property(head, "modulate", Color.WHITE, 0.8)
 
@@ -293,7 +283,6 @@ func set_mood(mood: String):
 	if not left_eye or not right_eye:
 		return
 	
-	# Detener tweens anteriores
 	if mood_tween:
 		mood_tween.kill()
 		
@@ -308,30 +297,27 @@ func set_mood(mood: String):
 	match mood:
 		"happy":
 			target_color = Color.CYAN * 1.3
-			eye_scale = Vector2(1.2, 0.7)  # Ojos "sonrientes"
-			head_tilt = 0.05  # Inclinar cabeza ligeramente
-			antenna_speed = 0.5  # Antenas más rápidas
+			eye_scale = Vector2(1.2, 0.7)
+			head_tilt = 0.05
+			antenna_speed = 0.5
 			
-			# Efecto de felicidad en toda la cabeza
 			mood_tween.tween_property(head_container, "scale", Vector2(1.05, 1.05), 0.3)
 			mood_tween.tween_property(head_container, "scale", Vector2(1.0, 1.0), 0.3)
 			
 		"alert":
 			target_color = Color.YELLOW * 1.4
-			eye_scale = Vector2(0.8, 1.3)  # Ojos más abiertos/atentos
-			head_tilt = -0.03  # Inclinación alerta
-			antenna_speed = 0.3  # Antenas muy rápidas
+			eye_scale = Vector2(0.8, 1.3)
+			head_tilt = -0.03 
+			antenna_speed = 0.3
 			
-			# Movimiento de alerta
 			mood_tween.tween_property(head, "position:y", head.position.y - 3, 0.1)
 			mood_tween.tween_property(head, "position:y", head.position.y, 0.2)
 			
 		"error":
 			target_color = Color.RED * 1.2
 			eye_scale = Vector2(1.1, 1.1)
-			antenna_speed = 2.0  # Antenas más lentas
+			antenna_speed = 2.0
 			
-			# Shake de error
 			for i in range(3):
 				mood_tween.tween_property(head_container, "position:x", 2, 0.05)
 				mood_tween.tween_property(head_container, "position:x", -2, 0.05)
@@ -343,16 +329,12 @@ func set_mood(mood: String):
 			head_tilt = 0.0
 			antenna_speed = 1.0
 	
-	# Cambios de ojos con animación dramática
 	mood_tween.tween_property(left_eye, "modulate", target_color, 0.4)
 	mood_tween.tween_property(right_eye, "modulate", target_color, 0.4)
 	mood_tween.tween_property(left_eye, "scale", eye_scale, 0.4)
 	mood_tween.tween_property(right_eye, "scale", eye_scale, 0.4)
-	
-	# Inclinación de cabeza
 	mood_tween.tween_property(head, "rotation", head_tilt, 0.4)
 	
-	# Ajustar velocidad de antenas
 	restart_antenna_pulse_with_speed(antenna_speed)
 
 func restart_antenna_pulse_with_speed(speed_multiplier: float):
@@ -377,33 +359,28 @@ func flash_neck_lights():
 	if not neck_lights_container:
 		return
 	
-	# Flash mucho más dramático y celebratorio
 	if celebration_tween:
 		celebration_tween.kill()
 		
 	celebration_tween = create_tween()
 	celebration_tween.set_parallel(true)
 	
-	# Secuencia de celebración usando timers
 	for round in range(3):
 		for i in range(1, 5):
 			var light = neck_lights_container.get_node("Light" + str(i))
 			if light:
 				var delay = round * 0.5 + i * 0.1
 				
-				# Usar timer para el delay
 				get_tree().create_timer(delay).timeout.connect(func():
 					if is_instance_valid(light):
 						var light_tween = create_tween()
 						light_tween.set_parallel(true)
-						# Flash individual dramático
 						light_tween.tween_property(light, "modulate", Color.GOLD * 2.0, 0.1)
 						light_tween.tween_property(light, "scale", Vector2(1.5, 1.5), 0.1)
 						light_tween.tween_property(light, "modulate", Color.WHITE, 0.3)
 						light_tween.tween_property(light, "scale", Vector2(1.0, 1.0), 0.3)
 				, CONNECT_ONE_SHOT)
 	
-	# Efecto de celebración en toda la cabeza
 	celebration_tween.tween_property(head_container, "scale", Vector2(1.1, 1.1), 0.2)
 	celebration_tween.tween_property(head_container, "rotation", 0.1, 0.2)
 	celebration_tween.tween_property(head_container, "scale", Vector2(1.0, 1.0), 0.4)
@@ -423,21 +400,18 @@ func stop_all_animations():
 	if blink_timer:
 		blink_timer.stop()
 
-# Nueva función para reacciones extra dramáticas
 func dramatic_reaction(reaction_type: String):
 	var dramatic_tween = create_tween()
 	dramatic_tween.set_parallel(true)
 	
 	match reaction_type:
 		"excitement":
-			# Salto de emoción
 			dramatic_tween.tween_property(head_container, "position:y", -20, 0.2)
 			dramatic_tween.tween_property(head_container, "position:y", 0, 0.4)
 			dramatic_tween.tween_property(head_container, "scale", Vector2(1.1, 1.1), 0.2)
 			dramatic_tween.tween_property(head_container, "scale", Vector2(1.0, 1.0), 0.4)
 			
 		"surprise":
-			# Movimiento de sorpresa
 			dramatic_tween.tween_property(head, "scale", Vector2(0.9, 1.1), 0.1)
 			dramatic_tween.tween_property(head, "scale", Vector2(1.0, 1.0), 0.3)
 			dramatic_tween.tween_property(left_eye, "scale", Vector2(0.5, 1.5), 0.1)
@@ -446,7 +420,6 @@ func dramatic_reaction(reaction_type: String):
 			dramatic_tween.tween_property(right_eye, "scale", Vector2(1.0, 1.0), 0.3)
 			
 		"thinking":
-			# Inclinación pensativa
 			dramatic_tween.tween_property(head, "rotation", 0.15, 0.5)
 			dramatic_tween.tween_property(left_eye, "modulate:a", 0.7, 0.5)
 			dramatic_tween.tween_property(right_eye, "modulate:a", 0.7, 0.5)

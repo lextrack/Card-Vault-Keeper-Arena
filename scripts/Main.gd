@@ -216,8 +216,6 @@ func _on_bundle_unlocked(bundle_id: String, cards: Array):
 	audio_helper.play_bonus_sound()
 
 func _wait_for_celebrations_to_complete():
-	print("Starting celebration wait check...")
-	
 	if not bundle_celebration_system:
 		print("No bundle celebration system, skipping wait")
 		return
@@ -237,8 +235,6 @@ func _wait_for_celebrations_to_complete():
 	print("Celebration wait timed out after ", max_wait_time, "s")
 
 func _wait_for_actions_to_complete():
-	print("Starting actions wait check...")
-	
 	var max_wait_time = 3.0
 	var wait_time = 0.0
 	var check_interval = 0.05
@@ -285,32 +281,23 @@ func _setup_notifications():
 	add_child(game_notification)
 
 func cleanup_notifications():
-	print("Cleanup: Starting notification cleanup...")
-	
 	if ai_notification:
-		print("Cleanup: Closing AI notification")
 		ai_notification.force_close()
 	
 	if game_notification:
-		print("Cleanup: Clearing game notifications")
 		game_notification.clear_all_notifications()
 	
 	if controls_panel:
-		print("Cleanup: Hiding controls panel")
 		controls_panel.force_hide()
 		
 	if options_menu:
-		print("Cleanup: Hiding options menu")
 		options_menu.hide_options()
 	
 	if bundle_celebration_system:
-		print("Cleanup: Clearing celebrations")
 		bundle_celebration_system.clear_all_celebrations()
 	
-	print("Cleanup: Waiting for process frames...")
 	await get_tree().process_frame
 	await get_tree().process_frame
-	print("Cleanup: Notification cleanup completed")
 
 func _setup_controls_panel():
 	controls_panel = controls_panel_scene.instantiate()
@@ -930,7 +917,6 @@ func _input(event):
 	
 func debug_show_deck_info():
 	if not player or not ai:
-		print("=== DEBUG: Player or AI not available ===")
 		return
 	
 	print("\n=== DECK DEBUG INFO ===")

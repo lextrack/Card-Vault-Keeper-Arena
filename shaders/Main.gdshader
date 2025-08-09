@@ -1,0 +1,22 @@
+shader_type canvas_item;
+
+uniform vec4 color1 : source_color = vec4(0.5, 0.15, 0.25, 0.6); // Color base
+uniform vec4 color2 : source_color = vec4(0.2, 0.3, 0.6, 0.7);   // Color resaltado
+uniform float speed = 0.2; 
+uniform float scale = 5.0; 
+
+void fragment() {
+    // Coordenadas normalizadas
+    vec2 uv = UV * scale;
+
+    // Movimiento horizontal suave
+    uv.x += TIME * speed;
+
+    // Gradiente animado
+    float gradient = 1.0 + 0.5 * sin(uv.x + uv.y);
+
+    // Interpolación entre colores
+    vec4 final_color = mix(color1, color2, gradient);
+
+    COLOR = final_color;
+}

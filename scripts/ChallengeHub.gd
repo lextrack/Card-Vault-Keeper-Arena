@@ -129,7 +129,6 @@ func setup_responsive_layout():
 	
 	if bundles_grid.columns != optimal_columns:
 		bundles_grid.columns = optimal_columns
-		print("Adjusted columns to: ", optimal_columns)
 	
 	var h_separation = 15
 	var v_separation = 12
@@ -251,8 +250,6 @@ func update_bundle_selection():
 		selected_bundle.scale = Vector2(1.02, 1.02)
 		
 		ensure_bundle_visible(selected_bundle_index)
-		
-		print("Selected bundle: ", selected_bundle_index, "/", bundle_card_instances.size() - 1)
 
 func clear_bundle_selection():
 	for bundle_card in bundle_card_instances:
@@ -491,8 +488,6 @@ func update_stats_display():
 	]
 
 func load_bundles():
-	print("=== load_bundles() start ===")
-	
 	for instance in bundle_card_instances:
 		if is_instance_valid(instance):
 			instance.queue_free()
@@ -515,18 +510,12 @@ func load_bundles():
 		var bundle_card = create_bundle_card(bundle_info)
 		bundles_grid.add_child(bundle_card)
 		bundle_card_instances.append(bundle_card)
-		print("Bundle card ", i, " added to grid")
-	
-	print("Total bundle cards created: ", bundle_card_instances.size())
-	print("Grid children count: ", bundles_grid.get_child_count())
 	
 	call_deferred("force_grid_layout")
 	
 	selected_bundle_index = 0
 	if gamepad_mode:
 		update_bundle_selection()
-	
-	print("=== load_bundles() complete ===")
 
 func force_grid_layout():
 	if not bundles_grid:

@@ -40,7 +40,6 @@ func get_target_shield_cards() -> int:
 func get_target_hybrid_cards() -> int:
 	return max(min_hybrid_cards, int(deck_size * hybrid_ratio))
 
-# En DeckConfig.gd
 func normalize_ratios():
 	var total = attack_ratio + heal_ratio + shield_ratio + hybrid_ratio
 	if total > 0:

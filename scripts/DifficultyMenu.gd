@@ -55,7 +55,6 @@ func update_difficulty_card(difficulty: String):
 	
 	var card_content = get_difficulty_content_node(difficulty)
 	if not card_content:
-		print("Warning: Could not find content node for difficulty: ", difficulty)
 		return
 	
 	var header_label = get_node_by_partial_name(card_content, "Header")

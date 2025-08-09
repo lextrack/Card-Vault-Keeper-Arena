@@ -537,22 +537,19 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 	gamepad_selection_active = true
 	_clear_all_gamepad_selection_styles()
    
-	# CORREGIDO: Asegurar que selected_card_index esté en rango válido
 	if card_instances.size() > 0:
 		selected_card_index = clamp(selected_card_index, 0, card_instances.size() - 1)
 		
-		# NUEVO: Aplicar inmediatamente el efecto visual a la carta seleccionada
 		var selected_card = card_instances[selected_card_index]
 		if is_instance_valid(selected_card) and selected_card_index < player.hand.size():
 			selected_card.apply_gamepad_selection_style()
    
-	# Configurar el resto de cartas
 	for i in range(card_instances.size()):
 		var card = card_instances[i]
 		if not is_instance_valid(card) or i >= player.hand.size():
 			continue
    		
-		if i != selected_card_index:  # Solo procesar las NO seleccionadas
+		if i != selected_card_index:
 			card.z_index = 0
 			var can_play = player.can_play_card(player.hand[i])
 			card.set_playable(can_play)

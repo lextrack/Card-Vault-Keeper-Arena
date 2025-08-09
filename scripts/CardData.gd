@@ -6,7 +6,7 @@ extends Resource
 @export var damage: int
 @export var heal: int
 @export var shield: int
-@export var card_type: String # "attack", "heal", "shield"
+@export var card_type: String
 @export var description: String
 
 func _init(name: String = "", c: int = 1, dmg: int = 0, h: int = 0, s: int = 0, type: String = "attack", desc: String = ""):

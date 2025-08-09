@@ -115,11 +115,9 @@ func _try_update_display():
 
 func update_display():
 	if bundle_info.is_empty():
-		print("BundleCard: No bundle info provided")
 		return
 	
 	if not _validate_nodes():
-		print("BundleCard: Nodes not ready, retrying...")
 		call_deferred("update_display")
 		return
 	
@@ -138,7 +136,6 @@ func update_display():
 
 func update_rarity_info_display(is_unlocked: bool):
 	if not rarity_info:
-		print("BundleCard: rarity_info node not found")
 		return
 	
 	var rarity_text = ""
