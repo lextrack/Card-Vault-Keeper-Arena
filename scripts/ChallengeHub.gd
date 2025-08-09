@@ -53,13 +53,13 @@ var casual_dialogs = [
 	"Some challenges are harder than others, but the rewards match.",
 	"Every great warrior needs the right tools...",
 	"Shield cards have saved more battles than most realize.",
+	"I hope it doesn't take you too long to get your cards back.",
 	"When we duel, I'll use some of these very cards against you...",
 	"The cards are watching your progress with interest...",
 	"I've seen warriors fall because they ignored defensive cards.",
 	"Every card in my vault has proven its worth in battle.",
 	"The ancient cards whisper secrets of victory...",
 	"Power calls to those who dare to earn it.",
-	"These bundles hold mysteries yet to be unveiled...",
 	"Power is fleeting, but mastery lasts forever.",
 	"Unlock more bundles so we have more cards to play together.",
 	"A single card can turn the tide of battle... if you know when to play it. Make sure to check you mana.",
@@ -74,7 +74,8 @@ var mysterious_dialogs = [
 	"The path to mastery is never easy...",
 	"Destiny favors the prepared mind...",
 	"Knowledge is the sharpest blade...",
-	"Victory belongs to those who understand..."
+	"Victory belongs to those who understand...",
+	"Looking through the game files, most of the design was planned and done with HTML and CSS, what a curious decision."
 ]
 
 func _ready():
