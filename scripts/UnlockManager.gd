@@ -163,7 +163,7 @@ var _starter_cards: Array[String] = [
 	"Herb Salve",
 	"First Aid",
 	"Block",
-	"Parry",
+	"Enhanced Blocking",
 	"Guard",
 	"Quick Recovery",
 	"Defensive Jab",
