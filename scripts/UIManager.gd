@@ -233,7 +233,7 @@ func start_player_turn(player: Player, difficulty: String):
 func start_ai_turn(ai: Player):
 	animate_turn_transition(false)
 	gamepad_selection_active = false
-	_force_clear_all_gamepad_effects()
+	_ensure_clear_all_gamepad_effects()
    
 	var tween = main_scene.create_tween()
 	tween.tween_property(top_panel_bg, "color", ai_turn_color, 0.4)
@@ -246,7 +246,7 @@ func start_ai_turn(ai: Player):
 
 	_darken_player_cards_for_ai_turn()
 
-func _force_clear_all_gamepad_effects():
+func _ensure_clear_all_gamepad_effects():
 	for card in card_instances:
 		if is_instance_valid(card) and card.has_method("force_reset_visual_state"):
 			card.force_reset_visual_state()
