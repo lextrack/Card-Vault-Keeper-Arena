@@ -194,7 +194,7 @@ func _generate_rarity_text_from_cards(card_names: Array) -> String:
 	if rarity_counts.uncommon > 0:
 		rarity_parts.append(str(rarity_counts.uncommon) + " Uncommon")
 	
-	if rarity_counts.common > 0 and rarity_parts.size() == 0:
+	if rarity_counts.common > 0:
 		rarity_parts.append(str(rarity_counts.common) + " Common")
 	
 	var result_text = ""

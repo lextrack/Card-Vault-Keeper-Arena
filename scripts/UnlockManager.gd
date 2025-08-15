@@ -48,7 +48,7 @@ var bundles: Dictionary = {
 		"requirement_type": "speed_win_hard",
 		"requirement_value": 480,
 		"cards": ["Divine Cure", "Vampire Blade", "Combat Medic"],
-		"rarity_info": "1 Rare Heal, 1 Uncommon Hybrid, 1 Common Hybrid"
+		"rarity_info": "1 Rare, 1 Uncommon, 1 Common"
 	},
 	
 	"hybrid_mastery": {

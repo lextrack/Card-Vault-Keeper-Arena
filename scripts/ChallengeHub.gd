@@ -61,6 +61,7 @@ var casual_dialogs = [
 	"The ancient cards whisper secrets of victory...",
 	"Power calls to those who dare to earn it.",
 	"Power is fleeting, but mastery lasts forever.",
+	"Did you know that I assign your life, mana, and cards in your hand?",
 	"Unlock more bundles so we have more cards to play together.",
 	"A single card can turn the tide of battle... if you know when to play it. Make sure to check you mana.",
 	"Besides dueling you and keeping these bundles, I also keep track of your actions in the statistics section."

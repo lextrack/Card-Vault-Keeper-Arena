@@ -168,9 +168,7 @@ func handle_input(event: InputEvent):
 		cancel_button.grab_focus()
 
 func _on_confirm_exit():
-	if main_scene.has_method("get") and main_scene.get("audio_helper"):
-		main_scene.audio_helper.play_notification_sound()
-	elif main_scene.has_method("_play_ui_sound"):
+	if main_scene.has_method("_play_ui_sound"):
 		main_scene._play_ui_sound("notification")
 	
 	is_showing = false

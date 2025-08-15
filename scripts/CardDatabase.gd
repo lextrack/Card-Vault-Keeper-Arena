@@ -29,7 +29,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Sword",
-			"cost": 2,
+			"cost": 3,
 			"damage": 4,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.COMMON,
@@ -69,7 +69,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Fierce Attack",
-			"cost": 4,
+			"cost": 5,
 			"damage": 7,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
@@ -85,7 +85,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Heavy Blow",
-			"cost": 4,
+			"cost": 5,
 			"damage": 7,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
@@ -93,7 +93,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Deep Cut",
-			"cost": 6,
+			"cost": 7,
 			"damage": 8,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.RARE,
@@ -109,7 +109,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Piercing Blow",
-			"cost": 4,
+			"cost": 5,
 			"damage": 9,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.RARE,
@@ -117,7 +117,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Devastating Blow",
-			"cost": 5,
+			"cost": 7,
 			"damage": 12,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.EPIC,
@@ -125,7 +125,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Berserker Fury",
-			"cost": 7,
+			"cost": 8,
 			"damage": 14,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.EPIC,
@@ -133,7 +133,7 @@ static func get_attack_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Execution",
-			"cost": 8,
+			"cost": 9,
 			"damage": 16,
 			"type": "attack",
 			"rarity": RaritySystem.Rarity.EPIC,
@@ -169,7 +169,7 @@ static func get_heal_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "First Aid",
-			"cost": 1,
+			"cost": 2,
 			"heal": 3,
 			"type": "heal",
 			"rarity": RaritySystem.Rarity.COMMON,
@@ -177,7 +177,7 @@ static func get_heal_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Herb Salve",
-			"cost": 2,
+			"cost": 3,
 			"heal": 4,
 			"type": "heal",
 			"rarity": RaritySystem.Rarity.COMMON,
@@ -185,7 +185,7 @@ static func get_heal_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Potion",
-			"cost": 3,
+			"cost": 4,
 			"heal": 5,
 			"type": "heal",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
@@ -193,7 +193,7 @@ static func get_heal_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Healing",
-			"cost": 3,
+			"cost": 4,
 			"heal": 6,
 			"type": "heal",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
@@ -201,7 +201,7 @@ static func get_heal_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Restoration",
-			"cost": 3,
+			"cost": 4,
 			"heal": 5,
 			"type": "heal",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
@@ -209,7 +209,7 @@ static func get_heal_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Major Healing",
-			"cost": 7,
+			"cost": 8,
 			"heal": 16,
 			"type": "heal",
 			"rarity": RaritySystem.Rarity.RARE,
@@ -217,7 +217,7 @@ static func get_heal_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Divine Cure",
-			"cost": 5,
+			"cost": 6,
 			"heal": 10,
 			"type": "heal",
 			"rarity": RaritySystem.Rarity.RARE,
@@ -245,7 +245,7 @@ static func get_shield_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Enhanced Blocking",
-			"cost": 4,
+			"cost": 5,
 			"shield": 6,
 			"type": "shield",
 			"rarity": RaritySystem.Rarity.COMMON,
@@ -261,7 +261,7 @@ static func get_shield_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Basic Shield",
-			"cost": 2,
+			"cost": 3,
 			"shield": 4,
 			"type": "shield",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
@@ -269,7 +269,7 @@ static func get_shield_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Shield",
-			"cost": 3,
+			"cost": 4,
 			"shield": 5,
 			"type": "shield",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
@@ -277,7 +277,7 @@ static func get_shield_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Iron Defense",
-			"cost": 3,
+			"cost": 5,
 			"shield": 6,
 			"type": "shield",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
@@ -285,7 +285,7 @@ static func get_shield_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Reinforced Shield",
-			"cost": 4,
+			"cost": 5,
 			"shield": 6,
 			"type": "shield",
 			"rarity": RaritySystem.Rarity.RARE,
@@ -293,7 +293,7 @@ static func get_shield_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Steel Wall",
-			"cost": 5,
+			"cost": 6,
 			"shield": 8,
 			"type": "shield",
 			"rarity": RaritySystem.Rarity.RARE,
@@ -301,7 +301,7 @@ static func get_shield_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Fortress",
-			"cost": 6,
+			"cost": 7,
 			"shield": 9,
 			"type": "shield",
 			"rarity": RaritySystem.Rarity.EPIC,
@@ -313,7 +313,7 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 	return [
 		{
 			"name": "Quick Recovery",
-			"cost": 3,
+			"cost": 4,
 			"damage": 2,
 			"heal": 3,
 			"type": "hybrid",
@@ -322,7 +322,7 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Defensive Jab",
-			"cost": 2,
+			"cost": 3,
 			"damage": 3,
 			"shield": 2,
 			"type": "hybrid",
@@ -331,7 +331,7 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Healing Ward",
-			"cost": 4,
+			"cost": 5,
 			"heal": 2,
 			"shield": 2,
 			"type": "hybrid",
@@ -340,7 +340,7 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Combat Medic",
-			"cost": 4,
+			"cost": 5,
 			"damage": 3,
 			"heal": 3,
 			"type": "hybrid",
@@ -349,7 +349,7 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Shield Strike",
-			"cost": 3,
+			"cost": 4,
 			"damage": 2,
 			"shield": 3,
 			"type": "hybrid",
@@ -358,7 +358,7 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Life Strike",
-			"cost": 5,
+			"cost": 6,
 			"damage": 8,
 			"heal": 10,
 			"type": "hybrid",
@@ -367,7 +367,7 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Shield Bash",
-			"cost": 3,
+			"cost": 4,
 			"damage": 3,
 			"shield": 2,
 			"type": "hybrid",
@@ -376,7 +376,7 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Guardian's Touch",
-			"cost": 5,
+			"cost": 6,
 			"heal": 4,
 			"shield": 6,
 			"type": "hybrid",
@@ -385,16 +385,16 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Blessed Strike",
-			"cost": 4,
+			"cost": 5,
 			"damage": 3,
-			"heal": 1,
+			"heal": 2,
 			"type": "hybrid",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
 			"weight": 15
 		},
 		{
 			"name": "Vampire Blade",
-			"cost": 5,
+			"cost": 6,
 			"damage": 3,
 			"heal": 10,
 			"type": "hybrid",
@@ -403,8 +403,8 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Armored Strike",
-			"cost": 3,
-			"damage": 2,
+			"cost": 4,
+			"damage": 3,
 			"shield": 3,
 			"type": "hybrid",
 			"rarity": RaritySystem.Rarity.UNCOMMON,
@@ -413,7 +413,7 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		{
 			"name": "Paladin's Resolve",
 			"cost": 4,
-			"damage": 3,
+			"damage": 4,
 			"heal": 3,
 			"type": "hybrid",
 			"rarity": RaritySystem.Rarity.RARE,
@@ -423,14 +423,14 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 			"name": "Divine Retribution",
 			"cost": 6,
 			"damage": 4,
-			"heal": 3,
+			"heal": 5,
 			"type": "hybrid",
 			"rarity": RaritySystem.Rarity.RARE,
 			"weight": 10
 		},
 		{
 			"name": "Fortress Guard",
-			"cost": 6,
+			"cost": 7,
 			"damage": 2,
 			"shield": 5,
 			"type": "hybrid",
@@ -439,8 +439,8 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Battle Healer",
-			"cost": 4,
-			"damage": 2,
+			"cost": 5,
+			"damage": 3,
 			"heal": 4,
 			"type": "hybrid",
 			"rarity": RaritySystem.Rarity.RARE,
@@ -457,8 +457,8 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		},
 		{
 			"name": "Divine Champion",
-			"cost": 6,
-			"damage": 4,
+			"cost": 7,
+			"damage": 5,
 			"shield": 6,
 			"type": "hybrid",
 			"rarity": RaritySystem.Rarity.EPIC,
@@ -467,7 +467,7 @@ static func get_hybrid_cards() -> Array[Dictionary]:
 		{
 			"name": "Sacred Guardian",
 			"cost": 7,
-			"heal": 6,
+			"heal": 7,
 			"shield": 5,
 			"type": "hybrid",
 			"rarity": RaritySystem.Rarity.EPIC,

@@ -113,15 +113,17 @@ func card_played(card_name: String, card_type: String, card_cost: int, player_wo
 		cards_used_count[card_name] = 0
 	cards_used_count[card_name] += 1
 	
-	if player_won_game:
+	if not most_effective_cards.has(card_name):
+		most_effective_cards[card_name] = {"wins": 0, "total": 0}
+	most_effective_cards[card_name]["total"] += 1
+	
+	total_mana_spent += card_cost
+
+func mark_cards_for_win():
+	for card_name in cards_used_count.keys():
 		if not most_effective_cards.has(card_name):
 			most_effective_cards[card_name] = {"wins": 0, "total": 0}
 		most_effective_cards[card_name]["wins"] += 1
-	
-	if most_effective_cards.has(card_name):
-		most_effective_cards[card_name]["total"] += 1
-	
-	total_mana_spent += card_cost
 
 func combat_action(action_type: String, amount: int):
 	match action_type:

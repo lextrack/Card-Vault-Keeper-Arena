@@ -27,8 +27,8 @@ Reduce your opponent's health to 0 to win the match.
 [font_size=18][color=lightblue]🎮 TURNS:[/color][/font_size]
 • Each turn you receive full mana and draw cards
 • You can play cards by paying their mana cost
-• You have a card limit per turn (based on difficulty)
-• When you end your turn, the opponent plays
+• You have a card limit per turn (2 cards)
+• When you end your turn, the opponent plays. You can end the turn manually
 
 [font_size=18][color=lightblue]💎 RESOURCES:[/color][/font_size]
 • [color=red]HEALTH[/color]: If it reaches 0, you lose the match
@@ -52,7 +52,14 @@ Reduce your opponent's health to 0 to win the match.
 • Absorb incoming damage
 • Stack if used consecutively
 • Don't regenerate automatically
-• Examples: Block (2 shield)""",
+• Examples: Block (2 shield)
+
+[font_size=18][color=yellow]🌟 HYBRID CARDS:[/color][/font_size]
+• They have two attributes from other cards
+• They can heal you and attack the enemy, or heal you and give you a shield, etc
+• Examples: Guardian's Touch (4 heal and 6 shield)""",
+
+	"🎴 Understand the Cards": "[center][img=850x540]res://assets/backgrounds/card_explanation.png[/img][/center]",
 
 	"⭐ Rarity System": """[font_size=24][color=yellow]💎 CARD RARITY[/color][/font_size]
 
@@ -134,15 +141,7 @@ Reduce your opponent's health to 0 to win the match.
 
 [font_size=18][color=red]🔓 UNLOCKING BUNDLES:[/color][/font_size]
 • Each bundle has specific requirements
-• Progress is tracked automatically
-• Unlock conditions vary by bundle rarity
-• Some bundles require multiple completed challenges
-
-[font_size=18][color=lightblue]💡 TIPS:[/color][/font_size]
-• Start with common bundles to build your collection
-• Check requirements regularly to plan your strategy
-• Higher rarity bundles offer more powerful cards
-• The Card Collector gives hints about your progress""",
+• Progress is tracked automatically""",
 }
 
 func handle_scene_entrance():

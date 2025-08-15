@@ -61,6 +61,10 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 	
 	print("Playing card: ", card.card_name, " (", card.card_type, ") | Cost: ", card.cost, " | Turn: ", turn_number)
 	
+	# Registrar estadísticas ANTES de jugar la carta
+	if not is_ai and StatisticsManagers:
+		StatisticsManagers.card_played(card.card_name, card.card_type, card.cost)
+	
 	spend_mana(card.cost)
 	discard_pile.append(card)
 	cards_played_this_turn += 1
@@ -98,10 +102,14 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 		"heal":
 			print("  Heal: ", card.heal, " HP")
 			heal(card.heal)
+			if not is_ai and StatisticsManagers:
+				StatisticsManagers.combat_action("healing_done", card.heal)
 		
 		"shield":
 			print("   Shield: ", card.shield, " protection")
 			add_shield(card.shield)
+			if not is_ai and StatisticsManagers:
+				StatisticsManagers.combat_action("shield_gained", card.shield)
 			
 			if not is_ai and UnlockManagers:
 				UnlockManagers.track_progress("damage_blocked", card.shield)
@@ -125,10 +133,14 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 			if card.heal > 0:
 				print("     Heal: ", card.heal, " HP")
 				heal(card.heal)
+				if not is_ai and StatisticsManagers:
+					StatisticsManagers.combat_action("healing_done", card.heal)
 			
 			if card.shield > 0:
 				print("     Shield: ", card.shield, " protection")
 				add_shield(card.shield)
+				if not is_ai and StatisticsManagers:
+					StatisticsManagers.combat_action("shield_gained", card.shield)
 				
 				if not is_ai and UnlockManagers:
 					UnlockManagers.track_progress("damage_blocked", card.shield)
@@ -197,6 +209,9 @@ func take_damage(damage: int, from_ai: bool = false):
 		current_hp -= damage
 		hp_changed.emit(current_hp)
 		damage_taken.emit(actual_damage)
+		
+		if not is_ai and StatisticsManagers:
+			StatisticsManagers.combat_action("damage_taken", actual_damage)
 		
 		if current_hp <= 5 and not was_at_low_hp_this_game:
 			was_at_low_hp_this_game = true
@@ -287,6 +302,10 @@ func play_card(card: CardData, target: Player = null) -> bool:
 	if not can_play_card(card):
 		return false
 	
+	# Registrar estadísticas ANTES de jugar la carta
+	if not is_ai and StatisticsManagers:
+		StatisticsManagers.card_played(card.card_name, card.card_type, card.cost)
+	
 	spend_mana(card.cost)
 	hand.erase(card)
 	discard_pile.append(card)
@@ -309,8 +328,12 @@ func play_card(card: CardData, target: Player = null) -> bool:
 					StatisticsManagers.combat_action("damage_dealt", damage_dealt)
 		"heal":
 			heal(card.heal)
+			if not is_ai and StatisticsManagers:
+				StatisticsManagers.combat_action("healing_done", card.heal)
 		"shield":
 			add_shield(card.shield)
+			if not is_ai and StatisticsManagers:
+				StatisticsManagers.combat_action("shield_gained", card.shield)
 		"hybrid":
 			if card.damage > 0 and target:
 				var bonus_damage = get_damage_bonus()
@@ -323,9 +346,13 @@ func play_card(card: CardData, target: Player = null) -> bool:
 			
 			if card.heal > 0:
 				heal(card.heal)
+				if not is_ai and StatisticsManagers:
+					StatisticsManagers.combat_action("healing_done", card.heal)
 			
 			if card.shield > 0:
 				add_shield(card.shield)
+				if not is_ai and StatisticsManagers:
+					StatisticsManagers.combat_action("shield_gained", card.shield)
 	
 	return true
 
@@ -394,6 +421,10 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 		else:
 			audio_helper.play_card_play_sound(card.card_type)
 	
+	# Registrar estadísticas ANTES de jugar la carta
+	if not is_ai and StatisticsManagers:
+		StatisticsManagers.card_played(card.card_name, card.card_type, card.cost)
+	
 	spend_mana(card.cost)
 	hand.erase(card)
 	discard_pile.append(card)
@@ -430,10 +461,14 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 		"heal":
 			print("  Heal: ", card.heal, " HP")
 			heal(card.heal)
+			if not is_ai and StatisticsManagers:
+				StatisticsManagers.combat_action("healing_done", card.heal)
 		
 		"shield":
 			print("   Shield: ", card.shield, " protection")
 			add_shield(card.shield)
+			if not is_ai and StatisticsManagers:
+				StatisticsManagers.combat_action("shield_gained", card.shield)
 			
 			if not is_ai and UnlockManagers:
 				UnlockManagers.track_progress("damage_blocked", card.shield)
@@ -457,10 +492,14 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 			if card.heal > 0:
 				print("     Heal: ", card.heal, " HP")
 				heal(card.heal)
+				if not is_ai and StatisticsManagers:
+					StatisticsManagers.combat_action("healing_done", card.heal)
 			
 			if card.shield > 0:
 				print("     Shield: ", card.shield, " protection")
 				add_shield(card.shield)
+				if not is_ai and StatisticsManagers:
+					StatisticsManagers.combat_action("shield_gained", card.shield)
 				
 				if not is_ai and UnlockManagers:
 					UnlockManagers.track_progress("damage_blocked", card.shield)

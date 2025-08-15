@@ -556,8 +556,8 @@ func restart_game():
 		audio_player.finished.connect(func(): audio_player.queue_free())
 
 	var tween = create_tween().set_parallel(true)
-	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 1), 1.2).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(message_label, "modulate:a", 1.0, 1.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 1), 1.5).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(message_label, "modulate:a", 1.0, 0.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	
 	await tween.finished
@@ -571,7 +571,7 @@ func restart_game():
 			card.z_index = 50 
 	
 	tween = create_tween().set_parallel(true)
-	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 0), 1.8).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 0), 2.0).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(message_label, "modulate:a", 0, 1.0).set_delay(0.8).set_ease(Tween.EASE_IN)
 	tween.tween_property(message_label, "position:y", message_label.position.y - 60, 1.0).set_delay(0.8).set_ease(Tween.EASE_IN)
 	
@@ -753,6 +753,7 @@ func _on_ai_died():
 		audio_manager.win_player.play()
 	
 	if StatisticsManagers:
+		StatisticsManagers.mark_cards_for_win()
 		StatisticsManagers.end_game(true, difficulty, player.turn_number)
 	
 	GameState.add_game_result(true)
@@ -860,9 +861,6 @@ func _on_card_clicked(card: Card):
 			UnlockManagers.track_progress("hybrid_cards_played", 1, extra_data)
 	
 	audio_helper.play_card_play_sound(card_type)
-	
-	if StatisticsManagers:
-		StatisticsManagers.card_played(card_name, card_type, card_cost)
 	
 	card.play_card_animation()
 
