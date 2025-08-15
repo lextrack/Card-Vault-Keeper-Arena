@@ -223,41 +223,49 @@ func _on_blink_timer_timeout():
 
 func set_speaking(speaking: bool):
 	if speaking:
+		# Limpiar tweens anteriores
+		if speak_tween:
+			speak_tween.kill()
+		
+		# Iniciar nueva animación
 		start_enhanced_speaking_animation()
 	else:
+		# Solo detener si no hay cola de diálogos
 		if speak_tween:
 			speak_tween.kill()
 			
+		# Resetear a estado normal
 		for i in range(1, 6):
 			var led = mouth.get_node("LED" + str(i))
-			if led:
-				led.modulate.a = 1.0
+			if is_instance_valid(led):
+				var reset_tween = create_tween()
+				reset_tween.tween_property(led, "modulate:a", 1.0, 0.2)
+				reset_tween.tween_property(led, "scale", Vector2(1.0, 1.0), 0.2)
 
 func start_enhanced_speaking_animation():
 	if speak_tween:
 		speak_tween.kill()
-		
+	
 	speak_tween = create_tween()
 	speak_tween.set_loops()
 	
+	speak_tween.parallel().tween_property(head, "rotation", 0.02, 0.8)
+	speak_tween.parallel().tween_property(head, "rotation", -0.02, 0.8)
+	speak_tween.parallel().tween_property(head, "rotation", 0.0, 0.4)
+	
 	for i in range(1, 6):
 		var led = mouth.get_node("LED" + str(i))
-		var delay = i * 0.1
-		
-		get_tree().create_timer(delay).timeout.connect(func():
-			if is_instance_valid(led):
-				var led_tween = create_tween()
-				led_tween.set_loops()
-				led_tween.parallel().tween_property(led, "modulate:a", 0.2, 0.2)
-				led_tween.parallel().tween_property(led, "modulate:a", 1.2, 0.2)
-				led_tween.parallel().tween_property(led, "scale", Vector2(1.1, 1.1), 0.2)
-				led_tween.parallel().tween_property(led, "scale", Vector2(1.0, 1.0), 0.2)
-		, CONNECT_ONE_SHOT)
+		if is_instance_valid(led):
+			var led_tween = create_tween()
+			var delay = i * 0.09
+			
+			led_tween.set_loops()
+			led_tween.tween_interval(delay)
+			led_tween.tween_property(led, "modulate:a", 0.3, 0.1)
+			led_tween.tween_property(led, "scale", Vector2(1.1, 1.1), 0.1)
+			led_tween.tween_property(led, "modulate:a", 1.0, 0.2)
+			led_tween.tween_property(led, "scale", Vector2(1.0, 1.0), 0.2)
 	
-	speak_tween.parallel().tween_property(head, "rotation", 0.02, 0.15)
-	speak_tween.parallel().tween_property(head, "rotation", -0.02, 0.15)
-	speak_tween.parallel().tween_property(head, "rotation", 0.0, 0.15)
-
 func set_active(active: bool):
 	if active:
 		modulate = Color.WHITE
@@ -307,7 +315,7 @@ func set_mood(mood: String):
 		"alert":
 			target_color = Color.YELLOW * 1.4
 			eye_scale = Vector2(0.8, 1.3)
-			head_tilt = -0.03 
+			head_tilt = -0.03
 			antenna_speed = 0.3
 			
 			mood_tween.tween_property(head, "position:y", head.position.y - 3, 0.1)

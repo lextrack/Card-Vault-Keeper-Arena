@@ -21,6 +21,7 @@ class Convertidor
 
         Directory.CreateDirectory(inputDir);
         Directory.CreateDirectory(outputDir);
+        ClearOutputDirectory(outputDir);
 
         string[] extensions = { "*.mp4", "*.mov", "*.avi", "*.mkv", "*.ogv", "*.webm" };
         var filesList = new List<string>();
@@ -37,19 +38,110 @@ class Convertidor
         Console.Write("Select a format (1-3): ");
         string formatChoice = Console.ReadLine() ?? "1";
 
-        Console.WriteLine("Resolutions 16:9 below 1280x720:");
-        Console.WriteLine("1) 960x540\n2) 854x480\n3) 800x450\n4) 640x360\n5) Keep original");
-        Console.Write("Select an option (1-5): ");
+        Console.WriteLine("\nSelect resolution:");
+        Console.WriteLine("=== 16:9 ===");
+        Console.WriteLine("1) 3840x2160 (4K)");
+        Console.WriteLine("2) 2560x1440 (2K/QHD)");
+        Console.WriteLine("3) 1920x1080 (1080p/FHD)");
+        Console.WriteLine("4) 1600x900");
+        Console.WriteLine("5) 1280x720 (720p/HD)");
+        Console.WriteLine("6) 960x540 (qHD)");
+        Console.WriteLine("7) 854x480 (FWVGA)");
+        Console.WriteLine("8) 640x360 (nHD)");
+        Console.WriteLine("9) 426x240 (Ultra Low)");
+
+        Console.WriteLine("\n=== 4:3 ===");
+        Console.WriteLine("10) 1600x1200");
+        Console.WriteLine("11) 1024x768 (XGA)");
+        Console.WriteLine("12) 800x600 (SVGA)");
+        Console.WriteLine("13) 640x480 (VGA)");
+        Console.WriteLine("14) 320x240 (QVGA)");
+
+        Console.WriteLine("\n=== 1:1 ===");
+        Console.WriteLine("15) 1080x1080");
+        Console.WriteLine("16) 512x512");
+
+        Console.WriteLine("\n17) Custom (manual entry)");
+        Console.WriteLine("18) Keep original");
+        Console.Write("\nOptions (1-18): ");
         string resChoice = Console.ReadLine() ?? "5";
 
         string scaleFilter = resChoice switch
         {
-            "1" => "scale=960:540",
-            "2" => "scale=854:480",
-            "3" => "scale=800:450",
-            "4" => "scale=640:360",
+            "1" => "scale=3840:2160:force_original_aspect_ratio=decrease",
+            "2" => "scale=2560:1440:force_original_aspect_ratio=decrease",
+            "3" => "scale=1920:1080:force_original_aspect_ratio=decrease",
+            "4" => "scale=1600:900:force_original_aspect_ratio=decrease",
+            "5" => "scale=1280:720:force_original_aspect_ratio=decrease",
+            "6" => "scale=960:540:force_original_aspect_ratio=decrease",
+            "7" => "scale=854:480:force_original_aspect_ratio=decrease",
+            "8" => "scale=640:360:force_original_aspect_ratio=decrease",
+            "9" => "scale=426:240:force_original_aspect_ratio=decrease",
+
+            "10" => "scale=1600:1200:force_original_aspect_ratio=decrease",
+            "11" => "scale=1024:768:force_original_aspect_ratio=decrease",
+            "12" => "scale=800:600:force_original_aspect_ratio=decrease",
+            "13" => "scale=640:480:force_original_aspect_ratio=decrease",
+            "14" => "scale=320:240:force_original_aspect_ratio=decrease",
+
+            "15" => "scale=1080:1080:force_original_aspect_ratio=decrease",
+            "16" => "scale=512:512:force_original_aspect_ratio=decrease",
+
+            "17" => GetCustomResolution(),
+
             _ => ""
         };
+
+        static void ClearOutputDirectory(string outputDir)
+        {
+            Console.Write($"Before you start. Do you want to delete all contents of '{outputDir}'? (y/n): ");
+            string response = (Console.ReadLine() ?? "n").Trim().ToLower();
+
+            if (response == "y")
+            {
+                if (Directory.Exists(outputDir))
+                {
+                    foreach (var file in Directory.GetFiles(outputDir))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Could not delete file {file}: {ex.Message}");
+                        }
+                    }
+
+                    foreach (var dir in Directory.GetDirectories(outputDir))
+                    {
+                        try
+                        {
+                            Directory.Delete(dir, true);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Could not delete folder {dir}: {ex.Message}");
+                        }
+                    }
+
+                    Console.WriteLine("Output folder cleared.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Output folder was not cleared.");
+            }
+        }
+
+        static string GetCustomResolution()
+        {
+            Console.Write("Ingresa ancho: ");
+            int width = int.Parse(Console.ReadLine() ?? "0");
+            Console.Write("Ingresa alto: ");
+            int height = int.Parse(Console.ReadLine() ?? "0");
+            return $"scale={width}:{height}:force_original_aspect_ratio=decrease";
+        }
 
         Console.Write("Desired FPS (e.g., 30, 60, or leave empty to keep): ");
         string fpsInput = Console.ReadLine();
@@ -84,7 +176,7 @@ class Convertidor
                 break;
             default:
                 extensionOut = ".ogv";
-                codecVideo = "-vcodec libtheora -q:v 8";
+                codecVideo = "-vcodec libtheora -q:v 7";
                 codecAudio = keepAudio ? "-acodec libvorbis -q:a 6" : "-an";
                 break;
         }

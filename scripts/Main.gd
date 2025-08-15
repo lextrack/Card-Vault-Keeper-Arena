@@ -568,7 +568,7 @@ func restart_game():
 	
 	for card in ui_manager.card_instances:
 		if is_instance_valid(card):
-			card.z_index = 50 
+			card.z_index = 50
 	
 	tween = create_tween().set_parallel(true)
 	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 0), 2.0).set_ease(Tween.EASE_IN_OUT)
@@ -599,6 +599,9 @@ func setup_game_with_new_music():
 	
 	if end_turn_button:
 		ui_manager.reset_turn_button(end_turn_button, input_manager.gamepad_mode)
+	
+	turn_label.text = "Your turn"
+	game_info_label.text = "Game #%d | %s" % [game_count, difficulty.to_upper()]
 	
 	ui_manager.update_all_labels(player, ai)
 	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)

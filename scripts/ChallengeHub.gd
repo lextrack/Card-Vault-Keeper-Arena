@@ -37,10 +37,12 @@ var max_columns: int = 3
 
 var dialog_timer: Timer
 var current_dialog_queue: Array = []
+var is_processing_dialogs: bool = false
 
 var robot_current_mood: String = "normal"
 var robot_speaking_timer: Timer
 var dialog_duration_per_word: float = 0.15
+var active_dialog_tweens: Array = []
 
 var intro_dialogs = [
 	"Welcome to my collection vault...",
@@ -373,26 +375,58 @@ func setup_dialog_system():
 	dialog_timer.one_shot = true
 	dialog_timer.timeout.connect(_process_dialog_queue)
 	add_child(dialog_timer)
+	
+	current_dialog_queue = []
+	is_processing_dialogs = false
 
 func queue_dialog_sequence(dialogs: Array):
-	current_dialog_queue = dialogs.duplicate()
-	_process_dialog_queue()
-
-func _process_dialog_queue():
-	if current_dialog_queue.is_empty():
-		dialog_timer.wait_time = 8.0
-		dialog_timer.start()
-		var dialog_pool = casual_dialogs + mysterious_dialogs
-		current_dialog_queue = [dialog_pool[randi() % dialog_pool.size()]]
+	if dialogs.is_empty():
 		return
 	
+	current_dialog_queue.clear()
+	current_dialog_queue = dialogs.duplicate()
+	
+	if not is_processing_dialogs:
+		_process_dialog_queue()
+
+func _process_dialog_queue():
+	if is_processing_dialogs and current_dialog_queue.is_empty():
+		is_processing_dialogs = false
+		_schedule_random_dialog()
+		return
+	
+	if current_dialog_queue.is_empty():
+		_schedule_random_dialog()
+		return
+	
+	is_processing_dialogs = true
 	var next_dialog = current_dialog_queue.pop_front()
 	show_ai_dialog(next_dialog)
 	
 	var word_count = next_dialog.split(" ").size()
-	var base_time = max(3.0, word_count * 0.2)
+	var base_time = max(3.5, word_count * 0.3)
+	
+	if not dialog_timer.is_stopped():
+		dialog_timer.stop()
+	
 	dialog_timer.wait_time = base_time
 	dialog_timer.start()
+
+func _schedule_random_dialog():
+	if not dialog_timer.is_stopped():
+		dialog_timer.stop()
+	
+	if dialog_timer.timeout.is_connected(_show_random_dialog):
+		dialog_timer.timeout.disconnect(_show_random_dialog)
+	
+	dialog_timer.timeout.connect(_show_random_dialog, CONNECT_ONE_SHOT)
+	dialog_timer.wait_time = randf_range(8.0, 15.0)
+	dialog_timer.start()
+
+func _show_random_dialog():
+	var dialog_pool = casual_dialogs + mysterious_dialogs
+	var random_dialog = dialog_pool[randi() % dialog_pool.size()]
+	queue_dialog_sequence([random_dialog])
 
 func setup_ui():
 	back_button.pressed.connect(_on_back_pressed)
@@ -422,12 +456,31 @@ func handle_lost_game_state():
 
 func setup_ai_character():
 	if UnlockManagers:
-		UnlockManagers.bundle_unlocked.connect(_on_bundle_unlocked)
-		UnlockManagers.progress_updated.connect(_on_progress_updated)
+		if not UnlockManagers.bundle_unlocked.is_connected(_on_bundle_unlocked):
+			UnlockManagers.bundle_unlocked.connect(_on_bundle_unlocked)
+		if not UnlockManagers.progress_updated.is_connected(_on_progress_updated):
+			UnlockManagers.progress_updated.connect(_on_progress_updated)
 	
-	ai_avatar.visible = false
+	if ai_avatar:
+		ai_avatar.visible = false
 	
-	robot_head_instance = robot_head_scene.instantiate()
+	_setup_robot_head()
+	setup_robot_speaking_timer()
+
+func _setup_robot_head():
+	if not robot_head_scene:
+		print("ERROR: robot_head_scene is null!")
+		return
+	
+	robot_head_instance = robot_head_scene.instantiate() as RobotHead
+	if not robot_head_instance:
+		print("ERROR: Failed to instantiate robot head!")
+		return
+	
+	if not ai_avatar or not ai_avatar.get_parent():
+		print("ERROR: ai_avatar or its parent is null!")
+		return
+	
 	ai_avatar.get_parent().add_child(robot_head_instance)
 	
 	robot_head_instance.anchor_left = 0.5
@@ -439,8 +492,8 @@ func setup_ai_character():
 	robot_head_instance.offset_top = -80
 	robot_head_instance.offset_bottom = 40
 	
-	setup_robot_speaking_timer()
-	
+	_update_robot_mood("normal")
+
 func setup_robot_speaking_timer():
 	robot_speaking_timer = Timer.new()
 	robot_speaking_timer.one_shot = true
@@ -448,9 +501,18 @@ func setup_robot_speaking_timer():
 	add_child(robot_speaking_timer)
 
 func _on_robot_speaking_finished():
-	if robot_head_instance:
-		robot_head_instance.set_speaking(false)
-		robot_head_instance.set_mood(robot_current_mood)
+	if is_instance_valid(robot_head_instance):
+		if robot_head_instance.has_method("set_speaking"):
+			robot_head_instance.set_speaking(false)
+		if robot_head_instance.has_method("set_mood"):
+			robot_head_instance.set_mood(robot_current_mood)
+
+func _update_robot_mood(new_mood: String):
+	robot_current_mood = new_mood
+	if robot_head_instance and is_instance_valid(robot_head_instance):
+		if robot_head_instance.has_method("set_mood"):
+			if not robot_speaking_timer or robot_speaking_timer.time_left <= 0:
+				robot_head_instance.set_mood(new_mood)
 
 func handle_scene_entrance():
 	await get_tree().process_frame
@@ -474,7 +536,7 @@ func play_entrance_animation():
 	var tween = create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(self, "modulate:a", 1.0, 0.5)
-	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 5.4)
+	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.4)
 
 func load_shop_data():
 	if not UnlockManagers:
@@ -566,35 +628,65 @@ func create_bundle_card(bundle_info: Dictionary) -> BundleCard:
 	return bundle_card
 
 func show_ai_dialog(text: String):
-	if not dialog_text:
+	if not dialog_text or text.is_empty():
 		return
 
-	if robot_head_instance:
-		robot_head_instance.set_speaking(true)
-		robot_head_instance.pulse_status_light()
+	_cleanup_dialog_tweens()
+	
+	if robot_head_instance and is_instance_valid(robot_head_instance):
+		if robot_head_instance.has_method("set_speaking"):
+			robot_head_instance.set_speaking(true)
+		if robot_head_instance.has_method("pulse_status_light"):
+			robot_head_instance.pulse_status_light()
 		
 		var word_count = text.split(" ").size()
-		var speaking_duration = max(2.0, word_count * dialog_duration_per_word)
-		robot_speaking_timer.wait_time = speaking_duration
-		robot_speaking_timer.start()
+		var speaking_duration = max(2.0, word_count * 0.25)
 		
-		if status_light:
-			status_light.color = Color(0.2, 0.8, 1.0, 1.0)
-			var light_tween = create_tween()
-			light_tween.set_loops(3)
-			light_tween.tween_property(status_light, "modulate:a", 0.3, 0.4)
-			light_tween.tween_property(status_light, "modulate:a", 1.0, 0.4)
+		if robot_speaking_timer:
+			robot_speaking_timer.wait_time = speaking_duration
+			robot_speaking_timer.start()
 	
+	_animate_status_light()
+	await _animate_typing_indicator()
+	_animate_dialog_text(text)
+	_start_dialog_float_animation()
+
+func _cleanup_dialog_tweens():
+	for tween in active_dialog_tweens:
+		if is_instance_valid(tween):
+			tween.kill()
+	active_dialog_tweens.clear()
+
+func _animate_status_light():
+	if not status_light:
+		return
+	
+	status_light.color = Color(0.2, 0.8, 1.0, 1.0)
+	var light_tween = create_tween()
+	light_tween.set_loops(3)
+	light_tween.tween_property(status_light, "modulate:a", 0.3, 0.4)
+	light_tween.tween_property(status_light, "modulate:a", 1.0, 0.4)
+	active_dialog_tweens.append(light_tween)
+
+func _animate_typing_indicator():
+	if not typing_indicator:
+		return
+	
+	typing_indicator.visible = true
+	var typing_tween = create_tween()
+	typing_tween.set_loops(2)
+	typing_tween.tween_property(typing_indicator, "modulate:a", 0.3, 0.3)
+	typing_tween.tween_property(typing_indicator, "modulate:a", 1.0, 0.3)
+	active_dialog_tweens.append(typing_tween)
+	
+	await get_tree().create_timer(0.8).timeout
 	if typing_indicator:
-		typing_indicator.visible = true
-		var typing_tween = create_tween()
-		typing_tween.set_loops(2)
-		typing_tween.tween_property(typing_indicator, "modulate:a", 0.3, 0.3)
-		typing_tween.tween_property(typing_indicator, "modulate:a", 1.0, 0.3)
-		
-		await get_tree().create_timer(0.8).timeout
 		typing_indicator.visible = false
-		
+
+func _animate_dialog_text(text: String):
+	if not dialog_text:
+		return
+	
 	dialog_text.text = text
 	dialog_text.modulate.a = 0.0
 	dialog_text.scale = Vector2(0.9, 0.9)
@@ -603,31 +695,23 @@ func show_ai_dialog(text: String):
 	tween.set_parallel(true)
 	tween.tween_property(dialog_text, "modulate:a", 1.0, 0.3)
 	tween.tween_property(dialog_text, "scale", Vector2(1.0, 1.0), 0.2)
+	active_dialog_tweens.append(tween)
 	
 	await tween.finished
-	start_float_animation()
-	
-	if status_light:
-		status_light.color = Color(0.2, 0.8, 0.4, 0.8)
 
-func start_float_animation():
+func _start_dialog_float_animation():
 	if not dialog_text:
 		return
 	
+	if status_light:
+		status_light.color = Color(0.2, 0.8, 0.4, 0.8)
+	
+	var original_pos = dialog_text.position.y
 	var float_tween = create_tween()
 	float_tween.set_loops()
-	float_tween.tween_property(dialog_text, "position:y", dialog_text.position.y - 2, 1.5)
-	float_tween.tween_property(dialog_text, "position:y", dialog_text.position.y + 2, 1.5)
-
-func animate_ai_speaking():
-	if not robot_head_instance:
-		return
-	
-	robot_head_instance.set_speaking(true)
-	robot_head_instance.pulse_status_light()
-	
-	await get_tree().create_timer(2.0).timeout
-	robot_head_instance.set_speaking(false)
+	float_tween.tween_property(dialog_text, "position:y", original_pos - 2, 1.5)
+	float_tween.tween_property(dialog_text, "position:y", original_pos + 2, 1.5)
+	active_dialog_tweens.append(float_tween)
 
 func _on_bundle_unlock_requested(bundle_id: String):
 	if not UnlockManagers:
@@ -642,53 +726,24 @@ func _on_bundle_unlock_requested(bundle_id: String):
 		load_shop_data()
 
 func _on_bundle_hovered(bundle_info: Dictionary):
-	if robot_head_instance:
-		var new_mood = "normal"
-		
-		if bundle_info.can_unlock:
-			new_mood = "alert"
+	if not robot_head_instance or not is_instance_valid(robot_head_instance):
+		return
+	
+	var new_mood = "normal"
+	
+	if bundle_info.can_unlock:
+		new_mood = "alert"
+		if robot_head_instance.has_method("dramatic_reaction"):
 			robot_head_instance.dramatic_reaction("excitement")
-		elif bundle_info.unlocked:
-			new_mood = "happy"
-		else:
-			new_mood = "normal"
-		
-		if not robot_speaking_timer.time_left > 0:
-			robot_head_instance.set_mood(new_mood)
-		
-		robot_current_mood = new_mood
-
-func _get_mysterious_hover_message(bundle_info: Dictionary) -> String:
-	if bundle_info.unlocked:
-		var positive_messages = [
-			"This power serves you well...",
-			"A worthy addition to your arsenal.",
-			"These cards remember their master."
-		]
-		return positive_messages[randi() % positive_messages.size()]
-	elif bundle_info.can_unlock:
-		var ready_messages = [
-			"The moment approaches...",
-			"Power calls to you...",
-			"Your efforts have borne fruit.",
-			"The vault recognizes your worth."
-		]
-		return ready_messages[randi() % ready_messages.size()]
+	elif bundle_info.unlocked:
+		new_mood = "happy"
 	else:
-		var locked_messages = [
-			"Patience, young warrior...",
-			"The path demands more...",
-			"Not yet...",
-			"Prove your worth first.",
-			"These secrets are well guarded."
-		]
-		return locked_messages[randi() % locked_messages.size()]
+		new_mood = "normal"
+	
+	_update_robot_mood(new_mood)
 
 func _on_bundle_unhovered():
-	if robot_head_instance:
-		if not robot_speaking_timer.time_left > 0:
-			robot_head_instance.set_mood("normal")
-		robot_current_mood = "normal"
+	_update_robot_mood("normal")
 
 func _on_bundle_unlocked(bundle_id: String, cards: Array):
 	var bundle_info = UnlockManagers.get_bundle_info(bundle_id)
@@ -700,19 +755,20 @@ func _on_bundle_unlocked(bundle_id: String, cards: Array):
 	]
 	queue_dialog_sequence([celebration_messages[randi() % celebration_messages.size()]])
 	
-	if robot_head_instance:
-		robot_head_instance.dramatic_reaction("excitement")
-		robot_head_instance.set_mood("happy")
-		robot_head_instance.flash_neck_lights()
-		robot_current_mood = "happy"
+	if robot_head_instance and is_instance_valid(robot_head_instance):
+		if robot_head_instance.has_method("dramatic_reaction"):
+			robot_head_instance.dramatic_reaction("excitement")
+		if robot_head_instance.has_method("flash_neck_lights"):
+			robot_head_instance.flash_neck_lights()
+		
+		_update_robot_mood("happy")
 		
 		var happiness_timer = Timer.new()
 		happiness_timer.wait_time = 5.0
 		happiness_timer.one_shot = true
 		happiness_timer.timeout.connect(func():
-			robot_current_mood = "normal"
-			if not robot_speaking_timer.time_left > 0:
-				robot_head_instance.set_mood("normal")
+			_update_robot_mood("normal")
+			happiness_timer.queue_free()
 		)
 		add_child(happiness_timer)
 		happiness_timer.start()
@@ -806,9 +862,13 @@ func _on_button_focus(button: Button):
 	_enter_mouse_mode()
 
 func play_ui_sound(sound_type: String):
+	if not ui_player:
+		return
+	
 	match sound_type:
 		"button_click":
 			ui_player.stream = preload("res://audio/ui/button_click.wav")
+			ui_player.pitch_scale = 1.0
 			ui_player.play()
 		"unlock":
 			ui_player.stream = preload("res://audio/ui/button_click.wav")
@@ -817,6 +877,9 @@ func play_ui_sound(sound_type: String):
 			ui_player.pitch_scale = 1.0
 
 func play_hover_sound():
+	if not hover_player:
+		return
+	
 	hover_player.stream = preload("res://audio/ui/button_click.wav")
 	hover_player.volume_db = -15.0
 	hover_player.play()
@@ -883,15 +946,18 @@ func _input(event):
 
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
-		if dialog_timer:
+		_cleanup_dialog_tweens()
+		
+		if dialog_timer and is_instance_valid(dialog_timer):
 			dialog_timer.stop()
-		if robot_speaking_timer:
+		if robot_speaking_timer and is_instance_valid(robot_speaking_timer):
 			robot_speaking_timer.stop()
 
 		if GlobalMusicManager and GlobalMusicManager.is_challenge_music_playing():
 			GlobalMusicManager.stop_all_music(0.3)
 	elif what == NOTIFICATION_RESIZED:
-		pass
+		if adaptive_columns:
+			call_deferred("setup_responsive_layout")
 	elif what == NOTIFICATION_WM_CLOSE_REQUEST:
 		if accessed_from_game:
 			GameStateManager.clear_saved_state()
