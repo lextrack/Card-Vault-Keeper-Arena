@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ class Convertidor
 
         Directory.CreateDirectory(inputDir);
         Directory.CreateDirectory(outputDir);
-        ClearOutputDirectory(outputDir);
+        ClearOutputDirectoryWithPrompt(outputDir);
 
         string[] extensions = { "*.mp4", "*.mov", "*.avi", "*.mkv", "*.ogv", "*.webm" };
         var filesList = new List<string>();
@@ -35,8 +35,8 @@ class Convertidor
         Console.WriteLine("1) OGV (Theora/Vorbis)");
         Console.WriteLine("2) MP4 (H.264/AAC)");
         Console.WriteLine("3) WebM (VP9/Opus)");
-        Console.Write("Select a format (1-3): ");
-        string formatChoice = Console.ReadLine() ?? "1";
+        int formatChoiceNum = GetIntInRange("Select a format (1-3): ", 1, 3);
+        string formatChoice = formatChoiceNum.ToString();
 
         Console.WriteLine("\nSelect resolution:");
         Console.WriteLine("=== 16:9 ===");
@@ -49,22 +49,19 @@ class Convertidor
         Console.WriteLine("7) 854x480 (FWVGA)");
         Console.WriteLine("8) 640x360 (nHD)");
         Console.WriteLine("9) 426x240 (Ultra Low)");
-
         Console.WriteLine("\n=== 4:3 ===");
         Console.WriteLine("10) 1600x1200");
         Console.WriteLine("11) 1024x768 (XGA)");
         Console.WriteLine("12) 800x600 (SVGA)");
         Console.WriteLine("13) 640x480 (VGA)");
         Console.WriteLine("14) 320x240 (QVGA)");
-
         Console.WriteLine("\n=== 1:1 ===");
         Console.WriteLine("15) 1080x1080");
         Console.WriteLine("16) 512x512");
-
         Console.WriteLine("\n17) Custom (manual entry)");
         Console.WriteLine("18) Keep original");
-        Console.Write("\nOptions (1-18): ");
-        string resChoice = Console.ReadLine() ?? "5";
+        int resChoiceNum = GetIntInRange("\nOptions (1-18): ", 1, 18);
+        string resChoice = resChoiceNum.ToString();
 
         string scaleFilter = resChoice switch
         {
@@ -77,74 +74,26 @@ class Convertidor
             "7" => "scale=854:480:force_original_aspect_ratio=decrease",
             "8" => "scale=640:360:force_original_aspect_ratio=decrease",
             "9" => "scale=426:240:force_original_aspect_ratio=decrease",
-
             "10" => "scale=1600:1200:force_original_aspect_ratio=decrease",
             "11" => "scale=1024:768:force_original_aspect_ratio=decrease",
             "12" => "scale=800:600:force_original_aspect_ratio=decrease",
             "13" => "scale=640:480:force_original_aspect_ratio=decrease",
             "14" => "scale=320:240:force_original_aspect_ratio=decrease",
-
             "15" => "scale=1080:1080:force_original_aspect_ratio=decrease",
             "16" => "scale=512:512:force_original_aspect_ratio=decrease",
-
             "17" => GetCustomResolution(),
-
             _ => ""
         };
 
-        static void ClearOutputDirectory(string outputDir)
+        Console.Write("Desired FPS (leave empty to keep original): ");
+        string fpsInput;
+        while (true)
         {
-            Console.Write($"Before you start. Do you want to delete all contents of '{outputDir}'? (y/n): ");
-            string response = (Console.ReadLine() ?? "n").Trim().ToLower();
-
-            if (response == "y")
-            {
-                if (Directory.Exists(outputDir))
-                {
-                    foreach (var file in Directory.GetFiles(outputDir))
-                    {
-                        try
-                        {
-                            File.Delete(file);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Could not delete file {file}: {ex.Message}");
-                        }
-                    }
-
-                    foreach (var dir in Directory.GetDirectories(outputDir))
-                    {
-                        try
-                        {
-                            Directory.Delete(dir, true);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Could not delete folder {dir}: {ex.Message}");
-                        }
-                    }
-
-                    Console.WriteLine("Output folder cleared.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Output folder was not cleared.");
-            }
+            fpsInput = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(fpsInput) || int.TryParse(fpsInput, out int fps) && fps > 0)
+                break;
+            Console.WriteLine("Please enter a positive number or leave blank.");
         }
-
-        static string GetCustomResolution()
-        {
-            Console.Write("Ingresa ancho: ");
-            int width = int.Parse(Console.ReadLine() ?? "0");
-            Console.Write("Ingresa alto: ");
-            int height = int.Parse(Console.ReadLine() ?? "0");
-            return $"scale={width}:{height}:force_original_aspect_ratio=decrease";
-        }
-
-        Console.Write("Desired FPS (e.g., 30, 60, or leave empty to keep): ");
-        string fpsInput = Console.ReadLine();
         string fpsFilter = !string.IsNullOrWhiteSpace(fpsInput) ? $"fps={fpsInput}" : "";
 
         string filterChain = "";
@@ -155,8 +104,7 @@ class Convertidor
         else if (!string.IsNullOrEmpty(fpsFilter))
             filterChain = fpsFilter;
 
-        Console.Write("Keep audio? (y/n): ");
-        bool keepAudio = (Console.ReadLine() ?? "n").Trim().ToLower() == "y";
+        bool keepAudio = GetYesNo("Keep audio? (y/n): ") == "y";
 
         string extensionOut;
         string codecVideo;
@@ -211,6 +159,75 @@ class Convertidor
         ExitWithMessage("Process completed.\nConverted videos are in: " + outputDir);
     }
 
+    static int GetIntInRange(string prompt, int min, int max)
+    {
+        int value;
+        while (true)
+        {
+            Console.Write(prompt);
+            string input = Console.ReadLine();
+            if (int.TryParse(input, out value) && value >= min && value <= max)
+                return value;
+            Console.WriteLine($"Please enter a number between {min} and {max}.");
+        }
+    }
+
+    static int GetPositiveInt(string prompt)
+    {
+        int value;
+        while (true)
+        {
+            Console.Write(prompt);
+            string input = Console.ReadLine();
+            if (int.TryParse(input, out value) && value > 0)
+                return value;
+            Console.WriteLine("Please enter a positive number.");
+        }
+    }
+
+    static string GetYesNo(string prompt)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+            string input = (Console.ReadLine() ?? "").Trim().ToLower();
+            if (input == "y" || input == "n")
+                return input;
+            Console.WriteLine("Please enter 'y' or 'n'.");
+        }
+    }
+
+    static string GetCustomResolution()
+    {
+        int width = GetPositiveInt("Enter width: ");
+        int height = GetPositiveInt("Enter height: ");
+        return $"scale={width}:{height}:force_original_aspect_ratio=decrease";
+    }
+
+    static void ClearOutputDirectoryWithPrompt(string outputDir)
+    {
+        string response = GetYesNo($"Do you want to delete all contents of '{outputDir}'? (y/n): ");
+        if (response == "y")
+        {
+            if (Directory.Exists(outputDir))
+            {
+                foreach (var file in Directory.GetFiles(outputDir))
+                {
+                    try { File.Delete(file); } catch (Exception ex) { Console.WriteLine($"Could not delete file {file}: {ex.Message}"); }
+                }
+                foreach (var dir in Directory.GetDirectories(outputDir))
+                {
+                    try { Directory.Delete(dir, true); } catch (Exception ex) { Console.WriteLine($"Could not delete folder {dir}: {ex.Message}"); }
+                }
+                Console.WriteLine("Output folder cleared.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Output folder was not cleared.");
+        }
+    }
+
     static double GetVideoDuration(string ffprobePath, string filePath)
     {
         try
@@ -256,7 +273,6 @@ class Convertidor
         {
             string line = proc.StandardError.ReadLine();
             if (line == null) continue;
-
             var match = timeRegex.Match(line);
             if (match.Success)
             {
