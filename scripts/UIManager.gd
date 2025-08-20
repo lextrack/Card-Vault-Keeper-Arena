@@ -212,23 +212,24 @@ func update_ai_shield(new_shield: int):
 
 func start_player_turn(player: Player, difficulty: String):
 	animate_turn_transition(true)
-   
+
 	var tween = main_scene.create_tween()
 	tween.tween_property(top_panel_bg, "color", player_turn_color, 0.4)
 
 	var max_cards = player.get_max_cards_per_turn()
 	var cards_played = player.get_cards_played()
-   
 	var difficulty_name = difficulty.to_upper()
 	game_info_label.text = "Cards: " + str(cards_played) + "/" + str(max_cards) + " | " + difficulty_name
-   
+
 	var end_turn_button = main_scene.end_turn_button
 	if end_turn_button:
 		end_turn_button.disabled = false
-
 		var input_manager = main_scene.input_manager
 		var gamepad_mode = input_manager.gamepad_mode if input_manager else false
 		update_turn_button_text(player, end_turn_button, gamepad_mode)
+
+	_update_existing_cards_playability(player)
+	_restore_gamepad_selection_immediate(player)
 
 func start_ai_turn(ai: Player):
 	animate_turn_transition(false)

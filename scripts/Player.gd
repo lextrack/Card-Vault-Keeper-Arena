@@ -302,7 +302,6 @@ func play_card(card: CardData, target: Player = null) -> bool:
 	if not can_play_card(card):
 		return false
 	
-	# Registrar estadísticas ANTES de jugar la carta
 	if not is_ai and StatisticsManagers:
 		StatisticsManagers.card_played(card.card_name, card.card_type, card.cost)
 	

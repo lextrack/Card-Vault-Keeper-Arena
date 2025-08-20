@@ -561,10 +561,15 @@ func restart_game():
 	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	
 	await tween.finished
-	
 	await get_tree().create_timer(0.7).timeout
 	
 	setup_game_with_new_music()
+	
+	await get_tree().process_frame
+
+	is_player_turn = true
+	if ui_manager and player:
+		ui_manager._update_existing_cards_playability(player)
 	
 	for card in ui_manager.card_instances:
 		if is_instance_valid(card):
