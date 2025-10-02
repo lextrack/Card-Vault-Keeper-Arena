@@ -27,12 +27,14 @@ signal card_hovered(card: Card)
 signal card_unhovered(card: Card)
 
 var original_scale: Vector2
-var original_position: Vector2
 var is_hovered: bool = false
 var is_playable: bool = true
 var is_being_played: bool = false
 var gamepad_selected: bool = false
 var current_tween: Tween
+
+var cached_type_colors: Dictionary = {}
+var cached_rarity_multiplier: float = 1.0
 
 const HOVER_SCALE = 1.07
 const GAMEPAD_SCALE = 1.07
@@ -42,15 +44,39 @@ func _ready():
 	original_scale = scale
 	
 	if card_data:
+		_cache_card_colors()
 		update_display()
 	
 	_setup_signals()
-	set_mouse_filter_recursive(self)
+	_optimize_mouse_filter()
 
 func _setup_signals():
 	gui_input.connect(_on_card_input)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
+
+func _optimize_mouse_filter():
+	_set_mouse_filter_recursive(self, Control.MOUSE_FILTER_PASS)
+
+func _set_mouse_filter_recursive(node: Node, filter: int):
+	if node is Control:
+		(node as Control).mouse_filter = filter
+	
+	for child in node.get_children():
+		_set_mouse_filter_recursive(child, filter)
+
+func _cache_card_colors():
+	if not card_data:
+		return
+	
+	cached_type_colors = _get_card_type_colors(card_data.card_type)
+	var rarity = CardProbability.calculate_card_rarity(
+		card_data.damage, 
+		card_data.heal, 
+		card_data.shield
+	)
+	var rarity_colors = _get_rarity_colors()
+	cached_rarity_multiplier = rarity_colors.get(rarity, 1.0)
 
 func get_card_data() -> CardData:
 	return card_data
@@ -67,7 +93,7 @@ func animate_mana_insufficient():
 	current_tween.tween_property(self, "rotation", deg_to_rad(-3), 0.05).set_delay(0.05)
 	current_tween.tween_property(self, "rotation", 0.0, 0.05).set_delay(0.1)
 	current_tween.tween_property(cost_bg, "color", Color.RED, 0.1)
-	current_tween.tween_property(cost_bg, "color", get_card_type_colors(card_data.card_type).cost_bg, 0.1).set_delay(0.1)
+	current_tween.tween_property(cost_bg, "color", cached_type_colors.cost_bg, 0.1).set_delay(0.1)
 
 func apply_gamepad_selection_style():
 	if gamepad_selected or is_being_played:
@@ -113,8 +139,11 @@ func play_disabled_animation():
 	current_tween.tween_property(self, "rotation", deg_to_rad(2), 0.05)
 	current_tween.tween_property(self, "rotation", deg_to_rad(-2), 0.05).set_delay(0.05)
 	current_tween.tween_property(self, "rotation", 0.0, 0.05).set_delay(0.1)
-	current_tween.tween_property(self, "modulate", Color(1.2, 0.8, 0.8, 1.0), 0.1)
-	current_tween.tween_property(self, "modulate", Color.WHITE if is_playable else Color(0.4, 0.4, 0.4, 0.7), 0.1).set_delay(0.1)
+	
+	var flash_color = Color(1.2, 0.8, 0.8, 1.0)
+	var return_color = Color.WHITE if is_playable else Color(0.4, 0.4, 0.4, 0.7)
+	current_tween.tween_property(self, "modulate", flash_color, 0.1)
+	current_tween.tween_property(self, "modulate", return_color, 0.1).set_delay(0.1)
 
 func play_card_animation():
 	if is_being_played:
@@ -139,10 +168,10 @@ func _on_mouse_entered():
 		return
 	
 	var main_scene_node = get_tree().get_first_node_in_group("main_scene")
-	var input_manager = main_scene_node.input_manager if main_scene_node else null
-	
-	if input_manager and input_manager.gamepad_mode:
-		return
+	if main_scene_node and main_scene_node.has("input_manager"):
+		var input_manager = main_scene_node.input_manager
+		if input_manager and input_manager.has("gamepad_mode") and input_manager.gamepad_mode:
+			return
 	
 	if not is_hovered and is_playable:
 		is_hovered = true
@@ -181,7 +210,7 @@ func has_gamepad_selection_applied() -> bool:
 	return gamepad_selected
 
 func set_playable(playable: bool):
-	if is_being_played:
+	if is_being_played or is_playable == playable:
 		return
 	
 	is_playable = playable
@@ -192,7 +221,7 @@ func set_playable(playable: bool):
 	if playable:
 		current_tween.tween_property(self, "modulate", Color.WHITE, 0.2)
 		mouse_filter = Control.MOUSE_FILTER_PASS
-		set_mouse_filter_recursive(self)
+		_set_mouse_filter_recursive(self, Control.MOUSE_FILTER_PASS)
 	else:
 		current_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.2)
 		if not gamepad_selected:
@@ -218,7 +247,7 @@ func force_reset_visual_state():
 	if is_playable:
 		modulate = Color.WHITE
 		mouse_filter = Control.MOUSE_FILTER_PASS
-		set_mouse_filter_recursive(self)
+		_set_mouse_filter_recursive(self, Control.MOUSE_FILTER_PASS)
 	else:
 		modulate = Color(0.4, 0.4, 0.4, 0.7)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -238,49 +267,51 @@ func _stop_current_tween():
 		current_tween.kill()
 		current_tween = null
 
+func _generate_description() -> String:
+	match card_data.card_type:
+		"attack":
+			return "Deals %d damage" % card_data.damage
+		"heal":
+			return "Restores %d health" % card_data.heal
+		"shield":
+			return "Grants %d shield" % card_data.shield
+		"hybrid":
+			var effects: PackedStringArray = []
+			if card_data.damage > 0:
+				effects.append("Deals %d damage" % card_data.damage)
+			if card_data.heal > 0:
+				effects.append("Restores %d health" % card_data.heal)
+			if card_data.shield > 0:
+				effects.append("Grants %d shield" % card_data.shield)
+			return " | ".join(effects)
+		_:
+			return card_data.description
+
 func update_display():
 	name_label.text = card_data.card_name
 	cost_label.text = str(card_data.cost)
+	description_label.text = _generate_description()
 
 	var rarity_text = DeckManager.get_card_rarity_text(card_data)
 	rarity_label.text = rarity_text
 	
-	match card_data.card_type:
-		"attack":
-			description_label.text = "Deals " + str(card_data.damage) + " damage"
-		"heal":
-			description_label.text = "Restores " + str(card_data.heal) + " health"
-		"shield":
-			description_label.text = "Grants " + str(card_data.shield) + " shield"
-		"hybrid":
-			var effects = []
-			if card_data.damage > 0:
-				effects.append("Deals " + str(card_data.damage) + " damage")
-			if card_data.heal > 0:
-				effects.append("Restores " + str(card_data.heal) + " health")
-			if card_data.shield > 0:
-				effects.append("Grants " + str(card_data.shield) + " shield")
-			description_label.text = " | ".join(effects)
-		_:
-			description_label.text = card_data.description
-	
-	var type_colors = get_card_type_colors(card_data.card_type)
-	var rarity_colors = get_rarity_colors()
-	var rarity = CardProbability.calculate_card_rarity(card_data.damage, card_data.heal, card_data.shield)
-	
-	card_bg.color = type_colors.background
-	card_border.color = type_colors.border
-	card_inner.color = type_colors.inner
-	cost_bg.color = type_colors.cost_bg
-	art_bg.color = type_colors.art_bg
+	card_bg.color = cached_type_colors.background
+	card_border.color = cached_type_colors.border * cached_rarity_multiplier
+	card_inner.color = cached_type_colors.inner
+	cost_bg.color = cached_type_colors.cost_bg
+	art_bg.color = cached_type_colors.art_bg
+	rarity_bg.color = cached_type_colors.border * 0.8
 
-	var rarity_multiplier = rarity_colors[rarity]
-	card_border.color = card_border.color * rarity_multiplier
-	rarity_bg.color = type_colors.border * 0.8
+	var rarity = CardProbability.calculate_card_rarity(
+		card_data.damage, 
+		card_data.heal, 
+		card_data.shield
+	)
+	_apply_rarity_effects(rarity)
+	_load_card_illustration()
+	_update_stat_display()
 
-	apply_rarity_effects(rarity)
-	load_card_illustration()
-	
+func _update_stat_display():
 	match card_data.card_type:
 		"attack":
 			stat_value.text = str(card_data.damage)
@@ -299,17 +330,13 @@ func update_display():
 			stat_value.text = "?"
 			stat_value.modulate = Color.GRAY
 
-func load_card_illustration():
+func _load_card_illustration():
 	var video_stream: VideoStream = null
 	match card_data.card_type:
-		"attack":
-			video_stream = ATTACK_VIDEO
-		"heal":
-			video_stream = HEAL_VIDEO
-		"shield":
-			video_stream = SHIELD_VIDEO
-		"hybrid":
-			video_stream = HYBRID_VIDEO
+		"attack": video_stream = ATTACK_VIDEO
+		"heal": video_stream = HEAL_VIDEO
+		"shield": video_stream = SHIELD_VIDEO
+		"hybrid": video_stream = HYBRID_VIDEO
 	
 	if video_stream and card_icon is VideoStreamPlayer:
 		card_icon.stream = video_stream
@@ -317,50 +344,47 @@ func load_card_illustration():
 		card_icon.autoplay = true
 		card_icon.play()
 
-func get_card_type_colors(card_type: String) -> Dictionary:
-	match card_type:
-		"attack":
-			return {
-				"background": Color(0.2, 0.1, 0.1, 1),
-				"border": Color(0.8, 0.2, 0.2, 1),
-				"inner": Color(0.3, 0.15, 0.15, 1),
-				"cost_bg": Color(0.6, 0.1, 0.1, 1),
-				"art_bg": Color(0.4, 0.2, 0.2, 1)
-			}
-		"heal":
-			return {
-				"background": Color(0.1, 0.2, 0.1, 1),
-				"border": Color(0.2, 0.8, 0.2, 1),
-				"inner": Color(0.15, 0.3, 0.15, 1),
-				"cost_bg": Color(0.1, 0.6, 0.1, 1),
-				"art_bg": Color(0.2, 0.4, 0.2, 1)
-			}
-		"shield":
-			return {
-				"background": Color(0.1, 0.1, 0.2, 1),
-				"border": Color(0.2, 0.4, 0.8, 1),
-				"inner": Color(0.15, 0.15, 0.3, 1),
-				"cost_bg": Color(0.1, 0.2, 0.6, 1),
-				"art_bg": Color(0.2, 0.2, 0.4, 1)
-			}
-		"hybrid":
-			return {
-				"background": Color(0.15, 0.12, 0.05, 1),
-				"border": Color(0.8, 0.7, 0.3, 1),
-				"inner": Color(0.25, 0.22, 0.15, 1),
-				"cost_bg": Color(0.6, 0.5, 0.2, 1),
-				"art_bg": Color(0.4, 0.35, 0.25, 1)
-			}
-		_:
-			return {
-				"background": Color(0.15, 0.15, 0.15, 1),
-				"border": Color(0.5, 0.5, 0.5, 1),
-				"inner": Color(0.25, 0.25, 0.25, 1),
-				"cost_bg": Color(0.4, 0.4, 0.4, 1),
-				"art_bg": Color(0.3, 0.3, 0.3, 1)
-			}
+func _get_card_type_colors(card_type: String) -> Dictionary:
+	const COLOR_TABLE = {
+		"attack": {
+			"background": Color(0.2, 0.1, 0.1, 1),
+			"border": Color(0.8, 0.2, 0.2, 1),
+			"inner": Color(0.3, 0.15, 0.15, 1),
+			"cost_bg": Color(0.6, 0.1, 0.1, 1),
+			"art_bg": Color(0.4, 0.2, 0.2, 1)
+		},
+		"heal": {
+			"background": Color(0.1, 0.2, 0.1, 1),
+			"border": Color(0.2, 0.8, 0.2, 1),
+			"inner": Color(0.15, 0.3, 0.15, 1),
+			"cost_bg": Color(0.1, 0.6, 0.1, 1),
+			"art_bg": Color(0.2, 0.4, 0.2, 1)
+		},
+		"shield": {
+			"background": Color(0.1, 0.1, 0.2, 1),
+			"border": Color(0.2, 0.4, 0.8, 1),
+			"inner": Color(0.15, 0.15, 0.3, 1),
+			"cost_bg": Color(0.1, 0.2, 0.6, 1),
+			"art_bg": Color(0.2, 0.2, 0.4, 1)
+		},
+		"hybrid": {
+			"background": Color(0.15, 0.12, 0.05, 1),
+			"border": Color(0.8, 0.7, 0.3, 1),
+			"inner": Color(0.25, 0.22, 0.15, 1),
+			"cost_bg": Color(0.6, 0.5, 0.2, 1),
+			"art_bg": Color(0.4, 0.35, 0.25, 1)
+		}
+	}
+	
+	return COLOR_TABLE.get(card_type, {
+		"background": Color(0.15, 0.15, 0.15, 1),
+		"border": Color(0.5, 0.5, 0.5, 1),
+		"inner": Color(0.25, 0.25, 0.25, 1),
+		"cost_bg": Color(0.4, 0.4, 0.4, 1),
+		"art_bg": Color(0.3, 0.3, 0.3, 1)
+	})
 
-func get_rarity_colors() -> Dictionary:
+func _get_rarity_colors() -> Dictionary:
 	return {
 		"common": 1.0,
 		"uncommon": 2.5,
@@ -371,17 +395,10 @@ func get_rarity_colors() -> Dictionary:
 func set_card_data(data: CardData):
 	card_data = data
 	if is_inside_tree():
+		_cache_card_colors()
 		update_display()
 
-func set_mouse_filter_recursive(node: Node):
-	if node is Control:
-		var control = node as Control
-		control.mouse_filter = Control.MOUSE_FILTER_PASS
-	
-	for child in node.get_children():
-		set_mouse_filter_recursive(child)
-
-func apply_rarity_effects(rarity: String):
+func _apply_rarity_effects(rarity: String):
 	match rarity:
 		"uncommon":
 			name_label.modulate = Color(0.7, 1.4, 0.9, 1.0)

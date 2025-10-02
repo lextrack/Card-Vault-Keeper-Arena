@@ -19,10 +19,12 @@ var selected_card_index: int = 0
 var original_ui_position: Vector2
 var is_screen_shaking: bool = false
 
-var current_hand_hash: int = 0
+var current_hand_fingerprint: String = ""
+var last_playability_fingerprint: String = ""
 var gamepad_selection_active: bool = false
-var last_playability_state: Array = []
-var ui_update_pending: bool = false
+
+var pending_update_timer: float = 0.0
+const UPDATE_DELAY: float = 0.016  # ~1 frame a 60fps
 
 var player_turn_color = Color(0.08, 0.13, 0.18, 0.9)
 var ai_turn_color = Color(0.15, 0.08, 0.08, 0.9)
@@ -45,34 +47,49 @@ func _get_ui_references():
 	top_panel_bg = main_scene.top_panel_bg
 	ui_layer = main_scene.ui_layer
 
-func _generate_hand_hash(hand: Array) -> int:
-	var hash = 0
-	for i in range(hand.size()):
-		var card = hand[i]
+func _generate_hand_fingerprint(hand: Array) -> String:
+	if not hand or hand.size() == 0:
+		return "empty"
+	
+	var parts: PackedStringArray = []
+	for card in hand:
 		if card is CardData:
-			hash = hash * 31 + card.get_instance_id()
-			hash = hash * 17 + card.cost
-	return hash
+			parts.append("%s_%d_%d_%d_%d" % [
+				card.card_name,
+				card.cost,
+				card.damage,
+				card.heal,
+				card.shield
+			])
+	
+	return ",".join(parts)
+
+func _generate_playability_fingerprint(player: Player) -> String:
+	if not player or not player.hand:
+		return "none"
+	
+	var parts: PackedStringArray = []
+	for card_data in player.hand:
+		parts.append("1" if player.can_play_card(card_data) else "0")
+	
+	return "".join(parts)
 
 func _has_hand_changed(player: Player) -> bool:
 	if not player or not player.hand:
 		return true
    
-	var new_hash = _generate_hand_hash(player.hand)
-	var changed = new_hash != current_hand_hash
-	current_hand_hash = new_hash
+	var new_fingerprint = _generate_hand_fingerprint(player.hand)
+	var changed = new_fingerprint != current_hand_fingerprint
+	current_hand_fingerprint = new_fingerprint
 	return changed
 
 func _has_playability_changed(player: Player) -> bool:
 	if not player or not player.hand:
 		return true
    
-	var new_playability = []
-	for card_data in player.hand:
-		new_playability.append(player.can_play_card(card_data))
-   
-	var changed = new_playability != last_playability_state
-	last_playability_state = new_playability
+	var new_fingerprint = _generate_playability_fingerprint(player)
+	var changed = new_fingerprint != last_playability_fingerprint
+	last_playability_fingerprint = new_fingerprint
 	return changed
 
 func handle_card_hover_audio(card: Card, hover_type: String):
@@ -84,9 +101,7 @@ func handle_card_hover_audio(card: Card, hover_type: String):
 		"mouse":
 			if not gamepad_selection_active:
 				audio_helper.play_card_hover_sound()
-		"gamepad_navigation":
-			audio_helper.play_card_hover_sound()
-		"gamepad_selection":
+		"gamepad_navigation", "gamepad_selection":
 			audio_helper.play_card_hover_sound()
 
 func update_all_labels(player: Player, ai: Player):
@@ -108,20 +123,8 @@ func animate_hp_change(hp_label: Label, new_hp: int, old_hp: int):
 			var return_tween = main_scene.create_tween()
 			return_tween.set_parallel(true)
 			return_tween.tween_property(hp_label, "scale", Vector2(1.0, 1.0), 0.3)
-   		
-			var final_color = Color.WHITE
-			if new_hp <= 5:
-				final_color = Color(1.0, 0.3, 0.3, 1.0)
-			elif new_hp <= 10:
-				final_color = Color(1.0, 0.7, 0.3, 1.0)
-			elif new_hp <= 15:
-				final_color = Color(1.0, 1.0, 0.3, 1.0)
-			else:
-				final_color = Color(0.4, 1.0, 0.6, 1.0)
-   		
-			return_tween.tween_property(hp_label, "modulate", final_color, 0.3)
+			return_tween.tween_property(hp_label, "modulate", _get_hp_color(new_hp), 0.3)
 		)
-   
 	elif new_hp > old_hp:
 		var tween = main_scene.create_tween()
 		tween.set_parallel(true)
@@ -132,38 +135,34 @@ func animate_hp_change(hp_label: Label, new_hp: int, old_hp: int):
 			var return_tween = main_scene.create_tween()
 			return_tween.set_parallel(true)
 			return_tween.tween_property(hp_label, "scale", Vector2(1.0, 1.0), 0.35)
-   		
-			var final_color = Color.WHITE
-			if new_hp <= 5:
-				final_color = Color(1.0, 0.3, 0.3, 1.0)
-			elif new_hp <= 10:
-				final_color = Color(1.0, 0.7, 0.3, 1.0)
-			elif new_hp <= 15:
-				final_color = Color(1.0, 1.0, 0.3, 1.0)
-			else:
-				final_color = Color(0.4, 1.0, 0.6, 1.0)
-   		
-			return_tween.tween_property(hp_label, "modulate", final_color, 0.35)
+			return_tween.tween_property(hp_label, "modulate", _get_hp_color(new_hp), 0.35)
 		)
+
+func _get_hp_color(hp: int) -> Color:
+	if hp <= 5:
+		return Color(1.0, 0.3, 0.3, 1.0)
+	elif hp <= 10:
+		return Color(1.0, 0.7, 0.3, 1.0)
+	elif hp <= 15:
+		return Color(1.0, 1.0, 0.3, 1.0)
+	else:
+		return Color(0.4, 1.0, 0.6, 1.0)
 
 func update_player_hp(new_hp: int):
 	var old_hp = int(player_hp_label.text) if player_hp_label.text.is_valid_int() else new_hp
 	player_hp_label.text = str(new_hp)
-   
 	if new_hp != old_hp:
 		animate_hp_change(player_hp_label, new_hp, old_hp)
 
 func update_ai_hp(new_hp: int):
 	var old_hp = int(ai_hp_label.text) if ai_hp_label.text.is_valid_int() else new_hp
 	ai_hp_label.text = str(new_hp)
-   
 	if new_hp != old_hp:
 		animate_hp_change(ai_hp_label, new_hp, old_hp)
 
 func update_player_mana(new_mana: int):
 	var old_text = player_mana_label.text
 	var old_mana = int(old_text) if old_text.is_valid_int() else new_mana
-   
 	player_mana_label.text = str(new_mana)
    
 	if new_mana > old_mana:
@@ -178,7 +177,6 @@ func update_player_mana(new_mana: int):
 func update_ai_mana(new_mana: int):
 	var old_text = ai_mana_label.text
 	var old_mana = int(old_text) if old_text.is_valid_int() else new_mana
-   
 	ai_mana_label.text = str(new_mana)
    
 	if new_mana > old_mana:
@@ -193,7 +191,6 @@ func update_ai_mana(new_mana: int):
 func update_player_shield(new_shield: int):
 	var old_text = player_shield_label.text
 	var old_shield = int(old_text) if old_text.is_valid_int() else new_shield
-   
 	player_shield_label.text = str(new_shield)
    
 	if new_shield > old_shield:
@@ -219,7 +216,7 @@ func start_player_turn(player: Player, difficulty: String):
 	var max_cards = player.get_max_cards_per_turn()
 	var cards_played = player.get_cards_played()
 	var difficulty_name = difficulty.to_upper()
-	game_info_label.text = "Cards: " + str(cards_played) + "/" + str(max_cards) + " | " + difficulty_name
+	game_info_label.text = "Cards: %d/%d | %s" % [cards_played, max_cards, difficulty_name]
 
 	var end_turn_button = main_scene.end_turn_button
 	if end_turn_button:
@@ -269,7 +266,6 @@ func animate_turn_transition(is_player_turn: bool):
 	tween.set_parallel(true)
 	tween.set_ease(Tween.EASE_OUT)
 	tween.set_trans(Tween.TRANS_BACK)
-   
 	tween.tween_property(turn_label, "scale", Vector2(1.1, 1.1), 0.15)
 	tween.tween_property(turn_label, "modulate", color * 1.2, 0.15)
    
@@ -278,7 +274,6 @@ func animate_turn_transition(is_player_turn: bool):
 		settle_tween.set_parallel(true)
 		settle_tween.set_ease(Tween.EASE_OUT)
 		settle_tween.set_trans(Tween.TRANS_ELASTIC)
-   	
 		settle_tween.tween_property(turn_label, "scale", Vector2(1.0, 1.0), 0.15)
 		settle_tween.tween_property(turn_label, "modulate", color, 0.15)
 	)
@@ -287,23 +282,16 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 	if not player or not card_scene or not hand_container or not player.hand:
 		return
    
-	request_ui_update(player, card_scene, hand_container)
-
-func request_ui_update(player: Player, card_scene: PackedScene, hand_container: Container):
-	if not ui_update_pending:
-		ui_update_pending = true
-		_process_ui_updates(player, card_scene, hand_container)
-
-func _process_ui_updates(player: Player, card_scene: PackedScene, hand_container: Container):
-	ui_update_pending = false
-   
-	var should_preserve_gamepad_selection = gamepad_selection_active and main_scene.is_player_turn
+	var should_preserve_gamepad = gamepad_selection_active and main_scene.is_player_turn
 	var old_selected_index = selected_card_index
 
-	if not _has_hand_changed(player) and card_instances.size() == player.hand.size():
-		if _has_playability_changed(player):
+	var hand_changed = _has_hand_changed(player)
+	var playability_changed = _has_playability_changed(player)
+	
+	if not hand_changed and card_instances.size() == player.hand.size():
+		if playability_changed:
 			_update_existing_cards_playability(player)
-		if should_preserve_gamepad_selection:
+		if should_preserve_gamepad:
 			_restore_gamepad_selection_immediate(player)
 		return
    
@@ -315,29 +303,16 @@ func _process_ui_updates(player: Player, card_scene: PackedScene, hand_container
 	if controls_panel:
 		controls_panel.update_cards_available(card_instances.size() > 0)
 
-	if should_preserve_gamepad_selection:
+	if should_preserve_gamepad:
 		_restore_gamepad_selection_immediate(player)
 
 func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_container: Container):
 	for child in hand_container.get_children():
-		if child.has_signal("card_clicked"):
-			if child.card_clicked.is_connected(main_scene._on_card_clicked):
-				child.card_clicked.disconnect(main_scene._on_card_clicked)
-		if child.has_signal("card_hovered"):
-			if child.card_hovered.is_connected(_on_card_gamepad_hovered):
-				child.card_hovered.disconnect(_on_card_gamepad_hovered)
-		if child.has_signal("card_unhovered"):
-			if child.card_unhovered.is_connected(_on_card_gamepad_unhovered):
-				child.card_unhovered.disconnect(_on_card_gamepad_unhovered)
-		if child.has_signal("mouse_entered"):
-			if child.mouse_entered.is_connected(_on_card_hover):
-				child.mouse_entered.disconnect(_on_card_hover)
 		child.queue_free()
-   
+	
 	card_instances.clear()
    
-	for i in range(player.hand.size()):
-		var card_data = player.hand[i]
+	for card_data in player.hand:
 		if not card_data:
 			continue
    		
@@ -346,8 +321,8 @@ func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_contain
 			continue
    	
 		card_instance.set_card_data(card_data)
+		
 		card_instance.card_clicked.connect(main_scene._on_card_clicked)
-
 		if card_instance.has_signal("card_hovered"):
 			card_instance.card_hovered.connect(_on_card_gamepad_hovered)
 		if card_instance.has_signal("card_unhovered"):
@@ -362,7 +337,9 @@ func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_contain
 		card_instance.set_playable(can_play)
 
 func _update_existing_cards_playability(player: Player):
-	for i in range(min(card_instances.size(), player.hand.size())):
+	var hand_size = min(card_instances.size(), player.hand.size())
+	
+	for i in range(hand_size):
 		var card_instance = card_instances[i]
 		var card_data = player.hand[i]
    	
@@ -420,24 +397,16 @@ func update_turn_button_text(player: Player, end_turn_button: Button, gamepad_mo
 		end_turn_button.modulate = Color(0.8, 0.8, 0.8, 1.0)
 	else:
 		end_turn_button.modulate = Color.WHITE
-		if gamepad_mode:
-			end_turn_button.text = "🎮 End Turn"
-		else:
-			end_turn_button.text = "End Turn"
+		end_turn_button.text = "🎮 End Turn" if gamepad_mode else "End Turn"
 
 func reset_turn_button(end_turn_button: Button, gamepad_mode: bool = false):
 	if not end_turn_button:
 		return
-   
 	end_turn_button.disabled = false
-	if gamepad_mode:
-		end_turn_button.text = "🎮 End Turn"
-	else:
-		end_turn_button.text = "End Turn"
+	end_turn_button.text = "🎮 End Turn" if gamepad_mode else "End Turn"
 
 func update_cards_played_info(cards_played: int, max_cards: int, difficulty: String):
-	var difficulty_name = difficulty.to_upper()
-	game_info_label.text = "Cards: " + str(cards_played) + "/" + str(max_cards) + " | " + difficulty_name
+	game_info_label.text = "Cards: %d/%d | %s" % [cards_played, max_cards, difficulty.to_upper()]
 
 func update_damage_bonus_indicator(player: Player, damage_bonus_label: Label):
 	if not damage_bonus_label:
@@ -446,31 +415,20 @@ func update_damage_bonus_indicator(player: Player, damage_bonus_label: Label):
 	var damage_bonus = player.get_damage_bonus()
    
 	if damage_bonus > 0:
-		var bonus_text = ""
-		var bonus_color = Color.WHITE
-   	
-		match damage_bonus:
-			1:
-				bonus_text = "⚔️ +1 DMG"
-				bonus_color = Color(1.0, 0.8, 0.2, 1.0)
-			2:
-				bonus_text = "⚔️ +2 DMG"
-				bonus_color = Color(1.0, 0.4, 0.2, 1.0)
-			3:
-				bonus_text = "💀 +3 DMG"
-				bonus_color = Color(1.0, 0.2, 0.2, 1.0)
-			4:
-				bonus_text = "🔥 +4 DMG"
-				bonus_color = Color(0.8, 0.2, 0.8, 1.0)
-			_:
-				bonus_text = "⚔️ +" + str(damage_bonus) + " DMG"
-				bonus_color = Color(0.6, 0.2, 0.6, 1.0)
-   	
-		damage_bonus_label.text = bonus_text
-		damage_bonus_label.modulate = bonus_color
+		var bonus_data = _get_damage_bonus_data(damage_bonus)
+		damage_bonus_label.text = bonus_data.text
+		damage_bonus_label.modulate = bonus_data.color
 		damage_bonus_label.visible = true
 	else:
 		damage_bonus_label.visible = false
+
+func _get_damage_bonus_data(bonus: int) -> Dictionary:
+	match bonus:
+		1: return {"text": "⚔️ +1 DMG", "color": Color(1.0, 0.8, 0.2, 1.0)}
+		2: return {"text": "⚔️ +2 DMG", "color": Color(1.0, 0.4, 0.2, 1.0)}
+		3: return {"text": "💀 +3 DMG", "color": Color(1.0, 0.2, 0.2, 1.0)}
+		4: return {"text": "🔥 +4 DMG", "color": Color(0.8, 0.2, 0.8, 1.0)}
+		_: return {"text": "⚔️ +%d DMG" % bonus, "color": Color(0.6, 0.2, 0.6, 1.0)}
 
 func reset_damage_bonus_indicator(damage_bonus_label: Label):
 	if damage_bonus_label:
@@ -478,78 +436,70 @@ func reset_damage_bonus_indicator(damage_bonus_label: Label):
 		damage_bonus_label.text = ""
 
 func show_damage_bonus_info(turn_num: int, damage_bonus: int):
-	turn_label.text = "Turn " + str(turn_num)
-	game_info_label.text = "Damage bonus: +" + str(damage_bonus) + "!"
+	turn_label.text = "Turn %d" % turn_num
+	game_info_label.text = "Damage bonus: +%d!" % damage_bonus
 
 func show_reshuffle_info(player_name: String):
-	turn_label.text = player_name + " reshuffled"
-	if player_name == "Player":
-		game_info_label.text = "Cards returned to the deck"
-	else:
-		game_info_label.text = "Some cards returned to their deck"
+	turn_label.text = "%s reshuffled" % player_name
+	game_info_label.text = "Cards returned to the deck" if player_name == "Player" else "Some cards returned to their deck"
 
 func play_damage_effects(damage_amount: int):
 	if is_screen_shaking:
 		return
-  
 	var shake_intensity = min(damage_amount * 1.0, 5.0)
 	screen_shake(shake_intensity, 0.3)
 
 func screen_shake(intensity: float, duration: float):
 	if is_screen_shaking:
 		return
-  
 	is_screen_shaking = true
-  
+	
 	var shake_count = 8
 	var time_per_shake = duration / shake_count
-  
+	
 	for i in range(shake_count):
 		var current_intensity = intensity * (1.0 - float(i) / shake_count)
 		var shake_x = randf_range(-current_intensity, current_intensity)
 		var shake_y = randf_range(-current_intensity, current_intensity)
 		var shake_position = original_ui_position + Vector2(shake_x, shake_y)
-  	
+		
 		var tween = main_scene.create_tween()
 		tween.tween_property(ui_layer, "position", shake_position, time_per_shake)
 		await tween.finished
-  
+	
 	var final_tween = main_scene.create_tween()
 	final_tween.tween_property(ui_layer, "position", original_ui_position, 0.1)
 	await final_tween.finished
-  
+	
 	is_screen_shaking = false
 
 func update_card_selection(gamepad_mode: bool, player: Player):
 	if not main_scene.is_player_turn or not gamepad_mode:
 		gamepad_selection_active = false
 		_clear_all_gamepad_selection_styles()
-   	
+		
 		for i in range(card_instances.size()):
 			var card = card_instances[i]
 			if not is_instance_valid(card) or i >= player.hand.size():
 				continue
-   		
 			card.z_index = 0
 			var can_play = player.can_play_card(player.hand[i])
 			card.set_playable(can_play)
 		return
-   
+	
 	gamepad_selection_active = true
 	_clear_all_gamepad_selection_styles()
-   
+	
 	if card_instances.size() > 0:
 		selected_card_index = clamp(selected_card_index, 0, card_instances.size() - 1)
-		
 		var selected_card = card_instances[selected_card_index]
 		if is_instance_valid(selected_card) and selected_card_index < player.hand.size():
 			selected_card.apply_gamepad_selection_style()
-   
+	
 	for i in range(card_instances.size()):
 		var card = card_instances[i]
 		if not is_instance_valid(card) or i >= player.hand.size():
 			continue
-   		
 		if i != selected_card_index:
 			card.z_index = 0
 			var can_play = player.can_play_card(player.hand[i])
@@ -564,30 +514,29 @@ func update_hand_display_no_animation(player: Player, card_scene: PackedScene, h
 	if not player or not card_scene or not hand_container or not player.hand:
 		return
 
-	var should_preserve_gamepad_selection = gamepad_selection_active and main_scene.is_player_turn
+	var should_preserve_gamepad = gamepad_selection_active and main_scene.is_player_turn
 	var old_selected_index = selected_card_index
 
 	_rebuild_hand_display(player, card_scene, hand_container)
-	current_hand_hash = _generate_hand_hash(player.hand)
-   
+	current_hand_fingerprint = _generate_hand_fingerprint(player.hand)
+	
 	selected_card_index = clamp(old_selected_index, 0, max(0, card_instances.size() - 1))
-   
+	
 	var controls_panel = main_scene.controls_panel
 	if controls_panel:
 		controls_panel.update_cards_available(card_instances.size() > 0)
-   
-	if should_preserve_gamepad_selection:
+	
+	if should_preserve_gamepad:
 		_restore_gamepad_selection_immediate(player)
-   
+
 func update_hand_display_with_new_cards_animation(player: Player, card_scene: PackedScene, hand_container: Container, new_cards_count: int = 0):
 	update_hand_display(player, card_scene, hand_container)
 
 func navigate_cards(direction: int, player: Player) -> bool:
 	if card_instances.size() == 0:
 		return false
-   
+	
 	var old_index = selected_card_index
-   
 	selected_card_index = (selected_card_index + direction) % card_instances.size()
 	if selected_card_index < 0:
 		selected_card_index = card_instances.size() - 1
@@ -596,9 +545,9 @@ func navigate_cards(direction: int, player: Player) -> bool:
 		_apply_navigation_change(old_index, selected_card_index, player)
 		gamepad_selection_active = true
 		return true
-   
+	
 	return false
-   
+
 func _apply_navigation_change(old_index: int, new_index: int, player: Player):
 	if old_index < card_instances.size():
 		var old_card = card_instances[old_index]
@@ -616,24 +565,23 @@ func get_selected_card() -> Card:
 		if is_instance_valid(selected_card):
 			return selected_card
 	return null
-   
+
 func is_card_selected(card: Card) -> bool:
 	if not is_instance_valid(card):
 		return false
-   
 	var selected_card = get_selected_card()
 	return selected_card == card
 
 func select_card_by_index(index: int, player: Player) -> bool:
 	if index < 0 or index >= card_instances.size():
 		return false
-   
+	
 	var old_index = selected_card_index
 	selected_card_index = index
-   
+	
 	if old_index != selected_card_index:
 		_apply_navigation_change(old_index, selected_card_index, player)
 		gamepad_selection_active = true
 		return true
-   
+	
 	return false
