@@ -5,10 +5,15 @@ var _card_pool: Array = []
 var _total_weight: int = 0
 var _rarity_guaranteed: Dictionary = {}
 
+var _stats_cache: Dictionary = {}
+var _rarity_weights_cache: Dictionary = {}
+var _cache_dirty: bool = true
+
 func clear():
 	_card_pool.clear()
 	_total_weight = 0
 	_rarity_guaranteed.clear()
+	_invalidate_cache()
 
 func add_template(template: Dictionary, weight_override: int = -1):
 	var card_name = template.get("name", "")
@@ -30,6 +35,8 @@ func add_template(template: Dictionary, weight_override: int = -1):
 	
 	if not _rarity_guaranteed.has(rarity):
 		_rarity_guaranteed[rarity] = template
+	
+	_invalidate_cache()
 
 func add_templates(templates: Array):
 	for template in templates:
@@ -96,7 +103,14 @@ func generate_cards(count: int) -> Array:
 	return cards
 
 func get_pool_stats() -> Dictionary:
-	var stats = {
+	if not _cache_dirty and not _stats_cache.is_empty():
+		return _stats_cache.duplicate()
+	
+	_rebuild_stats_cache()
+	return _stats_cache.duplicate()
+
+func _rebuild_stats_cache():
+	_stats_cache = {
 		"total_cards": _card_pool.size(),
 		"total_weight": _total_weight,
 		"rarity_distribution": {},
@@ -104,22 +118,28 @@ func get_pool_stats() -> Dictionary:
 	}
 	
 	for rarity in RaritySystem.get_all_rarities():
-		stats.rarity_distribution[rarity] = 0
+		_stats_cache.rarity_distribution[rarity] = 0
 	
 	var types = ["attack", "heal", "shield", "hybrid"]
 	for type in types:
-		stats.type_distribution[type] = 0
+		_stats_cache.type_distribution[type] = 0
+	
+	_rarity_weights_cache.clear()
+	for rarity in RaritySystem.get_all_rarities():
+		_rarity_weights_cache[rarity] = 0
 	
 	for entry in _card_pool:
 		var template = entry.template
 		var rarity = template.get("rarity", RaritySystem.Rarity.COMMON)
 		var type = template.get("type", "attack")
 		
-		stats.rarity_distribution[rarity] += 1
-		if type in stats.type_distribution:
-			stats.type_distribution[type] += 1
+		_stats_cache.rarity_distribution[rarity] += 1
+		if type in _stats_cache.type_distribution:
+			_stats_cache.type_distribution[type] += 1
+		
+		_rarity_weights_cache[rarity] += entry.weight
 	
-	return stats
+	_cache_dirty = false
 
 func get_card_probability(template: Dictionary) -> float:
 	if _total_weight <= 0:
@@ -129,15 +149,13 @@ func get_card_probability(template: Dictionary) -> float:
 	return float(weight) / float(_total_weight)
 
 func get_rarity_probability(rarity: RaritySystem.Rarity) -> float:
-	var rarity_weight = 0
-	
-	for entry in _card_pool:
-		if entry.template.get("rarity", RaritySystem.Rarity.COMMON) == rarity:
-			rarity_weight += entry.weight
-	
 	if _total_weight <= 0:
 		return 0.0
 	
+	if _cache_dirty:
+		_rebuild_stats_cache()
+	
+	var rarity_weight = _rarity_weights_cache.get(rarity, 0)
 	return float(rarity_weight) / float(_total_weight)
 
 func filter_by_type(card_type: String) -> WeightedCardPool:
@@ -173,12 +191,16 @@ func filter_by_cost_range(min_cost: int, max_cost: int) -> WeightedCardPool:
 	return filtered_pool
 
 func boost_rarity_weight(rarity: RaritySystem.Rarity, multiplier: float):
-	_total_weight = 0
+	var weight_delta = 0
 	
 	for entry in _card_pool:
 		if entry.template.get("rarity", RaritySystem.Rarity.COMMON) == rarity:
+			var old_weight = entry.weight
 			entry.weight = int(entry.weight * multiplier)
-		_total_weight += entry.weight
+			weight_delta += (entry.weight - old_weight)
+	
+	_total_weight += weight_delta
+	_invalidate_cache()
 
 func rebalance_weights():
 	_total_weight = 0
@@ -187,6 +209,8 @@ func rebalance_weights():
 		var rarity = entry.template.get("rarity", RaritySystem.Rarity.COMMON)
 		entry.weight = RaritySystem.get_weight(rarity)
 		_total_weight += entry.weight
+	
+	_invalidate_cache()
 
 func validate_pool() -> Dictionary:
 	var validation = {
@@ -278,3 +302,6 @@ func _calculate_adjusted_weight(base_weight: int, target_count: int, available_c
 	
 	var ratio = float(target_count) / float(available_count)
 	return max(1, int(base_weight * ratio))
+
+func _invalidate_cache():
+	_cache_dirty = true
