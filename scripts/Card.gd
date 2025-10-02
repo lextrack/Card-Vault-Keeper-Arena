@@ -26,6 +26,7 @@ signal card_played(card: Card)
 signal card_hovered(card: Card)
 signal card_unhovered(card: Card)
 
+var cached_rarity_string: String = ""
 var original_scale: Vector2
 var is_hovered: bool = false
 var is_playable: bool = true
@@ -70,13 +71,10 @@ func _cache_card_colors():
 		return
 	
 	cached_type_colors = _get_card_type_colors(card_data.card_type)
-	var rarity = CardProbability.calculate_card_rarity(
-		card_data.damage, 
-		card_data.heal, 
-		card_data.shield
-	)
+	var rarity_enum = RaritySystem.calculate_card_rarity(card_data.damage, card_data.heal, card_data.shield)
+	cached_rarity_string = RaritySystem.get_rarity_string(rarity_enum)
 	var rarity_colors = _get_rarity_colors()
-	cached_rarity_multiplier = rarity_colors.get(rarity, 1.0)
+	cached_rarity_multiplier = rarity_colors.get(cached_rarity_string, 1.0)
 
 func get_card_data() -> CardData:
 	return card_data
@@ -291,7 +289,7 @@ func update_display():
 	name_label.text = card_data.card_name
 	cost_label.text = str(card_data.cost)
 	description_label.text = _generate_description()
-
+	
 	var rarity_text = DeckManager.get_card_rarity_text(card_data)
 	rarity_label.text = rarity_text
 	
@@ -301,13 +299,8 @@ func update_display():
 	cost_bg.color = cached_type_colors.cost_bg
 	art_bg.color = cached_type_colors.art_bg
 	rarity_bg.color = cached_type_colors.border * 0.8
-
-	var rarity = CardProbability.calculate_card_rarity(
-		card_data.damage, 
-		card_data.heal, 
-		card_data.shield
-	)
-	_apply_rarity_effects(rarity)
+	
+	_apply_rarity_effects(cached_rarity_string)
 	_load_card_illustration()
 	_update_stat_display()
 

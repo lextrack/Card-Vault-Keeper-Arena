@@ -2,10 +2,10 @@ class_name DeckManager
 extends RefCounted
 
 static func create_basic_deck() -> Array:
-	return CardProbability.create_balanced_deck(30, 0.8)
+	return DeckGenerator.create_balanced_deck(30, 0.8, 0.12, 0.08)
 
 static func create_random_deck() -> Array:
-	return CardProbability.create_weighted_deck(30)
+	return DeckGenerator.create_random_deck(30)
 
 static func create_discard_pile_deck(discard_pile: Array) -> Array:
 	var new_deck = discard_pile.duplicate()
@@ -44,7 +44,8 @@ static func should_restart_game(player_deck_size: int, ai_deck_size: int, player
 	return player_no_cards and ai_no_cards
 
 static func get_card_rarity_text(card: CardData) -> String:
-	var rarity = CardProbability.calculate_card_rarity(card.damage, card.heal, card.shield)
+	var rarity_enum = RaritySystem.calculate_card_rarity(card.damage, card.heal, card.shield)
+	var rarity = RaritySystem.get_rarity_string(rarity_enum)
 	match rarity:
 		"common":
 			return "[Common]"
