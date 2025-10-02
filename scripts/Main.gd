@@ -812,7 +812,7 @@ func _track_game_end(player_won: bool):
 		if damage_taken == 0:
 			UnlockManagers.track_progress("perfect_victory", 1, extra_data)
 		
-		if difficulty == "hard" and game_time <= 120:
+		if difficulty == "hard" and game_time <= 480:
 			UnlockManagers.track_progress("speed_win_hard", 1, extra_data)
 	
 	UnlockManagers.track_progress("game_ended", 1, extra_data)
