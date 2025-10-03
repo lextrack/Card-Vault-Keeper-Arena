@@ -295,7 +295,7 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 			_restore_gamepad_selection_immediate(player)
 		return
    
-	_rebuild_hand_display(player, card_scene, hand_container)
+	_rebuild_hand_display(player, card_scene, hand_container, true)  # false para no animar
    
 	selected_card_index = clamp(old_selected_index, 0, max(0, card_instances.size() - 1))
    
@@ -305,13 +305,14 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 
 	if should_preserve_gamepad:
 		_restore_gamepad_selection_immediate(player)
-
-func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_container: Container):
+		
+func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_container: Container, animate: bool = false):
 	for child in hand_container.get_children():
 		child.queue_free()
 	
 	card_instances.clear()
    
+	var card_index = 0
 	for card_data in player.hand:
 		if not card_data:
 			continue
@@ -335,6 +336,36 @@ func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_contain
    	
 		var can_play = main_scene.is_player_turn and player.can_play_card(card_data)
 		card_instance.set_playable(can_play)
+		
+		if animate:
+			_animate_card_spawn(card_instance, card_index)
+		
+		card_index += 1
+		
+func _animate_card_spawn(card: Card, index: int):
+	if not is_instance_valid(card):
+		return
+	
+	card.modulate.a = 0.0
+	card.scale = Vector2(0.5, 0.5)
+	var initial_y = card.position.y
+	card.position.y = initial_y
+	
+	var delay = index * 0.06
+	
+	await main_scene.get_tree().create_timer(delay).timeout
+	
+	if not is_instance_valid(card):
+		return
+	
+	var tween = main_scene.create_tween()
+	tween.set_parallel(true)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_BACK)
+	
+	tween.tween_property(card, "modulate:a", 1.0, 0.6)
+	tween.tween_property(card, "scale", Vector2(1.0, 1.0), 0.6)
+	tween.tween_property(card, "position:y", initial_y, 0.6)
 
 func _update_existing_cards_playability(player: Player):
 	var hand_size = min(card_instances.size(), player.hand.size())
@@ -517,7 +548,7 @@ func update_hand_display_no_animation(player: Player, card_scene: PackedScene, h
 	var should_preserve_gamepad = gamepad_selection_active and main_scene.is_player_turn
 	var old_selected_index = selected_card_index
 
-	_rebuild_hand_display(player, card_scene, hand_container)
+	_rebuild_hand_display(player, card_scene, hand_container, true)  # false para no animar
 	current_hand_fingerprint = _generate_hand_fingerprint(player.hand)
 	
 	selected_card_index = clamp(old_selected_index, 0, max(0, card_instances.size() - 1))

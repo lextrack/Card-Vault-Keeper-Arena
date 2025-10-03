@@ -28,6 +28,12 @@ var focusable_buttons: Array[Button] = []
 var current_focus_index: int = 0
 var returning_from_menu: bool = false
 
+@export var entrance_duration: float = 0.8
+@export var scale_duration: float = 0.6
+@export var title_pulse_duration: float = 1.5
+@export var initial_scale: Vector2 = Vector2(3.0, 1.5)
+@export var entry_offset_y: float = -50.0
+
 @export var options_menu_scene: PackedScene = preload("res://scenes/OptionsMenu.tscn")
 
 func _ready():
@@ -198,15 +204,13 @@ func handle_scene_entrance():
 	await get_tree().process_frame
 	
 	if TransitionManager and TransitionManager.current_overlay:
-		print("MainMenu: TransitionManager available")
-		
 		if (TransitionManager.current_overlay.has_method("is_ready") and 
 			TransitionManager.current_overlay.is_ready() and 
 			TransitionManager.current_overlay.has_method("is_covering") and
 			TransitionManager.current_overlay.is_covering()):
 
 			if returning_from_menu:
-				await TransitionManager.current_overlay.fade_out(0.5)
+				await TransitionManager.current_overlay.fade_out(0.8)
 				_reset_menu_state()
 			else:
 				await TransitionManager.current_overlay.fade_out(0.8)
@@ -249,22 +253,36 @@ func _on_statistics_pressed():
 	TransitionManager.fade_to_scene("res://scenes/StatisticsMenu.tscn", 1.0)
 
 func play_entrance_animation():
+	# Inicializar propiedades
 	modulate.a = 0.0
-	scale = Vector2(5.0, 1.0)
+	scale = initial_scale
+	position.y = entry_offset_y
 
-	var tween = create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(self, "modulate:a", 1.0, 0.8)
-	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.6)
+	# Crear un tween con transiciones suaves y paralelas
+	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	
+	# Animar opacidad, escala y posición
+	tween.tween_property(self, "modulate:a", 1.0, entrance_duration)
+	tween.tween_property(self, "scale", Vector2(1.0, 1.0), scale_duration)
+	tween.tween_property(self, "position:y", 0.0, entrance_duration * 0.9)
+	
+	# Esperar a que termine la animación
 	await tween.finished
-	animate_title()
+	
+	if game_title:
+		animate_title()
+	else:
+		push_warning("game_title is not assigned!")
 
 func animate_title():
-	var tween = create_tween()
-	tween.set_loops()
-	tween.tween_property(game_title, "modulate", Color(1.2, 1.2, 0.9, 1.0), 2.0)
-	tween.tween_property(game_title, "modulate", Color(1.0, 1.0, 0.8, 1.0), 2.0)
+	# Crear un tween cíclico para el título
+	var tween = create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	
+	# Animar brillo y movimiento vertical
+	tween.tween_property(game_title, "modulate", Color(1.3, 1.3, 1.0, 1.0), title_pulse_duration)
+	tween.tween_property(game_title, "modulate", Color(0.8, 0.8, 0.7, 1.0), title_pulse_duration)
+	tween.tween_property(game_title, "position:y", game_title.position.y + 10, title_pulse_duration)
+	tween.tween_property(game_title, "position:y", game_title.position.y, title_pulse_duration)
 
 func _on_play_pressed():
 	if is_transitioning or popup_active:
@@ -313,13 +331,13 @@ func show_options_menu():
 	_disable_menu_input()
 	
 	if TransitionManager and TransitionManager.current_overlay:
-		await TransitionManager.current_overlay.fade_in(0.5)
+		await TransitionManager.current_overlay.fade_in(0.8)
 		
-		await get_tree().create_timer(0.3).timeout
+		await get_tree().create_timer(0.4).timeout
 		
 		options_menu.show_options()
 		
-		await TransitionManager.current_overlay.fade_out(0.5)
+		await TransitionManager.current_overlay.fade_out(0.8)
 	else:
 		options_menu.show_options()
 	
@@ -356,7 +374,7 @@ func _show_exit_transition_immediate():
 		await get_tree().create_timer(0.4).timeout
 		
 		if TransitionManager.current_overlay.has_method("fade_out"):
-			await TransitionManager.current_overlay.fade_out(0.5)
+			await TransitionManager.current_overlay.fade_out(0.8)
 	
 	_enable_menu_input()
 	is_transitioning = false

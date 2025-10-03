@@ -90,19 +90,27 @@ func fade_to_main_menu(duration: float = 1.0):
 		get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 		return
 	
-	await current_overlay.fade_in(duration * 0.3)
+	await current_overlay.fade_in(duration * 0.5)
+	while current_overlay and not current_overlay.is_covering():
+		await get_tree().process_frame
 	
-	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+	var scene_path = "res://scenes/MainMenu.tscn"
+	var loader = ResourceLoader.load_threaded_request(scene_path)
+	while ResourceLoader.load_threaded_get_status(scene_path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		await get_tree().process_frame
 	
-	await get_tree().process_frame
-	await get_tree().process_frame
+	var scene = ResourceLoader.load_threaded_get(scene_path)
+	get_tree().change_scene_to_packed(scene)
 	
 	var main_menu = get_tree().current_scene
-	if main_menu and main_menu.has_method("_on_scene_entered"):
-		await get_tree().create_timer(0.1).timeout
-		main_menu._on_scene_entered()
+	if main_menu and not main_menu.is_inside_tree():
+		await main_menu.tree_entered
 	
-	await current_overlay.fade_out(duration * 0.5)
+	if main_menu and main_menu.has_method("on_scene_entered"):
+		await get_tree().create_timer(0.1).timeout
+		main_menu.on_scene_entered()
+	
+	await current_overlay.fade_out(duration * 0.7)
 
 func recreate_overlay():
 	if current_overlay:

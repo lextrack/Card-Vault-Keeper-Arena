@@ -65,12 +65,18 @@ func initialize_game():
 	_setup_options_menu()
 	_load_difficulty()
 	
+	animate_ui()
+	
 	if StatisticsManagers:
 		StatisticsManagers.start_game(difficulty)
 	
 	await handle_scene_entrance()
 	setup_game()
 	
+func animate_ui():
+	$AnimationPlayer.play("show_panels_main")
+	await $AnimationPlayer.animation_finished
+
 func _setup_options_menu():
 	options_menu = options_menu_scene.instantiate()
 	options_menu.setup(audio_manager, true)
@@ -549,16 +555,16 @@ func restart_game():
 	if restart_sound:
 		var audio_player = AudioStreamPlayer.new()
 		audio_player.stream = restart_sound
-		audio_player.volume_db = 5.0
+		audio_player.volume_db = 6.0
 		add_child(audio_player)
 		audio_player.play()
 		
 		audio_player.finished.connect(func(): audio_player.queue_free())
 
 	var tween = create_tween().set_parallel(true)
-	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 1), 1.5).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 1), 1.3).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(message_label, "modulate:a", 1.0, 0.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.6).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	
 	await tween.finished
 	await get_tree().create_timer(0.7).timeout
