@@ -257,6 +257,8 @@ func restore_game_from_saved_state():
 	player = game_manager.player
 	ai = game_manager.ai
 	
+	_connect_player_buff_signals()
+	
 	if not GameStateManager.restore_game_state(self):
 		push_error("Failed to restore game state, starting new game")
 		setup_game()
@@ -428,9 +430,14 @@ func setup_game():
 		
 	verify_and_startup_deck()
 	
+	if joker_buff_label:
+		joker_buff_label.visible = false
+	
 	game_manager.setup_new_game(difficulty)
 	player = game_manager.player
 	ai = game_manager.ai
+	
+	_connect_player_buff_signals()
 	
 	if not player:
 		push_error("Failed to create player in setup_game")
@@ -572,6 +579,10 @@ func restart_game():
 	is_game_transitioning = true
 	input_manager.disable_input()
 
+	if joker_buff_label:
+		joker_buff_label.visible = false
+		joker_buff_label.text = ""
+
 	var fade_rect = ColorRect.new()
 	fade_rect.color = Color(0, 0, 0, 0)
 	fade_rect.size = get_viewport_rect().size
@@ -637,12 +648,18 @@ func restart_game():
 func setup_game_with_new_music():
 	verify_and_startup_deck()
 	
+	if joker_buff_label:
+		joker_buff_label.visible = false
+		joker_buff_label.text = ""
+	
 	start_game_music(true)
 	
 	game_manager.setup_new_game(difficulty)
 	player = game_manager.player
 	ai = game_manager.ai
-
+	
+	_connect_player_buff_signals()
+	
 	last_bonus_notification_turn = -1
 
 	if damage_bonus_label:

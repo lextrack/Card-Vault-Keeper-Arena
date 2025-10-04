@@ -148,13 +148,14 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 					StatisticsManagers.combat_action("healing_done", total_heal)
 			
 			if card.shield > 0:
-				print("     Shield: ", card.shield, " protection")
-				add_shield(card.shield)
+				var total_shield = card.shield + buff_mods.shield_bonus
+				print("     Shield: ", card.shield, " base + ", buff_mods.shield_bonus, " buff = ", total_shield, " protection")
+				add_shield(total_shield)
 				if not is_ai and StatisticsManagers:
-					StatisticsManagers.combat_action("shield_gained", card.shield)
+					StatisticsManagers.combat_action("shield_gained", total_shield)
 				
 				if not is_ai and UnlockManagers:
-					UnlockManagers.track_progress("damage_blocked", card.shield)
+					UnlockManagers.track_progress("damage_blocked", total_shield)
 	
 	print("   Cards played after: ", cards_played_this_turn, "/", get_max_cards_per_turn())
 	print("   Mana after card: ", current_mana)
@@ -710,6 +711,7 @@ func apply_buff_to_card(card: CardData) -> Dictionary:
 	var modifications = {
 		"damage_bonus": 0,
 		"heal_bonus": 0,
+		"shield_bonus": 0,
 		"cost_reduction": 0,
 		"consumed_buffs": []
 	}
@@ -734,6 +736,8 @@ func apply_buff_to_card(card: CardData) -> Dictionary:
 					modifications.damage_bonus = int(card.damage * bonus_multiplier)
 				if card.heal > 0:
 					modifications.heal_bonus = card.heal * bonus_multiplier
+				if card.shield > 0:
+					modifications.shield_bonus = int(card.shield * bonus_multiplier)
 				modifications.consumed_buffs.append("hybrid_bonus")
 				print("   Applying hybrid buff: +", int(bonus_multiplier * 100), "%")
 	
