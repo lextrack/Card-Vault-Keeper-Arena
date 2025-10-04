@@ -12,7 +12,10 @@ static func from_template(template: Dictionary) -> CardData:
 	card.heal = template.get("heal", 0)
 	card.shield = template.get("shield", 0)
 	
-	card.description = ""
+	card.is_joker = template.get("is_joker", false)
+	card.joker_effect = template.get("joker_effect", "")
+	
+	card.description = template.get("description", "")
 	
 	return card
 
@@ -61,7 +64,9 @@ static func clone_card(original: CardData) -> CardData:
 		"damage": original.damage,
 		"heal": original.heal,
 		"shield": original.shield,
-		"type": original.card_type
+		"type": original.card_type,
+		"is_joker": original.is_joker,
+		"joker_effect": original.joker_effect
 	}
 	return from_template(template)
 
@@ -72,7 +77,9 @@ static func modify_card(original: CardData, modifications: Dictionary) -> CardDa
 		"damage": modifications.get("damage", original.damage),
 		"heal": modifications.get("heal", original.heal),
 		"shield": modifications.get("shield", original.shield),
-		"type": modifications.get("type", original.card_type)
+		"type": modifications.get("type", original.card_type),
+		"is_joker": modifications.get("is_joker", original.is_joker),
+		"joker_effect": modifications.get("joker_effect", original.joker_effect)
 	}
 	return from_template(template)
 

@@ -333,6 +333,47 @@ static func validate_database() -> Dictionary:
 			validation.warnings.append("Card possibly too powerful: " + name + " (power: " + str(power) + ")")
 	
 	return validation
+	
+static func get_joker_templates() -> Array[Dictionary]:
+	return [
+		{
+			"name": "Joker Strike",
+			"cost": 1,
+			"damage": 4,
+			"type": "attack",
+			"is_joker": true,
+			"joker_effect": "attack_bonus",
+			"description": "4 damage + next attack +4 damage"
+		},
+		{
+			"name": "Joker Heal",
+			"cost": 1,
+			"heal": 4,
+			"type": "heal",
+			"is_joker": true,
+			"joker_effect": "heal_bonus",
+			"description": "4 heal + next heal +50%"
+		},
+		{
+			"name": "Joker Shield",
+			"cost": 1,
+			"shield": 4,
+			"type": "shield",
+			"is_joker": true,
+			"joker_effect": "cost_reduction",
+			"description": "4 shield + next card -1 mana"
+		},
+		{
+			"name": "Joker Hybrid",
+			"cost": 2,
+			"damage": 3,
+			"heal": 3,
+			"type": "hybrid",
+			"is_joker": true,
+			"joker_effect": "hybrid_bonus",
+			"description": "3 damage + 3 heal + next hybrid +25%"
+		}
+	]
 
 # limpiar el cache
 static func clear_cache():

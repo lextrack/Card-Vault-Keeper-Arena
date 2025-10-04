@@ -13,7 +13,7 @@ var game_info_label: Label
 var game_over_label: Label
 var top_panel_bg: ColorRect
 var ui_layer: Control
-
+var joker_card_scene: PackedScene = null
 var card_instances: Array = []
 var selected_card_index: int = 0
 var original_ui_position: Vector2
@@ -29,8 +29,9 @@ const UPDATE_DELAY: float = 0.016  # ~1 frame a 60fps
 var player_turn_color = Color(0.08, 0.13, 0.18, 0.9)
 var ai_turn_color = Color(0.15, 0.08, 0.08, 0.9)
 
-func setup(main: Control):
+func setup(main: Control, joker_scene: PackedScene = null):
 	main_scene = main
+	joker_card_scene = joker_scene
 	_get_ui_references()
 	original_ui_position = ui_layer.position
 
@@ -92,7 +93,7 @@ func _has_playability_changed(player: Player) -> bool:
 	last_playability_fingerprint = new_fingerprint
 	return changed
 
-func handle_card_hover_audio(card: Card, hover_type: String):
+func handle_card_hover_audio(card, hover_type: String):
 	var audio_helper = main_scene.audio_helper
 	if not audio_helper:
 		return
@@ -311,16 +312,23 @@ func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_contain
 		child.queue_free()
 	
 	card_instances.clear()
-   
+	
 	var card_index = 0
 	for card_data in player.hand:
 		if not card_data:
 			continue
-   		
-		var card_instance = card_scene.instantiate()
+		
+		var card_instance = null
+		
+		if card_data.is_joker and joker_card_scene:
+			card_instance = joker_card_scene.instantiate()
+			print("   Using JokerCard scene for: ", card_data.card_name)
+		else:
+			card_instance = card_scene.instantiate()
+		
 		if not card_instance:
 			continue
-   	
+		
 		card_instance.set_card_data(card_data)
 		
 		card_instance.card_clicked.connect(main_scene._on_card_clicked)
@@ -330,10 +338,10 @@ func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_contain
 			card_instance.card_unhovered.connect(_on_card_gamepad_unhovered)
 		if card_instance.has_signal("mouse_entered"):
 			card_instance.mouse_entered.connect(_on_card_hover)
-   	
+		
 		hand_container.add_child(card_instance)
 		card_instances.append(card_instance)
-   	
+		
 		var can_play = main_scene.is_player_turn and player.can_play_card(card_data)
 		card_instance.set_playable(can_play)
 		
@@ -342,7 +350,7 @@ func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_contain
 		
 		card_index += 1
 		
-func _animate_card_spawn(card: Card, index: int):
+func _animate_card_spawn(card: Control, index: int):  # ← Cambiar de Card a Control
 	if not is_instance_valid(card):
 		return
 	
@@ -378,13 +386,13 @@ func _update_existing_cards_playability(player: Player):
 			var can_play = main_scene.is_player_turn and player.can_play_card(card_data)
 			card_instance.set_playable(can_play)
 
-func _on_card_gamepad_hovered(card: Card):
+func _on_card_gamepad_hovered(card):
 	if gamepad_selection_active:
 		handle_card_hover_audio(card, "gamepad_selection")
 	else:
 		handle_card_hover_audio(card, "gamepad_navigation")
 
-func _on_card_gamepad_unhovered(card: Card):
+func _on_card_gamepad_unhovered(card):
 	pass
 
 func _restore_gamepad_selection_immediate(player: Player):

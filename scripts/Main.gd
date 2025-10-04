@@ -35,7 +35,7 @@ var is_player_turn: bool = true
 var difficulty: String = "normal"
 var game_count: int = 1
 var is_game_transitioning: bool = false
-
+var joker_card_scene = preload("res://scenes/JokerCard.tscn")
 var card_scene = preload("res://scenes/Card.tscn")
 var ai_notification_scene = preload("res://scenes/AICardNotification.tscn")
 var game_notification_scene = preload("res://scenes/GameNotification.tscn")
@@ -263,7 +263,7 @@ func _on_unlock_progress_updated(bundle_id: String, current: int, required: int)
 
 func _setup_components():
 	ui_manager = UIManager.new()
-	ui_manager.setup(self)
+	ui_manager.setup(self, joker_card_scene)
 	
 	game_manager = GameManager.new()
 	game_manager.setup(self)
@@ -425,28 +425,8 @@ func start_player_turn():
 		ui_manager._clear_all_gamepad_selection_styles()
 		input_manager.start_player_turn()
 
-	player.turn_number += 1
-	player.current_mana = player.max_mana
-	player.cards_played_this_turn = 0
-	
-	var current_bonus = player.get_damage_bonus()
-	var is_bonus_turn = GameBalance.is_damage_bonus_turn(player.turn_number)
-	
-	var cards_to_draw = min(player.get_max_cards_per_turn(), player.max_hand_size - player.hand.size())
-	var cards_actually_drawn = 0
-	
-	for i in range(cards_to_draw):
-		if player.draw_card():
-			cards_actually_drawn += 1
-		else:
-			break
-	
-	if cards_actually_drawn == 0:
-		player.draw_card()
-	
-	player.mana_changed.emit(player.current_mana)
-	player.cards_played_changed.emit(player.cards_played_this_turn, player.get_max_cards_per_turn())
-	player.turn_changed.emit(player.turn_number, current_bonus)
+	# LLAMAR A LA FUNCIÓN start_turn() DEL PLAYER
+	player.start_turn()
 	
 	audio_helper.play_turn_change_sound(true)
 	ui_manager.start_player_turn(player, difficulty)
@@ -464,9 +444,6 @@ func start_player_turn():
 		input_manager.start_player_turn()
 	else:
 		input_manager.start_player_turn()
-	
-	if cards_actually_drawn > 0:
-		player.card_drawn.emit(cards_actually_drawn, true)
 		
 func start_ai_turn():
 	if not is_player_turn or game_manager.is_game_ended():
@@ -476,35 +453,17 @@ func start_ai_turn():
 	
 	input_manager.start_ai_turn()
 	
-	ai.turn_number += 1
-	ai.current_mana = ai.max_mana
-	ai.cards_played_this_turn = 0
+	# LLAMAR A LA FUNCIÓN start_turn() DE LA IA
+	ai.start_turn()
 
 	var current_bonus = ai.get_damage_bonus()
 	var is_bonus_turn = GameBalance.is_damage_bonus_turn(ai.turn_number)
-	
-	var cards_to_draw = min(ai.get_max_cards_per_turn(), ai.max_hand_size - ai.hand.size())
-	var cards_actually_drawn = 0
-	
-	for i in range(cards_to_draw):
-		if ai.draw_card():
-			cards_actually_drawn += 1
-		else:
-			break
-	
-	if cards_actually_drawn == 0:
-		ai.draw_card()
-	
-	ai.mana_changed.emit(ai.current_mana)
-	ai.cards_played_changed.emit(ai.cards_played_this_turn, ai.get_max_cards_per_turn())
 
 	if is_bonus_turn and current_bonus > 0 and last_bonus_notification_turn != ai.turn_number:
 		last_bonus_notification_turn = ai.turn_number
 		audio_helper.play_bonus_sound()
 		game_notification.show_damage_bonus_notification(ai.turn_number, current_bonus)
 		await get_tree().create_timer(0.5).timeout
-
-	ai.turn_changed.emit(ai.turn_number, current_bonus)
 	
 	if StatisticsManagers:
 		StatisticsManagers.turn_completed()
@@ -847,7 +806,7 @@ func _notification(what):
 		await get_tree().create_timer(0.5).timeout
 		get_tree().quit()
 
-func _on_card_clicked(card: Card):
+func _on_card_clicked(card):
 	if not is_player_turn or not player.can_play_card(card.card_data) or is_game_transitioning:
 		return
 	

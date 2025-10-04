@@ -2,6 +2,9 @@ class_name Player
 extends Node
 
 signal ai_damage_dealt(damage: int)
+signal buff_applied(buff_type: String, buff_value: Variant)
+signal buff_consumed(buff_type: String)
+signal buff_cleared
 
 @export var difficulty: String = "normal"
 @export var is_ai: bool = false
@@ -10,7 +13,7 @@ var max_hp: int
 var max_mana: int
 var max_hand_size: int
 var max_cards_per_turn: int
-
+var active_buffs: Dictionary = {}
 var current_hp: int
 var current_mana: int
 var current_shield: int = 0
@@ -73,19 +76,27 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 	
 	var damage_dealt = 0
 	var bonus_damage = get_damage_bonus()
+	
+	var buff_mods = {"damage_bonus": 0, "heal_bonus": 0, "cost_reduction": 0, "consumed_buffs": []}
+	if not card.is_joker:
+		buff_mods = apply_buff_to_card(card)
+	
+	if card.is_joker:
+		card.apply_joker_effect(self)
 
 	print("   DAMAGE CALCULATION DEBUG:")
 	print("   Player type: ", "AI" if is_ai else "Player")
 	print("   Turn number: ", turn_number)
 	print("   Base damage: ", card.damage)
-	print("   Calculated bonus: ", bonus_damage)
+	print("   Turn bonus: ", bonus_damage)
+	print("   Buff bonus: ", buff_mods.damage_bonus)
 	
 	match card.card_type:
 		"attack":
 			if target:
-				var total_damage = card.damage + bonus_damage
+				var total_damage = card.damage + bonus_damage + buff_mods.damage_bonus
 				damage_dealt = total_damage
-				print("    FINAL Attack: ", card.damage, " base + ", bonus_damage, " bonus = ", total_damage, " total damage")
+				print("    FINAL Attack: ", card.damage, " base + ", bonus_damage, " turn bonus + ", buff_mods.damage_bonus, " buff = ", total_damage, " total damage")
 				target.take_damage(total_damage)
 				
 				if not is_ai and UnlockManager:
@@ -100,10 +111,11 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 				print("Attack card played without target!")
 		
 		"heal":
-			print("  Heal: ", card.heal, " HP")
-			heal(card.heal)
+			var total_heal = card.heal + int(buff_mods.heal_bonus)
+			print("  Heal: ", card.heal, " base + ", int(buff_mods.heal_bonus), " buff = ", total_heal, " HP")
+			heal(total_heal)
 			if not is_ai and StatisticsManagers:
-				StatisticsManagers.combat_action("healing_done", card.heal)
+				StatisticsManagers.combat_action("healing_done", total_heal)
 		
 		"shield":
 			print("   Shield: ", card.shield, " protection")
@@ -117,9 +129,9 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 		"hybrid":
 			print("   Hybrid card effects:")
 			if card.damage > 0 and target:
-				var total_damage = card.damage + bonus_damage
+				var total_damage = card.damage + bonus_damage + buff_mods.damage_bonus
 				damage_dealt = total_damage
-				print("    FINAL Hybrid Attack: ", card.damage, " base + ", bonus_damage, " bonus = ", total_damage, " total damage")
+				print("    FINAL Hybrid Attack: ", card.damage, " base + ", bonus_damage, " turn bonus + ", buff_mods.damage_bonus, " buff = ", total_damage, " total damage")
 				target.take_damage(total_damage)
 				
 				if not is_ai and UnlockManagers:
@@ -131,10 +143,11 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 				print("Hybrid card with damage played without target!")
 			
 			if card.heal > 0:
-				print("     Heal: ", card.heal, " HP")
-				heal(card.heal)
+				var total_heal = card.heal + int(buff_mods.heal_bonus)
+				print("     Heal: ", card.heal, " base + ", int(buff_mods.heal_bonus), " buff = ", total_heal, " HP")
+				heal(total_heal)
 				if not is_ai and StatisticsManagers:
-					StatisticsManagers.combat_action("healing_done", card.heal)
+					StatisticsManagers.combat_action("healing_done", total_heal)
 			
 			if card.shield > 0:
 				print("     Shield: ", card.shield, " protection")
@@ -247,31 +260,63 @@ func add_shield(amount: int):
 	shield_changed.emit(current_shield)
 
 func spend_mana(amount: int) -> bool:
-	if current_mana >= amount:
-		current_mana -= amount
+	var final_cost = amount
+	
+	# Aplicar reducción de coste si hay buff activo
+	if active_buffs.has("cost_reduction"):
+		var reduction = int(active_buffs["cost_reduction"])
+		final_cost = max(0, amount - reduction)
+		active_buffs.erase("cost_reduction")
+		buff_consumed.emit("cost_reduction")
+		print("   Cost reduction applied: ", amount, " - ", reduction, " = ", final_cost, " mana")
+	
+	if current_mana >= final_cost:
+		current_mana -= final_cost
 		mana_changed.emit(current_mana)
 		return true
 	return false
+	
+func _get_ai_joker_chance() -> float:
+	match difficulty:
+		"normal":
+			return 0.95
+		"hard":
+			return 0.07
+		"expert":
+			return 0.10
+		_:
+			return 0.05
 
 func start_turn():
 	turn_number += 1
 	current_mana = max_mana
 	cards_played_this_turn = 0
 	
-	var cards_to_draw = min(get_max_cards_per_turn(), max_hand_size - hand.size())
-	var cards_actually_drawn = 0
+	clear_buffs()
 	
-	for i in range(cards_to_draw):
-		if draw_card():
-			cards_actually_drawn += 1
-		else:
-			break
+	# Usar refill_hand para incluir probabilidad de comodines
+	var joker_chance = 0.15 if not is_ai else _get_ai_joker_chance()
+	var refill_result = DeckManager.refill_hand(
+		hand, 
+		deck, 
+		discard_pile, 
+		max_hand_size, 
+		joker_chance, 
+		is_ai
+	)
 	
-	if cards_actually_drawn == 0:
-		draw_card()
+	# Si el deck se mezcló, notificar
+	if refill_result.deck_reshuffled:
+		print("   Deck reshuffled for ", "AI" if is_ai else "Player")
 	
+	# Si se añadió un comodín, notificar
+	if refill_result.joker_added:
+		print("   ✨ Joker card added to ", "AI" if is_ai else "Player", " hand!")
+	
+	# Notificar cambios
 	mana_changed.emit(current_mana)
 	cards_played_changed.emit(cards_played_this_turn, get_max_cards_per_turn())
+	hand_changed.emit()
 	
 	var current_bonus = get_damage_bonus()
 	turn_changed.emit(turn_number, current_bonus)
@@ -557,7 +602,15 @@ func ai_turn(opponent: Player):
 		
 		var chosen_card: CardData = null
 
-		if opponent.current_hp <= 12:
+		# Priorizar comodines si hay alguno disponible
+		for card in playable_cards:
+			if card.is_joker:
+				chosen_card = card
+				print("AI: Prioritizing Joker card: ", chosen_card.card_name)
+				break
+
+		# Buscar carta finisher si el oponente está bajo
+		if not chosen_card and opponent.current_hp <= 12:
 			var finisher_cards = []
 			for card in playable_cards:
 				if (card.card_type == "attack" and card.damage >= 10) or (card.card_type == "hybrid" and card.damage >= 8):
@@ -565,7 +618,8 @@ func ai_turn(opponent: Player):
 			if finisher_cards.size() > 0:
 				chosen_card = finisher_cards[0]
 				print("AI: Choosing finisher card: ", chosen_card.card_name)
-				
+		
+		# Buscar carta de curación si la IA está baja de HP
 		if not chosen_card and current_hp < max_hp * heal_threshold:
 			var heal_cards = []
 			for card in playable_cards:
@@ -575,6 +629,7 @@ func ai_turn(opponent: Player):
 				chosen_card = heal_cards[0]
 				print("AI: Choosing heal card: ", chosen_card.card_name)
 		
+		# Buscar carta de escudo si no tiene escudo
 		if not chosen_card and current_shield == 0 and opponent.current_mana >= 4 and randf() > aggression:
 			var shield_cards = []
 			for card in playable_cards:
@@ -584,6 +639,7 @@ func ai_turn(opponent: Player):
 				chosen_card = shield_cards[0]
 				print("AI: Choosing shield card: ", chosen_card.card_name)
 		
+		# Buscar carta de ataque más fuerte
 		if not chosen_card:
 			var attack_cards = []
 			for card in playable_cards:
@@ -597,6 +653,7 @@ func ai_turn(opponent: Player):
 				chosen_card = strongest
 				print("AI: Choosing strongest attack: ", chosen_card.card_name)
 
+		# Fallback
 		if not chosen_card:
 			chosen_card = playable_cards[0]
 			print("AI: Choosing fallback card: ", chosen_card.card_name)
@@ -605,6 +662,7 @@ func ai_turn(opponent: Player):
 			var ai_bonus = get_damage_bonus()
 			print("   AI chosen card details:")
 			print("   Card: ", chosen_card.card_name, " | Type: ", chosen_card.card_type)
+			print("   Is Joker: ", chosen_card.is_joker)
 			print("   Base damage: ", chosen_card.damage, " | AI turn: ", turn_number, " | AI bonus: ", ai_bonus)
 			if chosen_card.card_type == "attack" or (chosen_card.card_type == "hybrid" and chosen_card.damage > 0):
 				var expected_total = chosen_card.damage + ai_bonus
@@ -655,6 +713,55 @@ func stop_ai_turn():
 
 func is_ai_turn_active() -> bool:
 	return is_ai and ai_turn_active
+	
+func clear_buffs():
+	if active_buffs.size() > 0:
+		print("   Clearing ", active_buffs.size(), " active buffs for ", "AI" if is_ai else "Player")
+		active_buffs.clear()
+		buff_cleared.emit()
+
+func apply_buff_to_card(card: CardData) -> Dictionary:
+	var modifications = {
+		"damage_bonus": 0,
+		"heal_bonus": 0,
+		"cost_reduction": 0,
+		"consumed_buffs": []
+	}
+	
+	if active_buffs.has("cost_reduction") and card.cost > 0:
+		var reduction = int(active_buffs["cost_reduction"])
+		modifications.cost_reduction = reduction
+		modifications.consumed_buffs.append("cost_reduction")
+		print("   Applying cost reduction: -", reduction, " mana")
+	
+	match card.card_type:
+		"attack":
+			if active_buffs.has("attack_bonus"):
+				modifications.damage_bonus = int(active_buffs["attack_bonus"])
+				modifications.consumed_buffs.append("attack_bonus")
+				print("   Applying attack buff: +", modifications.damage_bonus, " damage")
+		
+		"heal":
+			if active_buffs.has("heal_bonus"):
+				modifications.heal_bonus = card.heal * active_buffs["heal_bonus"]
+				modifications.consumed_buffs.append("heal_bonus")
+				print("   Applying heal buff: +", modifications.heal_bonus, " healing")
+		
+		"hybrid":
+			if active_buffs.has("hybrid_bonus"):
+				var bonus_multiplier = active_buffs["hybrid_bonus"]
+				if card.damage > 0:
+					modifications.damage_bonus = int(card.damage * bonus_multiplier)
+				if card.heal > 0:
+					modifications.heal_bonus = card.heal * bonus_multiplier
+				modifications.consumed_buffs.append("hybrid_bonus")
+				print("   Applying hybrid buff: +", int(bonus_multiplier * 100), "% to all effects")
+	
+	for buff in modifications.consumed_buffs:
+		active_buffs.erase(buff)
+		buff_consumed.emit(buff)
+	
+	return modifications
 
 func verify_game_state() -> Dictionary:
 	return {
