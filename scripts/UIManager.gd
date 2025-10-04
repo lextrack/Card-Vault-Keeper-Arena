@@ -436,13 +436,13 @@ func update_turn_button_text(player: Player, end_turn_button: Button, gamepad_mo
 		end_turn_button.modulate = Color(0.8, 0.8, 0.8, 1.0)
 	else:
 		end_turn_button.modulate = Color.WHITE
-		end_turn_button.text = "🎮 End Turn" if gamepad_mode else "End Turn"
+		end_turn_button.text = "End Turn" if gamepad_mode else "End Turn"
 
 func reset_turn_button(end_turn_button: Button, gamepad_mode: bool = false):
 	if not end_turn_button:
 		return
 	end_turn_button.disabled = false
-	end_turn_button.text = "🎮 End Turn" if gamepad_mode else "End Turn"
+	end_turn_button.text = "End Turn" if gamepad_mode else "End Turn"
 
 func update_cards_played_info(cards_played: int, max_cards: int, difficulty: String):
 	game_info_label.text = "Cards: %d/%d | %s" % [cards_played, max_cards, difficulty.to_upper()]

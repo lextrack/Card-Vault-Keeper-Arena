@@ -8,6 +8,7 @@ var games_played: int = 0
 var games_won: int = 0
 var games_lost: int = 0
 var total_play_time: float = 0.0
+var jokers_played: int = 0
 
 var difficulty_stats: Dictionary = {
 	"normal": {"played": 0, "won": 0, "lost": 0, "total_time": 0.0},
@@ -103,7 +104,7 @@ func end_game(player_won: bool, difficulty: String, final_turns: int):
 	print("Game ended - Win: ", player_won, " | Time: ", "%.1f" % game_time, "s | Turns: ", final_turns)
 
 
-func card_played(card_name: String, card_type: String, card_cost: int, player_won_game: bool = false):
+func card_played(card_name: String, card_type: String, card_cost: int, is_joker: bool = false, player_won_game: bool = false):
 	cards_played_total += 1
 	
 	if cards_played_by_type.has(card_type):
@@ -118,6 +119,10 @@ func card_played(card_name: String, card_type: String, card_cost: int, player_wo
 	most_effective_cards[card_name]["total"] += 1
 	
 	total_mana_spent += card_cost
+	
+	# Nuevo: Contar Jokers jugados
+	if is_joker:
+		jokers_played += 1
 
 func mark_cards_for_win():
 	for card_name in cards_used_count.keys():
@@ -179,7 +184,7 @@ func get_most_effective_cards(limit: int = 10) -> Array:
 	
 	for card_name in most_effective_cards.keys():
 		var card_stats = most_effective_cards[card_name]
-		if card_stats.total >= 5: 
+		if card_stats.total >= 5:
 			var win_rate = float(card_stats.wins) / float(card_stats.total)
 			effective_cards.append({
 				"name": card_name,
@@ -261,7 +266,8 @@ func save_statistics():
 		"current_win_streak": current_win_streak,
 		"current_loss_streak": current_loss_streak,
 		"best_win_streak": best_win_streak,
-		"worst_loss_streak": worst_loss_streak
+		"worst_loss_streak": worst_loss_streak,
+		"jokers_played": jokers_played
 	}
 	
 	var file = FileAccess.open(save_file_path, FileAccess.WRITE)
@@ -317,6 +323,7 @@ func load_statistics():
 	current_loss_streak = data.get("current_loss_streak", 0)
 	best_win_streak = data.get("best_win_streak", 0)
 	worst_loss_streak = data.get("worst_loss_streak", 0)
+	jokers_played = data.get("jokers_played", 0)
 	
 	print("Statistics loaded - Games played: ", games_played)
 
@@ -349,6 +356,7 @@ func reset_statistics():
 	current_loss_streak = 0
 	best_win_streak = 0
 	worst_loss_streak = 0
+	jokers_played = 0
 	
 	save_statistics()
 	stats_updated.emit()
@@ -386,7 +394,8 @@ func get_comprehensive_stats() -> Dictionary:
 			"by_type": cards_played_by_type,
 			"most_used": get_most_used_cards(5),
 			"most_effective": get_most_effective_cards(5),
-			"favorite_type": get_favorite_card_type()
+			"favorite_type": get_favorite_card_type(),
+			"jokers_played": jokers_played,
 		},
 		"combat": get_combat_efficiency(),
 		"streaks": {

@@ -19,96 +19,96 @@ func _ready():
 		topics_buttons_container.get_child(0).grab_focus()
 
 var help_topics = {
-	"📖 Basic Rules": """[font_size=24][color=yellow]⚔️ GAME RULES[/color][/font_size]
+	"Basic Rules": """[font_size=24][color=yellow]GAME RULES[/color][/font_size]
 
-[font_size=18][color=lightblue]🎯 OBJECTIVE:[/color][/font_size]
+[font_size=18][color=lightblue]OBJECTIVE:[/color][/font_size]
 Reduce your opponent's health to 0 to win the match.
 
-[font_size=18][color=lightblue]🎮 TURNS:[/color][/font_size]
+[font_size=18][color=lightblue]TURNS:[/color][/font_size]
 • Each turn you receive full mana and draw cards
 • You can play cards by paying their mana cost
 • You have a card limit per turn (2 cards)
 • When you end your turn, the opponent plays. You can end the turn manually
 
-[font_size=18][color=lightblue]💎 RESOURCES:[/color][/font_size]
+[font_size=18][color=lightblue]RESOURCES:[/color][/font_size]
 • [color=red]HEALTH[/color]: If it reaches 0, you lose the match
 • [color=cyan]MANA[/color]: Used to play cards, regenerates each turn
 • [color=orange]CARDS[/color]: This is your arsenal. Its availability varies depending on the cards you have unlocked in Challenge Hub
 • [color=white]DECKS[/color]: Available card count (automatically replenished, you'll never run out)""",
 
-	"🃏  Card Types": """[font_size=24][color=yellow]🗂️ CARD TYPES[/color][/font_size]
+	"Card Types": """[font_size=24][color=yellow]CARD TYPES[/color][/font_size]
 
-[font_size=18][color=red]⚔️ ATTACK CARDS:[/color][/font_size]
+[font_size=18][color=red]ATTACK CARDS:[/color][/font_size]
 • Deal direct damage to the opponent
 • First affects shield, then health
 • Examples: Basic Strike (1 damage)
 
-[font_size=18][color=green]💚 HEALING CARDS:[/color][/font_size]
+[font_size=18][color=green]HEALING CARDS:[/color][/font_size]
 • Restore your lost health
 • Can be used even exceeding your max health
 • Examples: Bandage (2 health)
 
-[font_size=18][color=cyan]🛡️ SHIELD CARDS:[/color][/font_size]
+[font_size=18][color=cyan]SHIELD CARDS:[/color][/font_size]
 • Absorb incoming damage
 • Stack if used consecutively
 • Don't regenerate automatically
 • Examples: Block (2 shield)
 
-[font_size=18][color=yellow]🌟 HYBRID CARDS:[/color][/font_size]
+[font_size=18][color=yellow]HYBRID CARDS:[/color][/font_size]
 • They have two attributes from other cards
 • They can heal you and attack the enemy, or heal you and give you a shield, etc
 • Examples: Guardian's Touch (4 heal and 6 shield)""",
 
-	"🎴 Understand the Cards": "[center][img=850x540]res://assets/backgrounds/card_explanation.png[/img][/center]",
+	"Understand the Cards": "[center][img=850x540]res://assets/backgrounds/card_explanation.png[/img][/center]",
 
-	"⭐ Rarity System": """[font_size=24][color=yellow]💎 CARD RARITY[/color][/font_size]
+	"Rarity System": """[font_size=24][color=yellow]CARD RARITY[/color][/font_size]
 
-[font_size=18][color=white]⚪ COMMON:[/color][/font_size]
+[font_size=18][color=white]COMMON:[/color][/font_size]
 • Basic balanced cards
 • Appear frequently
 • Simple but useful effects
 • Example: Basic Strike, Bandage
 
-[font_size=18][color=green]🟢 UNCOMMON:[/color][/font_size]
+[font_size=18][color=green]UNCOMMON:[/color][/font_size]
 • More powerful effects than common cards
 • Appear occasionally
 • More visual shine
 • Example: Sharp Sword, Potion
 
-[font_size=18][color=cyan]🔵 RARE:[/color][/font_size]
+[font_size=18][color=cyan]RARE:[/color][/font_size]
 • Very powerful cards
 • Only appear sometimes
 • Distinctive blue glow
 • Example: Critical Strike, Major Heal
 
-[font_size=18][color=magenta]🟣 EPIC:[/color][/font_size]
+[font_size=18][color=magenta]EPIC:[/color][/font_size]
 • Most powerful in the game
 • Devastating effects
 • Example: Annihilation (20 damage)""",
 
-	"⚔️ Combat System": """[font_size=24][color=yellow]🎲 COMBAT MECHANICS[/color][/font_size]
+	"Combat System": """[font_size=24][color=yellow]COMBAT MECHANICS[/color][/font_size]
 
-[font_size=18][color=cyan]💥 DAMAGE & SHIELD:[/color][/font_size]
+[font_size=18][color=cyan]DAMAGE & SHIELD:[/color][/font_size]
 • Shield absorbs damage before health
 • If damage exceeds shield, the difference goes to health
 • Stack shields using multiple cards
 
-[font_size=18][color=red]🔥 DAMAGE BONUS:[/color][/font_size]
+[font_size=18][color=red]DAMAGE BONUS:[/color][/font_size]
 • [color=orange]Turn 5:[/color] +1 damage to all attacks
-• [color=orange]Turn 8:[/color] +2 damage to all attacks  
+• [color=orange]Turn 8:[/color] +2 damage to all attacks
 • [color=orange]Turn 12:[/color] +3 damage to all attacks
 • [color=orange]Turn 16+:[/color] +4 damage to all attacks
 • After reaching these thresholds, the bonus applies automatically to all combatants
 
-[font_size=18][color=green]🔄 CARD RECYCLING:[/color][/font_size]
+[font_size=18][color=green]CARD RECYCLING:[/color][/font_size]
 • When the deck is empty, used cards are reshuffled
 • You'll never run completely out of options
 • Strategy changes based on available cards
 • Card recycling and drawing is automatic, no action required""",
 
-	"🎮 Controls": """[font_size=24][color=yellow]🕹️ GAME CONTROLS[/color][/font_size]
+	"Controls": """[font_size=24][color=yellow]GAME CONTROLS[/color][/font_size]
 
-[font_size=18][color=orange]🎯 IN-GAME CONTROLS:[/color][/font_size]
+[font_size=18][color=orange]IN-GAME CONTROLS:[/color][/font_size]
 [font_size=16][color=white]With Controller (Xbox):[/color][/font_size]
 - [color=lime]Left/Right (D-pad):[/color] Navigate between cards
 - [color=lime]A:[/color] Play the selected card
@@ -126,20 +126,20 @@ Reduce your opponent's health to 0 to win the match.
 - [color=lime]TAB:[/color] Open the options menu
 - [color=lime]H:[/color] View full key mapping during gameplay""",
 
-	"🏪 Challenge Hub": """[font_size=24][color=yellow]🏆 CHALLENGE HUB[/color][/font_size]
+	"Challenge Hub": """[font_size=24][color=yellow]CHALLENGE HUB[/color][/font_size]
 
-[font_size=18][color=cyan]🤖 THE CARD CURATOR:[/color][/font_size]
+[font_size=18][color=cyan]THE CARD CURATOR:[/color][/font_size]
 • An AI that guards powerful card bundles
 • Complete challenges to prove your worth
 • She will be your final opponent in combat
 
-[font_size=18][color=lime]🎯 CHALLENGE SYSTEM:[/color][/font_size]
+[font_size=18][color=lime]CHALLENGE SYSTEM:[/color][/font_size]
 • [color=yellow]Combat Challenges:[/color] Win matches under specific conditions
 • [color=yellow]Victory Streaks:[/color] Win consecutive battles
 • [color=yellow]Difficulty Tests:[/color] Complete matches on higher difficulties
 • [color=yellow]Strategic Goals:[/color] Use specific card types or tactics
 
-[font_size=18][color=red]🔓 UNLOCKING BUNDLES:[/color][/font_size]
+[font_size=18][color=red]UNLOCKING BUNDLES:[/color][/font_size]
 • Each bundle has specific requirements
 • Progress is tracked automatically""",
 }
@@ -148,8 +148,8 @@ func handle_scene_entrance():
 	await get_tree().process_frame
 	
 	if TransitionManager and TransitionManager.current_overlay:
-		if (TransitionManager.current_overlay.has_method("is_ready") and 
-			TransitionManager.current_overlay.is_ready() and 
+		if (TransitionManager.current_overlay.has_method("is_ready") and
+			TransitionManager.current_overlay.is_ready() and
 			TransitionManager.current_overlay.has_method("is_covering") and
 			TransitionManager.current_overlay.is_covering()):
 			

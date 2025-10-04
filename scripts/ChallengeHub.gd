@@ -835,7 +835,7 @@ func _on_debug_pressed():
 		load_shop_data()
 		queue_dialog_sequence(["*The vault bends to your will* All secrets revealed."])
 		
-		debug_button.text = "🗑️ RESET ALL"
+		debug_button.text = "RESET ALL"
 		debug_mode_unlock = false
 		
 	else:
@@ -844,7 +844,7 @@ func _on_debug_pressed():
 		load_shop_data()
 		queue_dialog_sequence(["*The vault seals itself once more* Prove yourself again, warrior."])
 		
-		debug_button.text = "🔓 UNLOCK ALL"
+		debug_button.text = "UNLOCK ALL"
 		debug_mode_unlock = true
 
 func _on_button_hover(button: Button):

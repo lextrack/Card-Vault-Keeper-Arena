@@ -4,7 +4,6 @@ extends Control
 @onready var bundle_name = $CardPanel/VBoxContainer/HeaderContainer/BundleName
 @onready var price_container = $CardPanel/VBoxContainer/HeaderContainer/PriceContainer
 @onready var price_label = $CardPanel/VBoxContainer/HeaderContainer/PriceContainer/PriceLabel
-@onready var status_icon = $CardPanel/VBoxContainer/StatusContainer/StatusIcon
 @onready var status_label = $CardPanel/VBoxContainer/StatusContainer/StatusLabel
 @onready var card_icons_container = $CardPanel/VBoxContainer/PreviewContainer/CardIconsContainer
 @onready var rarity_info = $CardPanel/VBoxContainer/PreviewContainer/RarityInfo
@@ -49,7 +48,7 @@ func _mark_setup_complete():
 
 func _validate_nodes() -> bool:
 	var required_nodes = [
-		bundle_name, status_icon, status_label, card_icons_container,
+		bundle_name, status_label, card_icons_container,
 		rarity_info, description_label, requirement_label, 
 		progress_bar, progress_label, unlock_button,
 		background_gradient, border_highlight, card_shadow
@@ -161,7 +160,7 @@ func update_rarity_info_display(is_unlocked: bool):
 	rarity_info.modulate = rarity_color
 	
 	if OS.is_debug_build():
-		print("🎴 Bundle ", bundle_info.get("name", ""), " rarity info: ", rarity_text)
+		print("Bundle ", bundle_info.get("name", ""), " rarity info: ", rarity_text)
 
 func _generate_rarity_text_from_cards(card_names: Array) -> String:
 	if not UnlockManagers:
@@ -375,23 +374,20 @@ func _safe_set_color(node: Node, color: Color):
 		node.modulate = color
 
 func update_status_display(is_unlocked: bool, can_unlock: bool):
-	if not status_icon or not status_label or not unlock_button:
+	if not status_label or not unlock_button:
 		return
 	
 	if is_unlocked:
-		_safe_set_text(status_icon, "✅")
 		_safe_set_text(status_label, "UNLOCKED")
 		status_label.modulate = Color(0.4, 1, 0.4, 1)
 		_safe_set_visible(unlock_button, false)
 	elif can_unlock:
-		_safe_set_text(status_icon, "🔓")
 		_safe_set_text(status_label, "READY TO UNLOCK")
 		status_label.modulate = Color(1, 0.8, 0.2, 1)
 		_safe_set_visible(unlock_button, true)
 		unlock_button.disabled = false
-		_safe_set_text(unlock_button, "🎁 UNLOCK NOW")
+		_safe_set_text(unlock_button, "UNLOCK NOW")
 	else:
-		_safe_set_text(status_icon, "🔒")
 		_safe_set_text(status_label, "LOCKED")
 		status_label.modulate = Color(0.7, 0.7, 0.7, 1)
 		_safe_set_visible(unlock_button, false)

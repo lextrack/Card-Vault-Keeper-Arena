@@ -90,7 +90,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 24
-text = "👨‍💻 DEVELOPMENT"
+text = "DEVELOPMENT"
 horizontal_alignment = 1
 
 [node name="DevName" type="Label" parent="MainContainer/CreditsContainer/LeftColumn/DevelopmentSection"]
@@ -118,7 +118,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.4, 1, 1)
 theme_override_font_sizes/font_size = 24
-text = "🛠️ TECHNOLOGY"
+text = "TECHNOLOGY"
 horizontal_alignment = 1
 
 [node name="EngineCredit" type="Label" parent="MainContainer/CreditsContainer/LeftColumn/TechSection"]
@@ -159,7 +159,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.6, 0.4, 1)
 theme_override_font_sizes/font_size = 24
-text = "🎨 ART & UI"
+text = "ART & UI"
 horizontal_alignment = 1
 
 [node name="UICredit" type="Label" parent="MainContainer/CreditsContainer/MiddleColumn/ArtSection"]
@@ -179,7 +179,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
 theme_override_font_sizes/font_size = 24
-text = "🙏 SPECIAL THANKS"
+text = "SPECIAL THANKS"
 horizontal_alignment = 1
 
 [node name="FreesoundCredit" type="Label" parent="MainContainer/CreditsContainer/MiddleColumn/ThanksSection"]
@@ -213,7 +213,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 24
-text = "🎵 MUSIC"
+text = "MUSIC"
 horizontal_alignment = 1
 
 [node name="MusicCredit1" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
@@ -262,7 +262,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 1, 0.4, 1)
 theme_override_font_sizes/font_size = 24
-text = "🔊 SOUND EFFECTS"
+text = "SOUND EFFECTS"
 horizontal_alignment = 1
 
 [node name="SFXCredit1" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
@@ -323,7 +323,7 @@ alignment = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 0.8, 1)
 theme_override_font_sizes/font_size = 16
-text = "© 2025 Lextrack Studios"
+text = "Lextrack Studios"
 horizontal_alignment = 1
 
 [node name="InstructionsLabel" type="Label" parent="MainContainer/FooterContainer"]

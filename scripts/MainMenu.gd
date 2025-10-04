@@ -396,7 +396,11 @@ func _on_button_hover(button: Button):
 	if not gamepad_mode or (gamepad_mode and button.has_focus()):
 		play_hover_sound()
 		var tween = create_tween()
-		tween.tween_property(button, "scale", Vector2(1.05, 1.05), 0.1)
+		tween.set_parallel(true)
+		tween.set_ease(Tween.EASE_OUT)
+		tween.set_trans(Tween.TRANS_CUBIC)
+		tween.tween_property(button, "scale", Vector2(1.03, 1.03), 0.2)
+		tween.tween_property(button, "modulate", Color(1.2, 1.2, 1.1, 1.0), 0.2) # Blanco cálido suave
 
 func _on_button_unhover(button: Button):
 	if not is_instance_valid(button):
@@ -404,7 +408,11 @@ func _on_button_unhover(button: Button):
 	
 	if not gamepad_mode or (gamepad_mode and not button.has_focus()):
 		var tween = create_tween()
-		tween.tween_property(button, "scale", Vector2(1.0, 1.0), 0.1)
+		tween.set_parallel(true)
+		tween.set_ease(Tween.EASE_IN)
+		tween.set_trans(Tween.TRANS_CUBIC)
+		tween.tween_property(button, "scale", Vector2(1.0, 1.0), 0.2)
+		tween.tween_property(button, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.2)
 
 func _on_button_focus(button: Button):
 	if popup_active or not is_instance_valid(button) or is_transitioning:
@@ -412,11 +420,13 @@ func _on_button_focus(button: Button):
 	
 	if gamepad_mode:
 		play_hover_sound()
-		
 		var tween = create_tween()
 		tween.set_parallel(true)
-		tween.tween_property(button, "modulate", Color(1.2, 1.2, 1.2, 1.0), 0.1)
-		tween.tween_property(button, "scale", Vector2(1.05, 1.05), 0.1)
+		tween.set_ease(Tween.EASE_OUT)
+		tween.set_trans(Tween.TRANS_CUBIC)
+		tween.tween_property(button, "scale", Vector2(1.04, 1.04), 0.2)
+		tween.tween_property(button, "modulate", Color(0.9, 1.1, 1.3, 1.0), 0.2) # Azul claro para foco
+		tween.tween_property(button, "position:y", button.position.y - 3.0, 0.2) # Subida sutil
 	
 	var index = focusable_buttons.find(button)
 	if index != -1:
@@ -429,30 +439,12 @@ func _on_button_unfocus(button: Button):
 	if gamepad_mode:
 		var tween = create_tween()
 		tween.set_parallel(true)
-		tween.tween_property(button, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.1)
-		tween.tween_property(button, "scale", Vector2(1.0, 1.0), 0.1)
+		tween.set_ease(Tween.EASE_IN)
+		tween.set_trans(Tween.TRANS_CUBIC)
+		tween.tween_property(button, "scale", Vector2(1.0, 1.0), 0.2)
+		tween.tween_property(button, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.2)
+		tween.tween_property(button, "position:y", button.position.y + 3.0, 0.2)
 
-func show_coming_soon(message: String):
-	popup_active = true
-	_disable_menu_input()
-	
-	transition_label.text = message
-	transition_layer.visible = true
-	transition_layer.modulate.a = 0.0
-	
-	var tween = create_tween()
-	tween.tween_property(transition_layer, "modulate:a", 0.8, 0.3)
-	
-	await tween.finished
-	await get_tree().create_timer(1.5).timeout
-	
-	tween = create_tween()
-	tween.tween_property(transition_layer, "modulate:a", 0.0, 0.3)
-	await tween.finished
-	
-	transition_layer.visible = false
-	popup_active = false
-	_enable_menu_input()
 
 func exit_game():
 	is_transitioning = true

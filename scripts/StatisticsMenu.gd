@@ -31,6 +31,7 @@ extends Control
 @onready var healing_per_game_label = $MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CombatContainer/HealingPerGameLabel
 @onready var shield_per_game_label = $MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CombatContainer/ShieldPerGameLabel
 @onready var mana_efficiency_label = $MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CombatContainer/ManaEfficiencyLabel
+@onready var jokers_played_label: Label = $MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview/JokersPlayedLabel
 
 @onready var back_button = $MainContainer/ButtonsContainer/BackButton
 @onready var refresh_button = $MainContainer/ButtonsContainer/RefreshButton
@@ -117,15 +118,15 @@ func refresh_statistics():
 	avg_game_time_label.text = "Average Game: %s" % statistics_manager.format_time(basic.average_game_time)
 	
 	var difficulty = stats.difficulty
-	normal_stats.text = "🟢 NORMAL: %d games (%.1f%% win rate)" % [
+	normal_stats.text = "NORMAL: %d games (%.1f%% win rate)" % [
 		difficulty.normal.played, 
 		statistics_manager.get_win_rate_by_difficulty("normal") * 100.0
 	]
-	hard_stats.text = "🟠 HARD: %d games (%.1f%% win rate)" % [
+	hard_stats.text = "HARD: %d games (%.1f%% win rate)" % [
 		difficulty.hard.played, 
 		statistics_manager.get_win_rate_by_difficulty("hard") * 100.0
 	]
-	expert_stats.text = "🔴 EXPERT: %d games (%.1f%% win rate)" % [
+	expert_stats.text = "EXPERT: %d games (%.1f%% win rate)" % [
 		difficulty.expert.played, 
 		statistics_manager.get_win_rate_by_difficulty("expert") * 100.0
 	]
@@ -161,21 +162,25 @@ func refresh_statistics():
 	favorite_type_label.text = "Favorite Type: %s" % cards.favorite_type.capitalize()
 	
 	var total_cards = max(1, cards.total_played)
-	attack_type_label.text = "  ⚔️ Attack: %d (%.1f%%)" % [
+	attack_type_label.text = "Attack: %d (%.1f%%)" % [
 		cards.by_type.get("attack", 0),
 		float(cards.by_type.get("attack", 0)) / total_cards * 100.0
 	]
-	heal_type_label.text = "  💚 Heal: %d (%.1f%%)" % [
+	heal_type_label.text = "Heal: %d (%.1f%%)" % [
 		cards.by_type.get("heal", 0),
 		float(cards.by_type.get("heal", 0)) / total_cards * 100.0
 	]
-	shield_type_label.text = "  🛡️ Shield: %d (%.1f%%)" % [
+	shield_type_label.text = "Shield: %d (%.1f%%)" % [
 		cards.by_type.get("shield", 0),
 		float(cards.by_type.get("shield", 0)) / total_cards * 100.0
 	]
-	hybrid_type_label.text = "  🌟 Hybrid: %d (%.1f%%)" % [
+	hybrid_type_label.text = "Hybrid: %d (%.1f%%)" % [
 		cards.by_type.get("hybrid", 0),
 		float(cards.by_type.get("hybrid", 0)) / total_cards * 100.0
+	]
+	jokers_played_label.text = "Total Jokers used: %d (%.1f%%)" % [
+	cards.jokers_played,
+	float(cards.jokers_played) / max(1, cards.total_played) * 100.0
 	]
 	
 	for child in most_used_container.get_children():

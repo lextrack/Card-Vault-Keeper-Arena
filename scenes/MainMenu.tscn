@@ -1,8 +1,28 @@
-[gd_scene load_steps=4 format=3 uid="uid://cxw6tc65b0iwr"]
+[gd_scene load_steps=8 format=3 uid="uid://cxw6tc65b0iwr"]
 
 [ext_resource type="Script" uid="uid://cgqsikv5uk8v4" path="res://scripts/MainMenu.gd" id="1_main_menu"]
 [ext_resource type="AudioStream" uid="uid://bi56v68uk67c8" path="res://audio/music/MainMenuMusic.ogg" id="2_0ykhv"]
 [ext_resource type="Script" uid="uid://b6wqi7wvh7nk7" path="res://scripts/CardRainBackground.gd" id="3_card_rain"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ow34m"]
+bg_color = Color(0.09803922, 0.13725491, 0.09803922, 0.7058824)
+shadow_size = 5
+shadow_offset = Vector2(2, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2wh52"]
+bg_color = Color(0.09803922, 0.09803922, 0.09803922, 0.7058824)
+shadow_size = 5
+shadow_offset = Vector2(2, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l72w3"]
+bg_color = Color(0.13725491, 0.09803922, 0.09803922, 0.7058824)
+shadow_size = 5
+shadow_offset = Vector2(2, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_826wr"]
+bg_color = Color(0.12941177, 0.13333334, 0.050980393, 0.7058824)
+shadow_size = 5
+shadow_offset = Vector2(2, 0)
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -112,6 +132,7 @@ custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_ow34m")
 text = "START GAME"
 
 [node name="OptionsButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -119,6 +140,7 @@ custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_2wh52")
 text = "OPTIONS"
 
 [node name="HelpButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -126,6 +148,7 @@ custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_2wh52")
 text = "HELP"
 
 [node name="ChallengeButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -133,6 +156,7 @@ custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_l72w3")
 text = "CHALLENGE HUB"
 
 [node name="CreditsButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -140,6 +164,7 @@ custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_2wh52")
 text = "CREDITS"
 
 [node name="StatsButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -147,6 +172,7 @@ custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_2wh52")
 text = "STATS"
 
 [node name="ExitButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -154,6 +180,7 @@ custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_826wr")
 text = "EXIT"
 
 [node name="FooterContainer" type="VBoxContainer" parent="."]
@@ -224,6 +251,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 24
-text = "Cargando..."
+text = "Loading..."
 horizontal_alignment = 1
 vertical_alignment = 1

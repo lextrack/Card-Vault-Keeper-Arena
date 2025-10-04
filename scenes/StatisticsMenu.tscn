@@ -51,7 +51,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 0.8, 1)
 theme_override_font_sizes/font_size = 36
-text = "📊 STATISTICS"
+text = "STATISTICS"
 horizontal_alignment = 1
 
 [node name="SessionInfo" type="Label" parent="MainContainer/HeaderContainer"]
@@ -105,7 +105,7 @@ size_flags_vertical = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
 theme_override_font_sizes/font_size = 20
-text = "🎮 GENERAL STATS"
+text = "GENERAL STATS"
 
 [node name="BasicStatsSeparator" type="HSeparator" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
 layout_mode = 2
@@ -145,7 +145,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
 theme_override_font_sizes/font_size = 20
-text = "⚖️ BY DIFFICULTY"
+text = "BY DIFFICULTY"
 
 [node name="DifficultySeparator" type="HSeparator" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
 layout_mode = 2
@@ -157,19 +157,19 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 16
-text = "🟢 NORMAL: 0 games (0% win rate)"
+text = "NORMAL: 0 games (0% win rate)"
 
 [node name="HardStats" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/DifficultyContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.6, 0.2, 1)
 theme_override_font_sizes/font_size = 16
-text = "🟠 HARD: 0 games (0% win rate)"
+text = "HARD: 0 games (0% win rate)"
 
 [node name="ExpertStats" type="Label" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent/DifficultyContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
 theme_override_font_sizes/font_size = 16
-text = "🔴 EXPERT: 0 games (0% win rate)"
+text = "EXPERT: 0 games (0% win rate)"
 
 [node name="Spacer3" type="Control" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
 custom_minimum_size = Vector2(0, 20)
@@ -179,7 +179,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
 theme_override_font_sizes/font_size = 20
-text = "🔥 STREAKS & RECORDS"
+text = "STREAKS & RECORDS"
 
 [node name="StreaksSeparator" type="HSeparator" parent="MainContainer/ContentContainer/LeftPanel/LeftScrollContainer/LeftContent"]
 layout_mode = 2
@@ -250,7 +250,7 @@ size_flags_vertical = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
 theme_override_font_sizes/font_size = 20
-text = "🃏 CARD STATISTICS"
+text = "CARD STATISTICS"
 
 [node name="CardsSeparator" type="HSeparator" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
 layout_mode = 2
@@ -263,6 +263,12 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_font_sizes/font_size = 16
 text = "Total Cards Played: 0"
+
+[node name="JokersPlayedLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "Jokers: 0 (0%)"
 
 [node name="FavoriteTypeLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview"]
 layout_mode = 2
@@ -277,25 +283,25 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
 theme_override_font_sizes/font_size = 16
-text = "  ⚔️ Attack: 0 (0%)"
+text = "Attack: 0 (0%)"
 
 [node name="HealTypeLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview/TypeBreakdown"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 1, 0.4, 1)
 theme_override_font_sizes/font_size = 16
-text = "  💚 Heal: 0 (0%)"
+text = "Heal: 0 (0%)"
 
 [node name="ShieldTypeLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview/TypeBreakdown"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.4, 1, 1)
 theme_override_font_sizes/font_size = 16
-text = "  🛡️ Shield: 0 (0%)"
+text = "Shield: 0 (0%)"
 
 [node name="HybridTypeLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent/CardsOverview/TypeBreakdown"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.4, 1, 1)
 theme_override_font_sizes/font_size = 16
-text = "  🌟 Hybrid: 0 (0%)"
+text = "Hybrid: 0 (0%)"
 
 [node name="Spacer5" type="Control" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
 custom_minimum_size = Vector2(0, 15)
@@ -305,7 +311,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
 theme_override_font_sizes/font_size = 18
-text = "📈 MOST USED CARDS"
+text = "MOST USED CARDS"
 
 [node name="MostUsedSeparator" type="HSeparator" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
 layout_mode = 2
@@ -341,7 +347,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
 theme_override_font_sizes/font_size = 18
-text = "⚔️ COMBAT EFFICIENCY"
+text = "COMBAT EFFICIENCY"
 
 [node name="CombatSeparator" type="HSeparator" parent="MainContainer/ContentContainer/RightPanel/RightScrollContainer/RightContent"]
 layout_mode = 2

@@ -14,11 +14,10 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4"]
-bg_color = Color(0.25, 0.35, 0.55, 1)
-border_color = Color(0.6, 0.9, 1, 1)
-shadow_color = Color(0.3, 0.6, 1, 0.5)
-shadow_size = 4
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3"]
+bg_color = Color(0.2, 0.301961, 0.501961, 0.8)
+shadow_color = Color(0.2, 0.4, 0.8, 0.3)
+shadow_size = 2
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5"]
 bg_color = Color(0.2, 0.3, 0.45, 1)
@@ -26,10 +25,11 @@ border_color = Color(0.5, 0.8, 1, 0.9)
 shadow_color = Color(0.2, 0.4, 0.8, 0.4)
 shadow_size = 3
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3"]
-bg_color = Color(0.2, 0.301961, 0.501961, 0.8)
-shadow_color = Color(0.2, 0.4, 0.8, 0.3)
-shadow_size = 2
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4"]
+bg_color = Color(0.25, 0.35, 0.55, 1)
+border_color = Color(0.6, 0.9, 1, 1)
+shadow_color = Color(0.3, 0.6, 1, 0.5)
+shadow_size = 4
 
 [node name="OptionsMenu" type="Control"]
 z_index = 1000
@@ -139,7 +139,7 @@ theme_override_constants/margin_bottom = 5
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 20
-text = "🔊 AUDIO SETTINGS"
+text = "AUDIO SETTINGS"
 horizontal_alignment = 1
 
 [node name="AudioSettingsContainer" type="MarginContainer" parent="MainPanel/VBoxContainer/ScrollContainer/SettingsContainer/AudioSection/AudioVBox"]
@@ -227,7 +227,7 @@ theme_override_constants/margin_bottom = 5
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 20
-text = "🖥️ VIDEO SETTINGS"
+text = "VIDEO SETTINGS"
 horizontal_alignment = 1
 
 [node name="VideoSettingsContainer" type="MarginContainer" parent="MainPanel/VBoxContainer/ScrollContainer/SettingsContainer/VideoSection/VideoVBox"]
@@ -258,9 +258,9 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/hover = SubResource("StyleBoxFlat_4")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_5")
 theme_override_styles/normal = SubResource("StyleBoxFlat_3")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_4")
 alignment = 1
 
 [node name="ResolutionContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/SettingsContainer/VideoSection/VideoVBox/VideoSettingsContainer/VideoSettings"]
@@ -281,9 +281,9 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/hover = SubResource("StyleBoxFlat_4")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_5")
 theme_override_styles/normal = SubResource("StyleBoxFlat_3")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_4")
 alignment = 1
 
 [node name="VsyncContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer/ScrollContainer/SettingsContainer/VideoSection/VideoVBox/VideoSettingsContainer/VideoSettings"]
@@ -304,9 +304,9 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/hover = SubResource("StyleBoxFlat_4")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_5")
 theme_override_styles/normal = SubResource("StyleBoxFlat_3")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_4")
 toggle_mode = true
 text = "VSync: ON"
 

@@ -65,7 +65,7 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 	print("Playing card: ", card.card_name, " (", card.card_type, ") | Cost: ", card.cost, " | Turn: ", turn_number)
 	
 	if not is_ai and StatisticsManagers:
-		StatisticsManagers.card_played(card.card_name, card.card_type, card.cost)
+		StatisticsManagers.card_played(card.card_name, card.card_type, card.cost, card.is_joker)
 	
 	spend_mana(card.cost)
 	discard_pile.append(card)
@@ -293,7 +293,7 @@ func start_turn():
 	clear_buffs()
 	
 	#JOKER PROBABILITY FOR THE PLAYER
-	var joker_chance = 0.65 if not is_ai else _get_ai_joker_chance()
+	var joker_chance = 0.45 if not is_ai else _get_ai_joker_chance()
 	var refill_result = DeckManager.refill_hand(
 		hand, 
 		deck, 
