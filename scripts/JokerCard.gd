@@ -16,10 +16,10 @@ extends Control
 @onready var joker_bg = $CardBackground/CardBorder/CardInner/VBox/JokerContainer
 @onready var art_bg = $CardBackground/CardBorder/CardInner/VBox/ArtContainer
 
-const ATTACK_VIDEO = preload("res://assets/backgrounds/attack1.ogv")
-const HEAL_VIDEO = preload("res://assets/backgrounds/heal1.ogv")
-const SHIELD_VIDEO = preload("res://assets/backgrounds/shield1.ogv")
-const HYBRID_VIDEO = preload("res://assets/backgrounds/hybrid1.ogv")
+const ATTACK_VIDEO = preload("res://assets/backgrounds/joker_strike.ogv")
+const HEAL_VIDEO = preload("res://assets/backgrounds/joker_heal.ogv")
+const SHIELD_VIDEO = preload("res://assets/backgrounds/joker_shield.ogv")
+const HYBRID_VIDEO = preload("res://assets/backgrounds/joker_hybrid.ogv")
 
 signal card_clicked(card: JokerCard)
 signal card_played(card: JokerCard)
@@ -274,7 +274,7 @@ func update_display():
 	print("DescriptionLabel visible: ", description_label.visible)
 	print("DescriptionLabel size: ", description_label.size)
 	
-	joker_label.text = "[CORINGA]"
+	joker_label.text = "JOKER"
 	
 	_update_panel_color(card_bg, JOKER_COLORS.background)
 	_update_panel_color(card_border, JOKER_COLORS.border)
@@ -316,7 +316,6 @@ func _load_card_illustration():
 		card_icon.loop = true
 		card_icon.autoplay = true
 		card_icon.play()
-		# Tinte dorado para el video
 		card_icon.modulate = Color(1.2, 1.1, 0.8, 1.0)
 
 func set_card_data(data: CardData):

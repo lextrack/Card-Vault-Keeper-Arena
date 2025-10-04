@@ -24,6 +24,7 @@ func save_game_state(main_scene: Control):
 		"player_cards_played": main_scene.player.cards_played_this_turn,
 		"player_turn_number": main_scene.player.turn_number,
 		"player_was_low_hp": main_scene.player.was_at_low_hp_this_game,
+		"player_active_buffs": main_scene.player.active_buffs.duplicate(),
 		
 		"ai_hp": main_scene.ai.current_hp,
 		"ai_max_hp": main_scene.ai.max_hp,
@@ -49,6 +50,8 @@ func save_game_state(main_scene: Control):
 	
 	is_game_saved = true
 	print("Game state saved successfully with ", available_cards_snapshot.size(), " cards in snapshot")
+	if main_scene.player.active_buffs.size() > 0:
+		print("Saved active buffs: ", main_scene.player.active_buffs)
 	return true
 
 func _serialize_cards(cards: Array) -> Array:
@@ -62,7 +65,9 @@ func _serialize_cards(cards: Array) -> Array:
 				"damage": card.damage,
 				"heal": card.heal,
 				"shield": card.shield,
-				"description": card.description
+				"description": card.description,
+				"is_joker": card.is_joker,
+				"joker_effect": card.joker_effect
 			})
 	return serialized
 
@@ -84,6 +89,15 @@ func restore_game_state(main_scene: Control) -> bool:
 		main_scene.player.hand = _deserialize_cards(saved_game_state.get("player_hand", []))
 		main_scene.player.deck = _deserialize_cards(saved_game_state.get("player_deck", []))
 		main_scene.player.discard_pile = _deserialize_cards(saved_game_state.get("player_discard", []))
+		
+		if saved_game_state.has("player_active_buffs"):
+			main_scene.player.active_buffs = saved_game_state.player_active_buffs.duplicate()
+			print("Restored active buffs: ", main_scene.player.active_buffs)
+			
+			for buff_type in main_scene.player.active_buffs.keys():
+				var buff_value = main_scene.player.active_buffs[buff_type]
+				if main_scene.has_method("_on_player_buff_applied"):
+					main_scene._on_player_buff_applied(buff_type, buff_value)
 	
 	if main_scene.ai:
 		main_scene.ai.current_hp = saved_game_state.get("ai_hp", 50)
@@ -123,6 +137,8 @@ func _deserialize_cards(serialized_cards: Array) -> Array:
 		card.heal = card_data.get("heal", 0)
 		card.shield = card_data.get("shield", 0)
 		card.description = card_data.get("description", "")
+		card.is_joker = card_data.get("is_joker", false)
+		card.joker_effect = card_data.get("joker_effect", "")
 		cards.append(card)
 	return cards
 

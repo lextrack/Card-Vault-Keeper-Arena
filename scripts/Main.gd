@@ -57,8 +57,6 @@ func _ready():
 		await initialize_game_from_saved_state()
 	else:
 		await initialize_game()
-	
-	_connect_player_buff_signals()
 
 func _connect_player_buff_signals():
 	await get_tree().process_frame
@@ -244,6 +242,9 @@ func verify_deck_consistency_after_unlock():
 	
 	for card in all_cards:
 		if card is CardData:
+			if card.is_joker:
+				continue
+			
 			if not UnlockManagers.is_card_available(card.card_name):
 				inconsistencies.append(card.card_name)
 	

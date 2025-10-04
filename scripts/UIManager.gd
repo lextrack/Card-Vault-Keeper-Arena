@@ -463,11 +463,11 @@ func update_damage_bonus_indicator(player: Player, damage_bonus_label: Label):
 
 func _get_damage_bonus_data(bonus: int) -> Dictionary:
 	match bonus:
-		1: return {"text": "⚔️ +1 DMG", "color": Color(1.0, 0.8, 0.2, 1.0)}
-		2: return {"text": "⚔️ +2 DMG", "color": Color(1.0, 0.4, 0.2, 1.0)}
-		3: return {"text": "💀 +3 DMG", "color": Color(1.0, 0.2, 0.2, 1.0)}
-		4: return {"text": "🔥 +4 DMG", "color": Color(0.8, 0.2, 0.8, 1.0)}
-		_: return {"text": "⚔️ +%d DMG" % bonus, "color": Color(0.6, 0.2, 0.6, 1.0)}
+		1: return {"text": "+1 DMG", "color": Color(1.0, 0.8, 0.2, 1.0)}
+		2: return {"text": "+2 DMG", "color": Color(1.0, 0.4, 0.2, 1.0)}
+		3: return {"text": "+3 DMG", "color": Color(1.0, 0.2, 0.2, 1.0)}
+		4: return {"text": "+4 DMG", "color": Color(0.8, 0.2, 0.8, 1.0)}
+		_: return {"text": "+%d DMG" % bonus, "color": Color(0.6, 0.2, 0.6, 1.0)}
 
 func reset_damage_bonus_indicator(damage_bonus_label: Label):
 	if damage_bonus_label:

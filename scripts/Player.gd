@@ -80,7 +80,6 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 	
 	if card.is_joker:
 		card.apply_joker_effect(self)
-		print("   Joker effect applied for next card")
 	
 	print("   DAMAGE CALCULATION DEBUG:")
 	print("   Player type: ", "AI" if is_ai else "Player")
@@ -277,13 +276,14 @@ func spend_mana(amount: int) -> bool:
 func _get_ai_joker_chance() -> float:
 	match difficulty:
 		"normal":
-			return 0.15
+			return 0.85
 		"hard":
-			return 0.18
+			return 0.19
 		"expert":
-			return 0.22
+			return 0.25
 		_:
 			return 0.15
+			
 
 func start_turn():
 	turn_number += 1
@@ -292,7 +292,8 @@ func start_turn():
 	
 	clear_buffs()
 	
-	var joker_chance = 0.50 if not is_ai else _get_ai_joker_chance()
+	#JOKER PROBABILITY FOR THE PLAYER
+	var joker_chance = 0.65 if not is_ai else _get_ai_joker_chance()
 	var refill_result = DeckManager.refill_hand(
 		hand, 
 		deck, 

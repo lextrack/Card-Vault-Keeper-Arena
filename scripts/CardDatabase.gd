@@ -343,7 +343,7 @@ static func get_joker_templates() -> Array[Dictionary]:
 			"type": "attack",
 			"is_joker": true,
 			"joker_effect": "attack_bonus",
-			"description": "4 damage + next attack +4 damage"
+			"description": "4 damage + next attack +4 damage (this turn)"
 		},
 		{
 			"name": "Coringa Heal",
@@ -352,7 +352,7 @@ static func get_joker_templates() -> Array[Dictionary]:
 			"type": "heal",
 			"is_joker": true,
 			"joker_effect": "heal_bonus",
-			"description": "4 heal + next heal +50%"
+			"description": "4 heal + next heal +50% (this turn)"
 		},
 		{
 			"name": "Coringa Shield",
@@ -361,7 +361,7 @@ static func get_joker_templates() -> Array[Dictionary]:
 			"type": "shield",
 			"is_joker": true,
 			"joker_effect": "cost_reduction",
-			"description": "4 shield + next card -1 mana"
+			"description": "4 shield + next card -1 mana (this turn)"
 		},
 		{
 			"name": "Coringa Hybrid",
@@ -371,7 +371,7 @@ static func get_joker_templates() -> Array[Dictionary]:
 			"type": "hybrid",
 			"is_joker": true,
 			"joker_effect": "hybrid_bonus",
-			"description": "3 damage + 3 heal + next hybrid +70%"
+			"description": "3 damage + 3 heal + next hybrid +50% (this turn)"
 		}
 	]
 

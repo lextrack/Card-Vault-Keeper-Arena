@@ -21,8 +21,11 @@
 shader = ExtResource("14_3p2gp")
 shader_parameter/color1 = Color(0.5, 0.15, 0.25, 0.6)
 shader_parameter/color2 = Color(0.2, 0.3, 0.6, 0.7)
+shader_parameter/color3 = Color(0.35, 0.25, 0.45, 0.65)
 shader_parameter/speed = 0.2
 shader_parameter/scale = 5.0
+shader_parameter/distortion = 0.3
+shader_parameter/glow_intensity = 0.4
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ft6cd"]
 shader = ExtResource("15_3p2gp")
@@ -415,7 +418,7 @@ horizontal_alignment = 1
 [node name="HPTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/HPStat"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "❤️ HEALTH"
+text = "HEALTH"
 horizontal_alignment = 1
 
 [node name="ManaStat" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer"]
@@ -433,7 +436,7 @@ horizontal_alignment = 1
 [node name="ManaTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/ManaStat"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "⚡ MANA"
+text = "MANA"
 horizontal_alignment = 1
 
 [node name="ShieldStat" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer"]
@@ -451,7 +454,7 @@ horizontal_alignment = 1
 [node name="ShieldTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/ShieldStat"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "🛡️ SHIELD"
+text = "SHIELD"
 horizontal_alignment = 1
 
 [node name="CenterInfo" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer"]
@@ -476,15 +479,15 @@ horizontal_alignment = 1
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
-theme_override_font_sizes/font_size = 20
-text = "⚔️ +1 DMG"
+theme_override_font_sizes/font_size = 16
+text = " X DMG"
 horizontal_alignment = 1
 
 [node name="JokerBuffLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/CenterInfo"]
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 16
 text = "Buff Active"
 horizontal_alignment = 1
 
@@ -528,7 +531,7 @@ horizontal_alignment = 1
 [node name="HPTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/HPStat"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "❤️ AI HEALTH"
+text = "AI HEALTH"
 horizontal_alignment = 1
 
 [node name="ManaStat" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer"]
@@ -546,7 +549,7 @@ horizontal_alignment = 1
 [node name="ManaTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/ManaStat"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "⚡ AI MANA"
+text = "AI MANA"
 horizontal_alignment = 1
 
 [node name="ShieldStat" type="VBoxContainer" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer"]
@@ -564,7 +567,7 @@ horizontal_alignment = 1
 [node name="ShieldTitle" type="Label" parent="UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/ShieldStat"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "🛡️ AI SHIELD"
+text = "AI SHIELD"
 horizontal_alignment = 1
 
 [node name="CenterArea" type="Control" parent="UILayer"]
@@ -594,8 +597,8 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -47.0
-offset_right = 8.0
-offset_bottom = 2.0
+offset_right = 16.0
+offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 0
 
@@ -610,21 +613,19 @@ color = Color(0.101961, 0.14902, 0.25098, 0.392157)
 
 [node name="TurnButtonsContainer" type="HBoxContainer" parent="UILayer/BottomPanel"]
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
 offset_left = -80.0
-offset_top = -20.0
+offset_top = 4.0
 offset_right = 80.0
-offset_bottom = 20.0
+offset_bottom = 44.0
 grow_horizontal = 2
-grow_vertical = 2
 alignment = 1
 
 [node name="EndTurnButton" type="Button" parent="UILayer/BottomPanel/TurnButtonsContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
 focus_mode = 0
 theme_override_font_sizes/font_size = 20
 text = "End Turn"

@@ -46,7 +46,7 @@ static func get_player_config(difficulty: String) -> Dictionary:
 	match difficulty:
 		"normal":
 			return {
-				"hp": 40,
+				"hp": 45,
 				"mana": DEFAULT_MANA,
 				"cards_per_turn": 2,
 				"hand_size": 6,
@@ -54,7 +54,7 @@ static func get_player_config(difficulty: String) -> Dictionary:
 			}
 		"hard":
 			return {
-				"hp": 45,
+				"hp": 50,
 				"mana": DEFAULT_MANA,
 				"cards_per_turn": 2,
 				"hand_size": 5,
@@ -62,7 +62,7 @@ static func get_player_config(difficulty: String) -> Dictionary:
 			}
 		"expert":
 			return {
-				"hp": 50,
+				"hp": 55,
 				"mana": 9,
 				"cards_per_turn": 2,
 				"hand_size": 5,
@@ -75,7 +75,7 @@ static func get_ai_config(difficulty: String) -> Dictionary:
 	match difficulty:
 		"normal":
 			return {
-				"hp": 30,
+				"hp": 38,
 				"mana": DEFAULT_MANA,
 				"cards_per_turn": 2,
 				"hand_size": DEFAULT_HAND_SIZE,
@@ -85,7 +85,7 @@ static func get_ai_config(difficulty: String) -> Dictionary:
 			}
 		"hard":
 			return {
-				"hp": 40,
+				"hp": 45,
 				"mana": DEFAULT_MANA,
 				"cards_per_turn": 2,
 				"hand_size": DEFAULT_HAND_SIZE,
@@ -95,7 +95,7 @@ static func get_ai_config(difficulty: String) -> Dictionary:
 			}
 		"expert":
 			return {
-				"hp": 45,
+				"hp": 50,
 				"mana": 11, 
 				"cards_per_turn": 2,
 				"hand_size": 6,
