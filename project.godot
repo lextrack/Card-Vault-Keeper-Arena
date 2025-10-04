@@ -123,3 +123,4 @@ end_turn_specific={
 
 textures/vram_compression/import_etc2_astc=true
 textures/default_filters/anisotropic_filtering_level=3
+anti_aliasing/quality/msaa_2d=1

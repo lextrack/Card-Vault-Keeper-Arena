@@ -598,14 +598,14 @@ func _apply_navigation_change(old_index: int, new_index: int, player: Player):
 		if is_instance_valid(new_card) and new_card.has_method("apply_gamepad_selection_style"):
 			new_card.apply_gamepad_selection_style()
 
-func get_selected_card() -> Card:
+func get_selected_card():
 	if card_instances.size() > 0 and selected_card_index < card_instances.size():
 		var selected_card = card_instances[selected_card_index]
 		if is_instance_valid(selected_card):
 			return selected_card
 	return null
 
-func is_card_selected(card: Card) -> bool:
+func is_card_selected(card) -> bool:
 	if not is_instance_valid(card):
 		return false
 	var selected_card = get_selected_card()

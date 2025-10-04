@@ -5,6 +5,7 @@ extends Control
 @onready var back_button = $MainContainer/ButtonsContainer/BackButton
 @onready var ui_player = $AudioManager/UIPlayer
 @onready var hover_player = $AudioManager/HoverPlayer
+@onready var animation_player = $AnimationPlayer
 
 var is_transitioning: bool = false
 var selected_topic_button: Button = null
@@ -114,7 +115,7 @@ Reduce your opponent's health to 0 to win the match.
 - [color=lime]A:[/color] Play the selected card
 - [color=lime]B:[/color] End your turn
 - [color=lime]X:[/color] Restart the match
-- [color=lime]Back/View:[/color]  Return to the main menu
+- [color=lime]Back/View:[/color] Return to the main menu
 - [color=lime]START:[/color] Open the options menu
 - [color=lime]RB:[/color] View full key mapping during gameplay
 
@@ -202,6 +203,7 @@ func _on_topic_selected(topic_name: String, button: Button):
 	button.modulate = Color(1.2, 1.2, 0.8, 1)
 	
 	content_label.text = help_topics[topic_name]
+	animation_player.play("content_change")
 	
 	play_ui_sound("select")
 

@@ -906,14 +906,22 @@ func _notification(what):
 		get_tree().quit()
 
 func _on_card_clicked(card):
-	if not is_player_turn or not player.can_play_card(card.card_data) or is_game_transitioning:
+	if not is_player_turn or is_game_transitioning:
+		return
+	
+	var card_data = null
+	if card.has_method("get_card_data"):
+		card_data = card.get_card_data()
+	else:
+		card_data = card.card_data
+	
+	if not card_data or not player.can_play_card(card_data):
 		return
 	
 	if not player.can_play_more_cards():
 		card.animate_mana_insufficient()
 		return
 
-	var card_data = card.card_data
 	var card_type = card_data.card_type
 	var card_name = card_data.card_name
 	var card_cost = card_data.cost

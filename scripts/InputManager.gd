@@ -246,8 +246,9 @@ func _handle_card_selection():
 		return
 		
 	var selected_card = main_scene.ui_manager.get_selected_card()
-	if selected_card:
-		if not main_scene.player.can_play_card(selected_card.card_data):
+	if selected_card and selected_card.has_method("get_card_data"):
+		var card_data = selected_card.get_card_data()
+		if not main_scene.player.can_play_card(card_data):
 			selected_card.animate_mana_insufficient()
 			return
 			

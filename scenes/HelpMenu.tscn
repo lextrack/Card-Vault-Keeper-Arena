@@ -1,6 +1,63 @@
-[gd_scene load_steps=2 format=3 uid="uid://c1ejnsrjlokjm"]
+[gd_scene load_steps=7 format=3 uid="uid://c1ejnsrjlokjm"]
 
 [ext_resource type="Script" uid="uid://cxiev32ucvdht" path="res://scripts/HelpMenu.gd" id="1_6vayk"]
+[ext_resource type="Shader" uid="uid://cstqok5jb3sb" path="res://shaders/DifficultyMenu.gdshader" id="2_3ctgx"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5kwh8"]
+shader = ExtResource("2_3ctgx")
+shader_parameter/color1 = Color(0.5, 0.15, 0.25, 0.6)
+shader_parameter/color2 = Color(0.2, 0.3, 0.6, 0.7)
+shader_parameter/speed = 1.3
+shader_parameter/scale = 3.0
+
+[sub_resource type="Animation" id="Animation_1"]
+resource_name = "content_change"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("MainContainer/ContentContainer/ContentPanel:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.16666667, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0.5), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("MainContainer/ContentContainer/ContentPanel:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.16666667, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.02, 1.02), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_6vayk"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("MainContainer:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(30, 20)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_2"]
+_data = {
+&"RESET": SubResource("Animation_6vayk"),
+&"content_change": SubResource("Animation_1")
+}
 
 [node name="HelpMenu" type="Control"]
 layout_mode = 3
@@ -28,7 +85,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.05, 0.1, 0.2, 1)
+color = Color(0.14226434, 0.4846266, 0.12169295, 1)
+
+[node name="BackgroundPattern" type="ColorRect" parent="BackgroundLayer"]
+material = SubResource("ShaderMaterial_5kwh8")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="MainContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -38,7 +105,7 @@ anchor_bottom = 1.0
 offset_left = 30.0
 offset_top = 20.0
 offset_right = -30.0
-offset_bottom = -20.0
+offset_bottom = -20.000244
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -157,7 +224,7 @@ alignment = 1
 custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "⬅️ BACK"
+text = "BACK"
 
 [node name="AudioManager" type="Node" parent="."]
 
@@ -166,3 +233,8 @@ volume_db = -5.0
 
 [node name="HoverPlayer" type="AudioStreamPlayer" parent="AudioManager"]
 volume_db = -12.0
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_2")
+}
