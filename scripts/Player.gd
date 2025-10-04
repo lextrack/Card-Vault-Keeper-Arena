@@ -76,13 +76,12 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 	var damage_dealt = 0
 	var bonus_damage = get_damage_bonus()
 	
-	var buff_mods = {"damage_bonus": 0, "heal_bonus": 0, "cost_reduction": 0, "consumed_buffs": []}
-	if not card.is_joker:
-		buff_mods = apply_buff_to_card(card)
+	var buff_mods = apply_buff_to_card(card)
 	
 	if card.is_joker:
 		card.apply_joker_effect(self)
-
+		print("   Joker effect applied for next card")
+	
 	print("   DAMAGE CALCULATION DEBUG:")
 	print("   Player type: ", "AI" if is_ai else "Player")
 	print("   Turn number: ", turn_number)
@@ -277,13 +276,13 @@ func spend_mana(amount: int) -> bool:
 func _get_ai_joker_chance() -> float:
 	match difficulty:
 		"normal":
-			return 0.95
+			return 0.15
 		"hard":
-			return 0.07
+			return 0.18
 		"expert":
-			return 0.10
+			return 0.22
 		_:
-			return 0.05
+			return 0.15
 
 func start_turn():
 	turn_number += 1
@@ -292,7 +291,7 @@ func start_turn():
 	
 	clear_buffs()
 	
-	var joker_chance = 0.15 if not is_ai else _get_ai_joker_chance()
+	var joker_chance = 0.50 if not is_ai else _get_ai_joker_chance()
 	var refill_result = DeckManager.refill_hand(
 		hand, 
 		deck, 
@@ -524,7 +523,7 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 				if not is_ai and StatisticsManagers:
 					StatisticsManagers.combat_action("damage_dealt", damage_dealt)
 			elif card.damage > 0 and not target:
-				print("⚠️ Hybrid card with damage played without target!")
+				print("Hybrid card with damage played without target!")
 			
 			if card.heal > 0:
 				print("     Heal: ", card.heal, " HP")
@@ -595,14 +594,12 @@ func ai_turn(opponent: Player):
 		
 		var chosen_card: CardData = null
 
-		# Priorizar comodines si hay alguno disponible
 		for card in playable_cards:
 			if card.is_joker:
 				chosen_card = card
 				print("AI: Prioritizing Joker card: ", chosen_card.card_name)
 				break
 
-		# Buscar carta finisher si el oponente está bajo
 		if not chosen_card and opponent.current_hp <= 12:
 			var finisher_cards = []
 			for card in playable_cards:
@@ -612,7 +609,6 @@ func ai_turn(opponent: Player):
 				chosen_card = finisher_cards[0]
 				print("AI: Choosing finisher card: ", chosen_card.card_name)
 		
-		# Buscar carta de curación si la IA está baja de HP
 		if not chosen_card and current_hp < max_hp * heal_threshold:
 			var heal_cards = []
 			for card in playable_cards:
@@ -622,7 +618,6 @@ func ai_turn(opponent: Player):
 				chosen_card = heal_cards[0]
 				print("AI: Choosing heal card: ", chosen_card.card_name)
 		
-		# Buscar carta de escudo si no tiene escudo
 		if not chosen_card and current_shield == 0 and opponent.current_mana >= 4 and randf() > aggression:
 			var shield_cards = []
 			for card in playable_cards:
@@ -632,7 +627,6 @@ func ai_turn(opponent: Player):
 				chosen_card = shield_cards[0]
 				print("AI: Choosing shield card: ", chosen_card.card_name)
 		
-		# Buscar carta de ataque más fuerte
 		if not chosen_card:
 			var attack_cards = []
 			for card in playable_cards:
@@ -646,7 +640,6 @@ func ai_turn(opponent: Player):
 				chosen_card = strongest
 				print("AI: Choosing strongest attack: ", chosen_card.card_name)
 
-		# Fallback
 		if not chosen_card:
 			chosen_card = playable_cards[0]
 			print("AI: Choosing fallback card: ", chosen_card.card_name)
@@ -721,12 +714,6 @@ func apply_buff_to_card(card: CardData) -> Dictionary:
 		"consumed_buffs": []
 	}
 	
-	if active_buffs.has("cost_reduction") and card.cost > 0:
-		var reduction = int(active_buffs["cost_reduction"])
-		modifications.cost_reduction = reduction
-		modifications.consumed_buffs.append("cost_reduction")
-		print("   Applying cost reduction: -", reduction, " mana")
-	
 	match card.card_type:
 		"attack":
 			if active_buffs.has("attack_bonus"):
@@ -748,11 +735,12 @@ func apply_buff_to_card(card: CardData) -> Dictionary:
 				if card.heal > 0:
 					modifications.heal_bonus = card.heal * bonus_multiplier
 				modifications.consumed_buffs.append("hybrid_bonus")
-				print("   Applying hybrid buff: +", int(bonus_multiplier * 100), "% to all effects")
+				print("   Applying hybrid buff: +", int(bonus_multiplier * 100), "%")
 	
 	for buff in modifications.consumed_buffs:
 		active_buffs.erase(buff)
 		buff_consumed.emit(buff)
+		print("   Buff consumed: ", buff)
 	
 	return modifications
 
@@ -768,4 +756,4 @@ func verify_game_state() -> Dictionary:
 		"cards_played": cards_played_this_turn,
 		"max_cards_per_turn": get_max_cards_per_turn(),
 		"damage_bonus": get_damage_bonus()
-		}
+	}

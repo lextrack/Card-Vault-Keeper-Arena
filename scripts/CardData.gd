@@ -29,16 +29,20 @@ func apply_joker_effect(player: Player):
 	match joker_effect:
 		"attack_bonus":
 			player.active_buffs["attack_bonus"] = 4
+			player.buff_applied.emit("attack_bonus", 4)
 			print("   Joker effect applied: Next attack card +4 damage")
 		
 		"heal_bonus":
 			player.active_buffs["heal_bonus"] = 0.5
+			player.buff_applied.emit("heal_bonus", 0.5)
 			print("   Joker effect applied: Next heal +50%")
 		
 		"cost_reduction":
 			player.active_buffs["cost_reduction"] = 1
-			print("   Joker effect applied: Next card costs -1 mana")
+			player.buff_applied.emit("cost_reduction", 1)
+			print("   Joker effect applied: Next card -1 mana")
 		
 		"hybrid_bonus":
-			player.active_buffs["hybrid_bonus"] = 0.25
-			print("   Joker effect applied: Next hybrid card +25% effects")
+			player.active_buffs["hybrid_bonus"] = 0.50
+			player.buff_applied.emit("hybrid_bonus", 0.50)
+			print("   Joker effect applied: Next hybrid card +50% effects")

@@ -480,6 +480,14 @@ theme_override_font_sizes/font_size = 20
 text = "⚔️ +1 DMG"
 horizontal_alignment = 1
 
+[node name="JokerBuffLabel" type="Label" parent="UILayer/TopPanel/StatsContainer/CenterInfo"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 18
+text = "🃏 Buff Active"
+horizontal_alignment = 1
+
 [node name="AIStatsPanel" type="Panel" parent="UILayer/TopPanel/StatsContainer"]
 layout_mode = 2
 size_flags_horizontal = 3

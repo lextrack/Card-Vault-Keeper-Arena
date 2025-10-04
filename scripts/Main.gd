@@ -15,6 +15,7 @@ extends Control
 @onready var top_panel_bg = $UILayer/TopPanel/TopPanelBG
 @onready var damage_bonus_label = $UILayer/TopPanel/StatsContainer/CenterInfo/DamageBonusLabel
 @onready var audio_manager = $AudioManager
+@onready var joker_buff_label: Label = $UILayer/TopPanel/StatsContainer/CenterInfo/JokerBuffLabel
 
 var last_bonus_notification_turn: int = -1
 var options_menu: OptionsMenu
@@ -56,6 +57,90 @@ func _ready():
 		await initialize_game_from_saved_state()
 	else:
 		await initialize_game()
+	
+	_connect_player_buff_signals()
+
+func _connect_player_buff_signals():
+	await get_tree().process_frame
+	
+	if player:
+		if not player.buff_applied.is_connected(_on_player_buff_applied):
+			player.buff_applied.connect(_on_player_buff_applied)
+		if not player.buff_consumed.is_connected(_on_player_buff_consumed):
+			player.buff_consumed.connect(_on_player_buff_consumed)
+		if not player.buff_cleared.is_connected(_on_player_buff_cleared):
+			player.buff_cleared.connect(_on_player_buff_cleared)
+
+func _on_player_buff_applied(buff_type: String, buff_value: Variant):
+	var buff_message = _get_buff_display_message(buff_type, buff_value)
+	
+	if joker_buff_label:
+		joker_buff_label.text = buff_message
+		joker_buff_label.modulate = _get_buff_color(buff_type)
+		joker_buff_label.visible = true
+		
+		var tween = create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(joker_buff_label, "scale", Vector2(1.3, 1.3), 0.2)
+		tween.tween_property(joker_buff_label, "modulate:a", 1.0, 0.2)
+		
+		tween.finished.connect(func():
+			var settle = create_tween()
+			settle.tween_property(joker_buff_label, "scale", Vector2(1.0, 1.0), 0.3)
+		)
+	
+	audio_helper.play_bonus_sound()
+	print("Joker buff applied: ", buff_message)
+
+func _on_player_buff_consumed(buff_type: String):
+	print("Buff consumed: ", buff_type)
+	
+	if joker_buff_label and joker_buff_label.visible:
+		var tween = create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(joker_buff_label, "modulate:a", 0.0, 0.3)
+		tween.tween_property(joker_buff_label, "scale", Vector2(0.8, 0.8), 0.3)
+		
+		tween.finished.connect(func():
+			joker_buff_label.visible = false
+			joker_buff_label.scale = Vector2(1.0, 1.0)
+		)
+
+func _on_player_buff_cleared():
+	print("All buffs cleared")
+	
+	if joker_buff_label and joker_buff_label.visible:
+		var tween = create_tween()
+		tween.tween_property(joker_buff_label, "modulate:a", 0.0, 0.2)
+		tween.finished.connect(func():
+			joker_buff_label.visible = false
+		)
+
+func _get_buff_display_message(buff_type: String, buff_value: Variant) -> String:
+	match buff_type:
+		"attack_bonus":
+			return "Next Attack +%d" % int(buff_value)
+		"heal_bonus":
+			return "Next Heal +%d%%" % int(buff_value * 100)
+		"cost_reduction":
+			return "Next Card -%d Mana" % int(buff_value)
+		"hybrid_bonus":
+			return "Next Hybrid +%d%%" % int(buff_value * 100)
+		_:
+			return "Buff Active"
+
+func _get_buff_color(buff_type: String) -> Color:
+	match buff_type:
+		"attack_bonus":
+			return Color(1.0, 0.3, 0.3, 1.0)
+		"heal_bonus":
+			return Color(0.3, 1.0, 0.5, 1.0)
+		"cost_reduction":
+			return Color(0.4, 0.7, 1.0, 1.0)
+		"hybrid_bonus":
+			return Color(1.0, 0.8, 0.2, 1.0)
+		_:
+			return Color(1.0, 1.0, 1.0, 1.0)
 		
 func initialize_game():
 	_setup_components()

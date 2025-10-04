@@ -371,7 +371,7 @@ static func get_joker_templates() -> Array[Dictionary]:
 			"type": "hybrid",
 			"is_joker": true,
 			"joker_effect": "hybrid_bonus",
-			"description": "3 damage + 3 heal + next hybrid normal card +25% (this turn)"
+			"description": "3 damage + 3 heal + next hybrid +50% (this turn)"
 		}
 	]
 
