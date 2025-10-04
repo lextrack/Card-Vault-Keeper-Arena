@@ -253,20 +253,16 @@ func _on_statistics_pressed():
 	TransitionManager.fade_to_scene("res://scenes/StatisticsMenu.tscn", 1.0)
 
 func play_entrance_animation():
-	# Inicializar propiedades
 	modulate.a = 0.0
 	scale = initial_scale
 	position.y = entry_offset_y
 
-	# Crear un tween con transiciones suaves y paralelas
 	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	
-	# Animar opacidad, escala y posición
 	tween.tween_property(self, "modulate:a", 1.0, entrance_duration)
 	tween.tween_property(self, "scale", Vector2(1.0, 1.0), scale_duration)
 	tween.tween_property(self, "position:y", 0.0, entrance_duration * 0.9)
-	
-	# Esperar a que termine la animación
+
 	await tween.finished
 	
 	if game_title:
@@ -275,10 +271,8 @@ func play_entrance_animation():
 		push_warning("game_title is not assigned!")
 
 func animate_title():
-	# Crear un tween cíclico para el título
 	var tween = create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	
-	# Animar brillo y movimiento vertical
 	tween.tween_property(game_title, "modulate", Color(1.3, 1.3, 1.0, 1.0), title_pulse_duration)
 	tween.tween_property(game_title, "modulate", Color(0.8, 0.8, 0.7, 1.0), title_pulse_duration)
 	tween.tween_property(game_title, "position:y", game_title.position.y + 10, title_pulse_duration)

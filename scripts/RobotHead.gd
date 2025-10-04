@@ -223,18 +223,14 @@ func _on_blink_timer_timeout():
 
 func set_speaking(speaking: bool):
 	if speaking:
-		# Limpiar tweens anteriores
 		if speak_tween:
 			speak_tween.kill()
 		
-		# Iniciar nueva animación
 		start_enhanced_speaking_animation()
 	else:
-		# Solo detener si no hay cola de diálogos
 		if speak_tween:
 			speak_tween.kill()
 			
-		# Resetear a estado normal
 		for i in range(1, 6):
 			var led = mouth.get_node("LED" + str(i))
 			if is_instance_valid(led):

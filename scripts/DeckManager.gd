@@ -65,12 +65,10 @@ static func refill_hand(hand: Array, deck: Array, discard_pile: Array, max_hand_
 		"deck_reshuffled": false
 	}
 	
-	print("=== REFILL HAND DEBUG ===")
 	print("Hand size: ", hand.size(), " / ", max_hand_size)
 	print("Joker chance: ", joker_chance)
 	print("Is AI: ", is_ai)
 	
-	# Verificar si ya hay un comodín en la mano
 	var joker_already_in_hand = false
 	for card in hand:
 		if card is CardData and card.is_joker:
@@ -78,7 +76,6 @@ static func refill_hand(hand: Array, deck: Array, discard_pile: Array, max_hand_
 			print("Joker already in hand, skipping")
 			break
 	
-	# PRIMERO: Intentar añadir comodín ANTES de rellenar
 	var roll = randf()
 	print("Random roll: ", roll, " (need < ", joker_chance, ")")
 	print("Joker already in hand: ", joker_already_in_hand)
@@ -101,7 +98,7 @@ static func refill_hand(hand: Array, deck: Array, discard_pile: Array, max_hand_
 				
 				hand.append(joker_card)
 				result.joker_added = true
-				print("✨ Joker added to ", "AI" if is_ai else "Player", " hand: ", joker_card.card_name)
+				print("Joker added to ", "AI" if is_ai else "Player", " hand: ", joker_card.card_name)
 			else:
 				print("ERROR: Failed to create joker card")
 		else:
@@ -115,7 +112,6 @@ static func refill_hand(hand: Array, deck: Array, discard_pile: Array, max_hand_
 		elif hand.size() >= max_hand_size:
 			print("  Reason: Hand full")
 	
-	# SEGUNDO: Rellenar el resto de la mano con cartas normales
 	while hand.size() < max_hand_size:
 		if deck.size() == 0:
 			if discard_pile.size() > 0:
@@ -134,6 +130,5 @@ static func refill_hand(hand: Array, deck: Array, discard_pile: Array, max_hand_
 	
 	print("Cards drawn: ", result.cards_drawn)
 	print("Final hand size: ", hand.size())
-	print("=== END REFILL DEBUG ===")
 	
 	return result

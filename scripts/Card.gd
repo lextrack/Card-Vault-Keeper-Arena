@@ -2,19 +2,19 @@ class_name Card
 extends Control
 
 @export var card_data: CardData
-@onready var name_label = $CardBackground/VBox/HeaderContainer/NameLabel
-@onready var cost_label = $CardBackground/VBox/HeaderContainer/CostContainer/CostLabel
-@onready var cost_bg = $CardBackground/VBox/HeaderContainer/CostContainer/CostBG
-@onready var description_label = $CardBackground/VBox/DescriptionContainer/DescriptionLabel
+@onready var name_label = $CardBackground/CardBorder/CardInner/VBox/HeaderContainer/NameLabel
+@onready var cost_label = $CardBackground/CardBorder/CardInner/VBox/HeaderContainer/CostContainer/CostLabel
+@onready var cost_bg = $CardBackground/CardBorder/CardInner/VBox/HeaderContainer/CostContainer
+@onready var description_label = $CardBackground/CardBorder/CardInner/VBox/DescriptionContainer/DescriptionLabel
 @onready var card_background = $CardBackground
-@onready var card_bg = $CardBackground/CardBG
+@onready var card_bg = $CardBackground
 @onready var card_border = $CardBackground/CardBorder
-@onready var card_inner = $CardBackground/CardInner
-@onready var card_icon = $CardBackground/VBox/ArtContainer/CardIcon
-@onready var stat_value = $CardBackground/VBox/StatsContainer/StatValue
-@onready var rarity_label = $CardBackground/VBox/RarityContainer/RarityLabel
-@onready var rarity_bg = $CardBackground/VBox/RarityContainer/RarityBG
-@onready var art_bg = $CardBackground/VBox/ArtContainer/ArtBG
+@onready var card_inner = $CardBackground/CardBorder/CardInner
+@onready var card_icon = $CardBackground/CardBorder/CardInner/VBox/ArtContainer/CardIcon
+@onready var stat_value = $CardBackground/CardBorder/CardInner/VBox/StatsContainer/StatValue
+@onready var rarity_label = $CardBackground/CardBorder/CardInner/VBox/RarityContainer/RarityLabel
+@onready var rarity_bg = $CardBackground/CardBorder/CardInner/VBox/RarityContainer
+@onready var art_bg = $CardBackground/CardBorder/CardInner/VBox/ArtContainer
 
 const ATTACK_VIDEO = preload("res://assets/backgrounds/attack1.ogv")
 const HEAL_VIDEO = preload("res://assets/backgrounds/heal1.ogv")
@@ -90,8 +90,12 @@ func animate_mana_insufficient():
 	current_tween.tween_property(self, "rotation", deg_to_rad(3), 0.05)
 	current_tween.tween_property(self, "rotation", deg_to_rad(-3), 0.05).set_delay(0.05)
 	current_tween.tween_property(self, "rotation", 0.0, 0.05).set_delay(0.1)
-	current_tween.tween_property(cost_bg, "color", Color.RED, 0.1)
-	current_tween.tween_property(cost_bg, "color", cached_type_colors.cost_bg, 0.1).set_delay(0.1)
+	
+	var cost_style = cost_bg.get_theme_stylebox("panel")
+	if cost_style is StyleBoxFlat:
+		var original_color = cost_style.bg_color
+		current_tween.tween_method(func(color): cost_style.bg_color = color, original_color, Color.RED, 0.1)
+		current_tween.tween_method(func(color): cost_style.bg_color = color, Color.RED, original_color, 0.1).set_delay(0.1)
 
 func apply_gamepad_selection_style():
 	if gamepad_selected or is_being_played:
@@ -293,16 +297,24 @@ func update_display():
 	var rarity_text = DeckManager.get_card_rarity_text(card_data)
 	rarity_label.text = rarity_text
 	
-	card_bg.color = cached_type_colors.background
-	card_border.color = cached_type_colors.border * cached_rarity_multiplier
-	card_inner.color = cached_type_colors.inner
-	cost_bg.color = cached_type_colors.cost_bg
-	art_bg.color = cached_type_colors.art_bg
-	rarity_bg.color = cached_type_colors.border * 0.8
+	_update_panel_color(card_bg, cached_type_colors.background)
+	_update_panel_color(card_border, cached_type_colors.border * cached_rarity_multiplier)
+	_update_panel_color(card_inner, cached_type_colors.inner)
+	_update_panel_color(cost_bg, cached_type_colors.cost_bg)
+	_update_panel_color(art_bg, cached_type_colors.art_bg)
+	_update_panel_color(rarity_bg, cached_type_colors.border * 0.8)
 	
 	_apply_rarity_effects(cached_rarity_string)
 	_load_card_illustration()
 	_update_stat_display()
+
+func _update_panel_color(panel: Panel, color: Color):
+	if panel:
+		var style = panel.get_theme_stylebox("panel")
+		if style is StyleBoxFlat:
+			var unique_style = style.duplicate()
+			unique_style.bg_color = color
+			panel.add_theme_stylebox_override("panel", unique_style)
 
 func _update_stat_display():
 	match card_data.card_type:

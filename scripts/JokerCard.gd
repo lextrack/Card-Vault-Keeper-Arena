@@ -2,19 +2,19 @@ class_name JokerCard
 extends Control
 
 @export var card_data: CardData
-@onready var name_label = $CardBackground/VBox/HeaderContainer/NameLabel
-@onready var cost_label = $CardBackground/VBox/HeaderContainer/CostContainer/CostLabel
-@onready var cost_bg = $CardBackground/VBox/HeaderContainer/CostContainer/CostBG
-@onready var description_label = $CardBackground/VBox/DescriptionContainer/DescriptionLabel
+@onready var name_label = $CardBackground/CardBorder/CardInner/VBox/HeaderContainer/NameLabel
+@onready var cost_label = $CardBackground/CardBorder/CardInner/VBox/HeaderContainer/CostContainer/CostLabel
+@onready var cost_bg = $CardBackground/CardBorder/CardInner/VBox/HeaderContainer/CostContainer
+@onready var description_label = $CardBackground/CardBorder/CardInner/VBox/DescriptionContainer/DescriptionLabel
 @onready var card_background = $CardBackground
-@onready var card_bg = $CardBackground/CardBG
+@onready var card_bg = $CardBackground
 @onready var card_border = $CardBackground/CardBorder
-@onready var card_inner = $CardBackground/CardInner
-@onready var card_icon = $CardBackground/VBox/ArtContainer/CardIcon
-@onready var stat_value = $CardBackground/VBox/StatsContainer/StatValue
-@onready var joker_label = $CardBackground/VBox/JokerContainer/JokerLabel
-@onready var joker_bg = $CardBackground/VBox/JokerContainer/JokerBG
-@onready var art_bg = $CardBackground/VBox/ArtContainer/ArtBG
+@onready var card_inner = $CardBackground/CardBorder/CardInner
+@onready var card_icon = $CardBackground/CardBorder/CardInner/VBox/ArtContainer/CardIcon
+@onready var stat_value = $CardBackground/CardBorder/CardInner/VBox/StatsContainer/StatValue
+@onready var joker_label = $CardBackground/CardBorder/CardInner/VBox/JokerContainer/JokerLabel
+@onready var joker_bg = $CardBackground/CardBorder/CardInner/VBox/JokerContainer
+@onready var art_bg = $CardBackground/CardBorder/CardInner/VBox/ArtContainer
 
 const ATTACK_VIDEO = preload("res://assets/backgrounds/attack1.ogv")
 const HEAL_VIDEO = preload("res://assets/backgrounds/heal1.ogv")
@@ -37,14 +37,13 @@ const HOVER_SCALE = 1.07
 const GAMEPAD_SCALE = 1.07
 const ANIMATION_SPEED = 0.15
 
-# Colores especiales para comodines (dorado/púrpura brillante)
 const JOKER_COLORS = {
 	"background": Color(0.15, 0.08, 0.20, 1.0),
-	"border": Color(1.0, 0.84, 0.0, 1.0),  # Dorado brillante
+	"border": Color(1.0, 0.84, 0.0, 1.0), 
 	"inner": Color(0.25, 0.15, 0.30, 1.0),
 	"cost_bg": Color(0.8, 0.6, 0.2, 1.0),
 	"art_bg": Color(0.4, 0.25, 0.45, 1.0),
-	"joker_bg": Color(0.6, 0.3, 0.8, 1.0)  # Púrpura
+	"joker_bg": Color(0.6, 0.3, 0.8, 1.0)
 }
 
 func _ready():
@@ -85,8 +84,12 @@ func animate_mana_insufficient():
 	current_tween.tween_property(self, "rotation", deg_to_rad(3), 0.05)
 	current_tween.tween_property(self, "rotation", deg_to_rad(-3), 0.05).set_delay(0.05)
 	current_tween.tween_property(self, "rotation", 0.0, 0.05).set_delay(0.1)
-	current_tween.tween_property(cost_bg, "color", Color.RED, 0.1)
-	current_tween.tween_property(cost_bg, "color", JOKER_COLORS.cost_bg, 0.1).set_delay(0.1)
+	
+	var cost_style = cost_bg.get_theme_stylebox("panel")
+	if cost_style is StyleBoxFlat:
+		var original_color = cost_style.bg_color
+		current_tween.tween_method(func(color): cost_style.bg_color = color, original_color, Color.RED, 0.1)
+		current_tween.tween_method(func(color): cost_style.bg_color = color, Color.RED, original_color, 0.1).set_delay(0.1)
 
 func apply_gamepad_selection_style():
 	if gamepad_selected or is_being_played:
@@ -266,35 +269,39 @@ func update_display():
 	name_label.text = card_data.card_name
 	cost_label.text = str(card_data.cost)
 	
-	# Descripción especial para comodines
 	description_label.text = card_data.description
 	print("DEBUG Joker description: ", card_data.description)
 	print("DescriptionLabel visible: ", description_label.visible)
 	print("DescriptionLabel size: ", description_label.size)
 	
-	# Etiqueta JOKER
-	joker_label.text = "[JOKER]"
+	joker_label.text = "[CORINGA]"
 	
-	# Aplicar colores especiales de comodín
-	card_bg.color = JOKER_COLORS.background
-	card_border.color = JOKER_COLORS.border
-	card_inner.color = JOKER_COLORS.inner
-	cost_bg.color = JOKER_COLORS.cost_bg
-	art_bg.color = JOKER_COLORS.art_bg
-	joker_bg.color = JOKER_COLORS.joker_bg
+	_update_panel_color(card_bg, JOKER_COLORS.background)
+	_update_panel_color(card_border, JOKER_COLORS.border)
+	_update_panel_color(card_inner, JOKER_COLORS.inner)
+	_update_panel_color(cost_bg, JOKER_COLORS.cost_bg)
+	_update_panel_color(art_bg, JOKER_COLORS.art_bg)
+	_update_panel_color(joker_bg, JOKER_COLORS.joker_bg)
 	
-	# Efectos visuales especiales
-	name_label.modulate = Color(1.5, 1.3, 0.8, 1.0)  # Dorado
+	name_label.modulate = Color(1.2, 1.018, 0.43, 1.0)
 	cost_label.modulate = Color(1.5, 1.3, 0.8, 1.0)
-	joker_label.modulate = Color(1.3, 1.0, 1.5, 1.0)  # Púrpura brillante
+	joker_label.modulate = Color(1.3, 1.0, 1.5, 1.0) 
 	
 	_load_card_illustration()
 	_update_stat_display()
 
+func _update_panel_color(panel: Panel, color: Color):
+	if panel:
+		var style = panel.get_theme_stylebox("panel")
+		if style is StyleBoxFlat:
+			var unique_style = style.duplicate()
+			unique_style.bg_color = color
+			panel.add_theme_stylebox_override("panel", unique_style)
+
 func _update_stat_display():
 	var total_power = card_data.damage + card_data.heal + card_data.shield
 	stat_value.text = str(total_power)
-	stat_value.modulate = Color(1.5, 1.2, 0.5, 1.0)  # Dorado brillante
+	stat_value.modulate = Color(1.5, 1.2, 0.5, 1.0)
 
 func _load_card_illustration():
 	var video_stream: VideoStream = null

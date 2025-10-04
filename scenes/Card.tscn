@@ -1,6 +1,62 @@
-[gd_scene load_steps=2 format=3 uid="uid://bmd1idc70kmiu"]
+[gd_scene load_steps=10 format=3 uid="uid://bmd1idc70kmiu"]
 
 [ext_resource type="Script" uid="uid://bmwtnxhcx165w" path="res://scripts/Card.gd" id="1_0x2y3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shadow"]
+bg_color = Color(0, 0, 0, 0.4)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.12, 0.12, 0.22, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_border"]
+bg_color = Color(0.35, 0.4, 0.5, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_inner"]
+bg_color = Color(0.22, 0.28, 0.38, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cost"]
+bg_color = Color(0.15, 0.35, 0.75, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_art"]
+bg_color = Color(0.28, 0.32, 0.42, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_desc"]
+bg_color = Color(0.08, 0.08, 0.13, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rarity"]
+bg_color = Color(0.35, 0.35, 0.35, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="Card" type="Control"]
 custom_minimum_size = Vector2(205, 310)
@@ -20,7 +76,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1_0x2y3")
 
-[node name="CardShadow" type="ColorRect" parent="."]
+[node name="CardShadow" type="Panel" parent="."]
 z_index = -1
 layout_mode = 1
 anchors_preset = 15
@@ -32,7 +88,7 @@ offset_right = 6.0
 offset_bottom = 6.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.4)
+theme_override_styles/panel = SubResource("StyleBoxFlat_shadow")
 
 [node name="CardBackground" type="Panel" parent="."]
 clip_contents = true
@@ -43,18 +99,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
-[node name="CardBG" type="ColorRect" parent="CardBackground"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.12, 0.12, 0.22, 1)
-
-[node name="CardBorder" type="ColorRect" parent="CardBackground"]
+[node name="CardBorder" type="Panel" parent="CardBackground"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -65,20 +112,20 @@ offset_right = -2.0
 offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.35, 0.4, 0.5, 1)
+theme_override_styles/panel = SubResource("StyleBoxFlat_border")
 
-[node name="CardInner" type="ColorRect" parent="CardBackground"]
+[node name="CardInner" type="Panel" parent="CardBackground/CardBorder"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = -4.0
-offset_bottom = -4.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.22, 0.28, 0.38, 1)
+theme_override_styles/panel = SubResource("StyleBoxFlat_inner")
 
 [node name="CardGlow" type="ColorRect" parent="CardBackground"]
 visible = false
@@ -95,7 +142,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 0.6, 0.3)
 
-[node name="VBox" type="VBoxContainer" parent="CardBackground"]
+[node name="VBox" type="VBoxContainer" parent="CardBackground/CardBorder/CardInner"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -107,11 +154,11 @@ offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HeaderContainer" type="HBoxContainer" parent="CardBackground/VBox"]
+[node name="HeaderContainer" type="HBoxContainer" parent="CardBackground/CardBorder/CardInner/VBox"]
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="NameLabel" type="Label" parent="CardBackground/VBox/HeaderContainer"]
+[node name="NameLabel" type="Label" parent="CardBackground/CardBorder/CardInner/VBox/HeaderContainer"]
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -124,35 +171,14 @@ text = "Card"
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="CostContainer" type="Panel" parent="CardBackground/VBox/HeaderContainer"]
+[node name="CostContainer" type="Panel" parent="CardBackground/CardBorder/CardInner/VBox/HeaderContainer"]
 clip_contents = true
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
 size_flags_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_cost")
 
-[node name="CostBG" type="ColorRect" parent="CardBackground/VBox/HeaderContainer/CostContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.15, 0.35, 0.75, 1)
-
-[node name="CostBorder" type="ColorRect" parent="CardBackground/VBox/HeaderContainer/CostContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 1.0
-offset_top = 1.0
-offset_right = -1.0
-offset_bottom = -1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.25, 0.45, 0.85, 1)
-
-[node name="CostLabel" type="Label" parent="CardBackground/VBox/HeaderContainer/CostContainer"]
+[node name="CostLabel" type="Label" parent="CardBackground/CardBorder/CardInner/VBox/HeaderContainer/CostContainer"]
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -169,37 +195,16 @@ text = "1"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="CardBackground/VBox"]
+[node name="HSeparator" type="HSeparator" parent="CardBackground/CardBorder/CardInner/VBox"]
 layout_mode = 2
 
-[node name="ArtContainer" type="Panel" parent="CardBackground/VBox"]
+[node name="ArtContainer" type="Panel" parent="CardBackground/CardBorder/CardInner/VBox"]
 clip_contents = true
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_art")
 
-[node name="ArtBG" type="ColorRect" parent="CardBackground/VBox/ArtContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.28, 0.32, 0.42, 1)
-
-[node name="ArtBorder" type="ColorRect" parent="CardBackground/VBox/ArtContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 1.0
-offset_top = 1.0
-offset_right = -1.0
-offset_bottom = -1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.32, 0.37, 0.47, 1)
-
-[node name="CardIcon" type="VideoStreamPlayer" parent="CardBackground/VBox/ArtContainer"]
+[node name="CardIcon" type="VideoStreamPlayer" parent="CardBackground/CardBorder/CardInner/VBox/ArtContainer"]
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -211,14 +216,14 @@ autoplay = true
 expand = true
 loop = true
 
-[node name="HSeparator2" type="HSeparator" parent="CardBackground/VBox"]
+[node name="HSeparator2" type="HSeparator" parent="CardBackground/CardBorder/CardInner/VBox"]
 layout_mode = 2
 
-[node name="StatsContainer" type="HBoxContainer" parent="CardBackground/VBox"]
+[node name="StatsContainer" type="HBoxContainer" parent="CardBackground/CardBorder/CardInner/VBox"]
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="StatValue" type="Label" parent="CardBackground/VBox/StatsContainer"]
+[node name="StatValue" type="Label" parent="CardBackground/CardBorder/CardInner/VBox/StatsContainer"]
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -231,37 +236,16 @@ text = "2"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HSeparator3" type="HSeparator" parent="CardBackground/VBox"]
+[node name="HSeparator3" type="HSeparator" parent="CardBackground/CardBorder/CardInner/VBox"]
 layout_mode = 2
 
-[node name="DescriptionContainer" type="Panel" parent="CardBackground/VBox"]
+[node name="DescriptionContainer" type="Panel" parent="CardBackground/CardBorder/CardInner/VBox"]
 clip_contents = true
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_desc")
 
-[node name="DescBG" type="ColorRect" parent="CardBackground/VBox/DescriptionContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.08, 0.08, 0.13, 0.9)
-
-[node name="DescBorder" type="ColorRect" parent="CardBackground/VBox/DescriptionContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 1.0
-offset_top = 1.0
-offset_right = -1.0
-offset_bottom = -1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.12, 0.12, 0.17, 0.9)
-
-[node name="DescriptionLabel" type="Label" parent="CardBackground/VBox/DescriptionContainer"]
+[node name="DescriptionLabel" type="Label" parent="CardBackground/CardBorder/CardInner/VBox/DescriptionContainer"]
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -283,38 +267,17 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="HSeparator4" type="HSeparator" parent="CardBackground/VBox"]
+[node name="HSeparator4" type="HSeparator" parent="CardBackground/CardBorder/CardInner/VBox"]
 layout_mode = 2
 
-[node name="RarityContainer" type="Panel" parent="CardBackground/VBox"]
+[node name="RarityContainer" type="Panel" parent="CardBackground/CardBorder/CardInner/VBox"]
 clip_contents = true
 custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 size_flags_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_rarity")
 
-[node name="RarityBG" type="ColorRect" parent="CardBackground/VBox/RarityContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.35, 0.35, 0.35, 0.7)
-
-[node name="RarityBorder" type="ColorRect" parent="CardBackground/VBox/RarityContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 1.0
-offset_top = 1.0
-offset_right = -1.0
-offset_bottom = -1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.45, 0.45, 0.45, 0.7)
-
-[node name="RarityLabel" type="Label" parent="CardBackground/VBox/RarityContainer"]
+[node name="RarityLabel" type="Label" parent="CardBackground/CardBorder/CardInner/VBox/RarityContainer"]
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15

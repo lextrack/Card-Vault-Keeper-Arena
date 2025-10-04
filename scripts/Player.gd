@@ -64,7 +64,6 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 	
 	print("Playing card: ", card.card_name, " (", card.card_type, ") | Cost: ", card.cost, " | Turn: ", turn_number)
 	
-	# Registrar estadísticas ANTES de jugar la carta
 	if not is_ai and StatisticsManagers:
 		StatisticsManagers.card_played(card.card_name, card.card_type, card.cost)
 	
@@ -262,7 +261,6 @@ func add_shield(amount: int):
 func spend_mana(amount: int) -> bool:
 	var final_cost = amount
 	
-	# Aplicar reducción de coste si hay buff activo
 	if active_buffs.has("cost_reduction"):
 		var reduction = int(active_buffs["cost_reduction"])
 		final_cost = max(0, amount - reduction)
@@ -294,7 +292,6 @@ func start_turn():
 	
 	clear_buffs()
 	
-	# Usar refill_hand para incluir probabilidad de comodines
 	var joker_chance = 0.15 if not is_ai else _get_ai_joker_chance()
 	var refill_result = DeckManager.refill_hand(
 		hand, 
@@ -304,16 +301,13 @@ func start_turn():
 		joker_chance, 
 		is_ai
 	)
-	
-	# Si el deck se mezcló, notificar
+
 	if refill_result.deck_reshuffled:
-		print("   Deck reshuffled for ", "AI" if is_ai else "Player")
+		print("Deck reshuffled for ", "AI" if is_ai else "Player")
 	
-	# Si se añadió un comodín, notificar
 	if refill_result.joker_added:
-		print("   ✨ Joker card added to ", "AI" if is_ai else "Player", " hand!")
+		print("Joker card added to ", "AI" if is_ai else "Player", " hand!")
 	
-	# Notificar cambios
 	mana_changed.emit(current_mana)
 	cards_played_changed.emit(cards_played_this_turn, get_max_cards_per_turn())
 	hand_changed.emit()
@@ -330,7 +324,7 @@ func sync_turn_with_opponent(opponent: Player):
 		var target_turn = min(turn_number, opponent.turn_number)
 		turn_number = target_turn
 		opponent.turn_number = target_turn
-		print("   Synced both to turn: ", target_turn)
+		print("Synced both to turn: ", target_turn)
 
 func can_play_card(card: CardData) -> bool:
 	var has_mana = current_mana >= card.cost
@@ -465,7 +459,6 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 		else:
 			audio_helper.play_card_play_sound(card.card_type)
 	
-	# Registrar estadísticas ANTES de jugar la carta
 	if not is_ai and StatisticsManagers:
 		StatisticsManagers.card_played(card.card_name, card.card_type, card.cost)
 	

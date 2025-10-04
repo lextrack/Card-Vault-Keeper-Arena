@@ -350,7 +350,7 @@ func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_contain
 		
 		card_index += 1
 		
-func _animate_card_spawn(card: Control, index: int):  # ← Cambiar de Card a Control
+func _animate_card_spawn(card: Control, index: int):
 	if not is_instance_valid(card):
 		return
 	

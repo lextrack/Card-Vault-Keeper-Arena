@@ -337,45 +337,44 @@ static func validate_database() -> Dictionary:
 static func get_joker_templates() -> Array[Dictionary]:
 	return [
 		{
-			"name": "Joker Strike",
+			"name": "Coringa Strike",
 			"cost": 1,
 			"damage": 4,
 			"type": "attack",
 			"is_joker": true,
 			"joker_effect": "attack_bonus",
-			"description": "4 damage + next attack +4 damage"
+			"description": "4 damage + next attack +4 damage (this turn)"
 		},
 		{
-			"name": "Joker Heal",
+			"name": "Coringa Heal",
 			"cost": 1,
 			"heal": 4,
 			"type": "heal",
 			"is_joker": true,
 			"joker_effect": "heal_bonus",
-			"description": "4 heal + next heal +50%"
+			"description": "4 heal + next heal +50% (this turn)"
 		},
 		{
-			"name": "Joker Shield",
+			"name": "Coringa Shield",
 			"cost": 1,
 			"shield": 4,
 			"type": "shield",
 			"is_joker": true,
 			"joker_effect": "cost_reduction",
-			"description": "4 shield + next card -1 mana"
+			"description": "4 shield + next card -1 mana (this turn)"
 		},
 		{
-			"name": "Joker Hybrid",
+			"name": "Coringa Hybrid",
 			"cost": 2,
 			"damage": 3,
 			"heal": 3,
 			"type": "hybrid",
 			"is_joker": true,
 			"joker_effect": "hybrid_bonus",
-			"description": "3 damage + 3 heal + next hybrid +25%"
+			"description": "3 damage + 3 heal + next hybrid normal card +25% (this turn)"
 		}
 	]
 
-# limpiar el cache
 static func clear_cache():
 	_all_cards_cache.clear()
 	_cards_by_name_cache.clear()

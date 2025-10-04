@@ -425,7 +425,6 @@ func start_player_turn():
 		ui_manager._clear_all_gamepad_selection_styles()
 		input_manager.start_player_turn()
 
-	# LLAMAR A LA FUNCIÓN start_turn() DEL PLAYER
 	player.start_turn()
 	
 	audio_helper.play_turn_change_sound(true)
@@ -450,10 +449,7 @@ func start_ai_turn():
 		return
 		
 	is_player_turn = false
-	
 	input_manager.start_ai_turn()
-	
-	# LLAMAR A LA FUNCIÓN start_turn() DE LA IA
 	ai.start_turn()
 
 	var current_bonus = ai.get_damage_bonus()
