@@ -36,7 +36,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.6819129, 0.43434143, 0.042496674, 1)
+color = Color(0, 0, 0, 1)
 
 [node name="BackgroundPattern" type="ColorRect" parent="BackgroundLayer"]
 material = SubResource("ShaderMaterial_ws1pa")
@@ -77,7 +77,7 @@ text = "CHALLENGE HUB"
 
 [node name="Subtitle" type="Label" parent="MainContainer/HeaderContainer/TitleSection"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_colors/font_color = Color(0.90588236, 0.90588236, 0.9411765, 1)
 theme_override_font_sizes/font_size = 14
 text = "Unlock new cards by completing challenges"
 
@@ -89,7 +89,7 @@ alignment = 2
 [node name="StatsLabel" type="Label" parent="MainContainer/HeaderContainer/StatsSection"]
 layout_mode = 2
 size_flags_horizontal = 8
-theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_colors/font_color = Color(0.9042955, 0.90476185, 0.9392443, 1)
 theme_override_font_sizes/font_size = 12
 text = "Collection: 0/0 bundles unlocked"
 horizontal_alignment = 2
@@ -138,7 +138,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.14902, 0.14902, 0.25098, 0.901961)
+color = Color(0.14901961, 0.14901961, 0.2509804, 0.9019608)
 
 [node name="BundlesScrollContainer" type="ScrollContainer" parent="MainContainer/ContentContainer/BundlesPanel"]
 layout_mode = 1
@@ -182,7 +182,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.08, 0.1, 0.15, 0.9)
+color = Color(0.078431375, 0.101960786, 0.14901961, 0.9019608)
 
 [node name="AIContent" type="VBoxContainer" parent="MainContainer/ContentContainer/AIContainer/AIPanel"]
 layout_mode = 1

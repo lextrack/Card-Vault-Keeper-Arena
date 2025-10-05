@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://c52lhdd2akltu" path="res://assets/ui/difficulty_hard.png" id="3_hard"]
 [ext_resource type="Texture2D" uid="uid://ppujy2081nxr" path="res://assets/ui/difficulty_expert.png" id="4_expert"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_2grfk"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_opo3b"]
 shader = ExtResource("2_opo3b")
 shader_parameter/color1 = Color(0.5, 0.15, 0.25, 0.6)
 shader_parameter/color2 = Color(0.2, 0.3, 0.6, 0.7)
@@ -39,10 +39,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.3665946, 0.3665946, 0.36659458, 1)
+color = Color(0, 0, 0, 1)
 
 [node name="BackgroundPattern" type="ColorRect" parent="BackgroundLayer"]
-material = SubResource("ShaderMaterial_2grfk")
+material = SubResource("ShaderMaterial_opo3b")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -164,7 +164,7 @@ stretch_mode = 5
 
 [node name="StatsContainer" type="VBoxContainer" parent="MenuContainer/DifficultyContainer/NormalCard/Content"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="PlayerLabel" type="Label" parent="MenuContainer/DifficultyContainer/NormalCard/Content/StatsContainer"]
 layout_mode = 2
@@ -270,7 +270,7 @@ stretch_mode = 5
 
 [node name="StatsContainer" type="VBoxContainer" parent="MenuContainer/DifficultyContainer/HardCard/Content"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="PlayerLabel" type="Label" parent="MenuContainer/DifficultyContainer/HardCard/Content/StatsContainer"]
 layout_mode = 2
@@ -376,7 +376,7 @@ stretch_mode = 5
 
 [node name="StatsContainer" type="VBoxContainer" parent="MenuContainer/DifficultyContainer/ExpertCard/Content"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="PlayerLabel" type="Label" parent="MenuContainer/DifficultyContainer/ExpertCard/Content/StatsContainer"]
 layout_mode = 2

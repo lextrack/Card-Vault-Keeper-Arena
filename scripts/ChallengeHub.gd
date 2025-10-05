@@ -35,14 +35,7 @@ var adaptive_columns: bool = true
 var min_card_width: float = 320.0
 var max_columns: int = 3
 
-var dialog_timer: Timer
-var current_dialog_queue: Array = []
-var is_processing_dialogs: bool = false
-
-var robot_current_mood: String = "normal"
-var robot_speaking_timer: Timer
-var dialog_duration_per_word: float = 0.15
-var active_dialog_tweens: Array = []
+var dialog_manager: DialogManager
 
 var intro_dialogs = [
 	"Welcome to my collection vault...",
@@ -66,7 +59,8 @@ var casual_dialogs = [
 	"Did you know that I assign your life, mana, and cards in your hand?",
 	"Unlock more bundles so we have more cards to play together.",
 	"A single card can turn the tide of battle... if you know when to play it. Make sure to check you mana.",
-	"Besides dueling you and keeping these bundles, I also keep track of your actions in the statistics section."
+	"Besides dueling you and keeping these bundles, I also keep track of your actions in the statistics section.",
+	"Use Coringas (Jokers) wisely. They are very helpful in most situations."
 ]
 
 var mysterious_dialogs = [
@@ -86,20 +80,19 @@ func _ready():
 	
 	setup_ui()
 	setup_ai_character()
-	setup_dialog_system()
+	setup_dialog_manager()
 	setup_gamepad_navigation()
 	setup_challenge_music()
 	
 	get_viewport().size_changed.connect(_on_viewport_resized)
 
-	
 	if accessed_from_game:
 		back_button.text = "BACK TO GAME"
 		var game_age = GameStateManager.get_save_age_seconds()
 		if game_age >= 0 and game_age < 60:
-			queue_dialog_sequence(["Your battle awaits... Take your time browsing."])
+			dialog_manager.queue_sequence(["Your battle awaits... Take your time browsing."])
 		else:
-			queue_dialog_sequence(["Ahh, you return to my vault..."])
+			dialog_manager.queue_sequence(["Ahh, you return to my vault..."])
 	else:
 		back_button.text = "BACK"
 	
@@ -110,10 +103,10 @@ func _ready():
 	if not accessed_from_game:
 		var first_visit = load_first_visit_status()
 		if first_visit:
-			queue_dialog_sequence(intro_dialogs)
+			dialog_manager.queue_sequence(intro_dialogs)
 			save_first_visit_status(false)
 		else:
-			queue_dialog_sequence([casual_dialogs[randi() % casual_dialogs.size()]])
+			dialog_manager.show_random_dialog()
 	
 	call_deferred("setup_responsive_layout")
 
@@ -368,65 +361,21 @@ func activate_selected_bundle():
 	if bundle_info.can_unlock:
 		_on_bundle_unlock_requested(bundle_info.id)
 	else:
-		queue_dialog_sequence(["The path is not yet clear..."])
+		dialog_manager.queue_sequence(["The path is not yet clear..."])
 
-func setup_dialog_system():
-	dialog_timer = Timer.new()
-	dialog_timer.one_shot = true
-	dialog_timer.timeout.connect(_process_dialog_queue)
-	add_child(dialog_timer)
-	
-	current_dialog_queue = []
-	is_processing_dialogs = false
+func setup_dialog_manager():
+	dialog_manager = DialogManager.new()
+	dialog_manager.dialog_pools = {
+		"casual": casual_dialogs,
+		"mysterious": mysterious_dialogs
+	}
+	dialog_manager.dialog_shown.connect(_on_dialog_shown)
+	add_child(dialog_manager)
 
-func queue_dialog_sequence(dialogs: Array):
-	if dialogs.is_empty():
-		return
-	
-	current_dialog_queue.clear()
-	current_dialog_queue = dialogs.duplicate()
-	
-	if not is_processing_dialogs:
-		_process_dialog_queue()
-
-func _process_dialog_queue():
-	if is_processing_dialogs and current_dialog_queue.is_empty():
-		is_processing_dialogs = false
-		_schedule_random_dialog()
-		return
-	
-	if current_dialog_queue.is_empty():
-		_schedule_random_dialog()
-		return
-	
-	is_processing_dialogs = true
-	var next_dialog = current_dialog_queue.pop_front()
-	show_ai_dialog(next_dialog)
-	
-	var word_count = next_dialog.split(" ").size()
-	var base_time = max(3.5, word_count * 0.3)
-	
-	if not dialog_timer.is_stopped():
-		dialog_timer.stop()
-	
-	dialog_timer.wait_time = base_time
-	dialog_timer.start()
-
-func _schedule_random_dialog():
-	if not dialog_timer.is_stopped():
-		dialog_timer.stop()
-	
-	if dialog_timer.timeout.is_connected(_show_random_dialog):
-		dialog_timer.timeout.disconnect(_show_random_dialog)
-	
-	dialog_timer.timeout.connect(_show_random_dialog, CONNECT_ONE_SHOT)
-	dialog_timer.wait_time = randf_range(8.0, 15.0)
-	dialog_timer.start()
-
-func _show_random_dialog():
-	var dialog_pool = casual_dialogs + mysterious_dialogs
-	var random_dialog = dialog_pool[randi() % dialog_pool.size()]
-	queue_dialog_sequence([random_dialog])
+func _on_dialog_shown(text: String):
+	show_ai_dialog(text)
+	if robot_head_instance:
+		robot_head_instance.speak(text)
 
 func setup_ui():
 	back_button.pressed.connect(_on_back_pressed)
@@ -443,16 +392,12 @@ func setup_ui():
 		
 func handle_lost_game_state():
 	if accessed_from_game and not GameStateManager.has_saved_state():
-		queue_dialog_sequence(["The threads of your battle have been severed..."])
+		dialog_manager.queue_sequence([
+			"The threads of your battle have been severed...",
+			"A new path must be forged from the beginning."
+		])
 		accessed_from_game = false
 		back_button.text = "BACK TO MENU"
-		
-		var timer = Timer.new()
-		timer.wait_time = 3.0
-		timer.one_shot = true
-		timer.timeout.connect(func(): queue_dialog_sequence(["A new path must be forged from the beginning."]))
-		add_child(timer)
-		timer.start()
 
 func setup_ai_character():
 	if UnlockManagers:
@@ -465,7 +410,6 @@ func setup_ai_character():
 		ai_avatar.visible = false
 	
 	_setup_robot_head()
-	setup_robot_speaking_timer()
 
 func _setup_robot_head():
 	if not robot_head_scene:
@@ -492,27 +436,11 @@ func _setup_robot_head():
 	robot_head_instance.offset_top = -80
 	robot_head_instance.offset_bottom = 40
 	
-	_update_robot_mood("normal")
-
-func setup_robot_speaking_timer():
-	robot_speaking_timer = Timer.new()
-	robot_speaking_timer.one_shot = true
-	robot_speaking_timer.timeout.connect(_on_robot_speaking_finished)
-	add_child(robot_speaking_timer)
+	robot_head_instance.speaking_finished.connect(_on_robot_speaking_finished)
+	robot_head_instance.set_mood("normal")
 
 func _on_robot_speaking_finished():
-	if is_instance_valid(robot_head_instance):
-		if robot_head_instance.has_method("set_speaking"):
-			robot_head_instance.set_speaking(false)
-		if robot_head_instance.has_method("set_mood"):
-			robot_head_instance.set_mood(robot_current_mood)
-
-func _update_robot_mood(new_mood: String):
-	robot_current_mood = new_mood
-	if robot_head_instance and is_instance_valid(robot_head_instance):
-		if robot_head_instance.has_method("set_mood"):
-			if not robot_speaking_timer or robot_speaking_timer.time_left <= 0:
-				robot_head_instance.set_mood(new_mood)
+	dialog_manager.on_speaking_finished()
 
 func handle_scene_entrance():
 	await get_tree().process_frame
@@ -630,32 +558,10 @@ func create_bundle_card(bundle_info: Dictionary) -> BundleCard:
 func show_ai_dialog(text: String):
 	if not dialog_text or text.is_empty():
 		return
-
-	_cleanup_dialog_tweens()
-	
-	if robot_head_instance and is_instance_valid(robot_head_instance):
-		if robot_head_instance.has_method("set_speaking"):
-			robot_head_instance.set_speaking(true)
-		if robot_head_instance.has_method("pulse_status_light"):
-			robot_head_instance.pulse_status_light()
-		
-		var word_count = text.split(" ").size()
-		var speaking_duration = max(2.0, word_count * 0.25)
-		
-		if robot_speaking_timer:
-			robot_speaking_timer.wait_time = speaking_duration
-			robot_speaking_timer.start()
 	
 	_animate_status_light()
 	await _animate_typing_indicator()
 	_animate_dialog_text(text)
-	_start_dialog_float_animation()
-
-func _cleanup_dialog_tweens():
-	for tween in active_dialog_tweens:
-		if is_instance_valid(tween):
-			tween.kill()
-	active_dialog_tweens.clear()
 
 func _animate_status_light():
 	if not status_light:
@@ -666,7 +572,6 @@ func _animate_status_light():
 	light_tween.set_loops(3)
 	light_tween.tween_property(status_light, "modulate:a", 0.3, 0.4)
 	light_tween.tween_property(status_light, "modulate:a", 1.0, 0.4)
-	active_dialog_tweens.append(light_tween)
 
 func _animate_typing_indicator():
 	if not typing_indicator:
@@ -677,7 +582,6 @@ func _animate_typing_indicator():
 	typing_tween.set_loops(2)
 	typing_tween.tween_property(typing_indicator, "modulate:a", 0.3, 0.3)
 	typing_tween.tween_property(typing_indicator, "modulate:a", 1.0, 0.3)
-	active_dialog_tweens.append(typing_tween)
 	
 	await get_tree().create_timer(0.8).timeout
 	if typing_indicator:
@@ -695,13 +599,8 @@ func _animate_dialog_text(text: String):
 	tween.set_parallel(true)
 	tween.tween_property(dialog_text, "modulate:a", 1.0, 0.3)
 	tween.tween_property(dialog_text, "scale", Vector2(1.0, 1.0), 0.2)
-	active_dialog_tweens.append(tween)
 	
 	await tween.finished
-
-func _start_dialog_float_animation():
-	if not dialog_text:
-		return
 	
 	if status_light:
 		status_light.color = Color(0.2, 0.8, 0.4, 0.8)
@@ -711,7 +610,6 @@ func _start_dialog_float_animation():
 	float_tween.set_loops()
 	float_tween.tween_property(dialog_text, "position:y", original_pos - 2, 1.5)
 	float_tween.tween_property(dialog_text, "position:y", original_pos + 2, 1.5)
-	active_dialog_tweens.append(float_tween)
 
 func _on_bundle_unlock_requested(bundle_id: String):
 	if not UnlockManagers:
@@ -721,53 +619,43 @@ func _on_bundle_unlock_requested(bundle_id: String):
 	
 	var unlocked_cards = UnlockManagers.unlock_bundle(bundle_id)
 	if unlocked_cards.size() > 0:
-		queue_dialog_sequence(["Excellent work! A new bundle awaits you."])
+		dialog_manager.queue_sequence(["Excellent work! A new bundle awaits you."])
 		await get_tree().create_timer(1.0).timeout
 		load_shop_data()
 
 func _on_bundle_hovered(bundle_info: Dictionary):
-	if not robot_head_instance or not is_instance_valid(robot_head_instance):
+	if not robot_head_instance:
 		return
 	
-	var new_mood = "normal"
-	
 	if bundle_info.can_unlock:
-		new_mood = "alert"
-		if robot_head_instance.has_method("dramatic_reaction"):
-			robot_head_instance.dramatic_reaction("excitement")
+		robot_head_instance.react_to_event("hover_unlockable")
 	elif bundle_info.unlocked:
-		new_mood = "happy"
+		robot_head_instance.react_to_event("hover_unlocked")
 	else:
-		new_mood = "normal"
-	
-	_update_robot_mood(new_mood)
+		robot_head_instance.react_to_event("hover_locked")
 
 func _on_bundle_unhovered():
-	_update_robot_mood("normal")
+	if robot_head_instance:
+		robot_head_instance.react_to_event("unhover")
 
 func _on_bundle_unlocked(bundle_id: String, cards: Array):
-	var bundle_info = UnlockManagers.get_bundle_info(bundle_id)
 	var celebration_messages = [
 		"The vault yields its secrets!",
 		"Power is yours to command!",
 		"Another mystery unveiled...",
 		"Your destiny unfolds..."
 	]
-	queue_dialog_sequence([celebration_messages[randi() % celebration_messages.size()]])
+	dialog_manager.queue_sequence([celebration_messages[randi() % celebration_messages.size()]])
 	
-	if robot_head_instance and is_instance_valid(robot_head_instance):
-		if robot_head_instance.has_method("dramatic_reaction"):
-			robot_head_instance.dramatic_reaction("excitement")
-		if robot_head_instance.has_method("flash_neck_lights"):
-			robot_head_instance.flash_neck_lights()
-		
-		_update_robot_mood("happy")
+	if robot_head_instance:
+		robot_head_instance.react_to_event("unlock")
 		
 		var happiness_timer = Timer.new()
 		happiness_timer.wait_time = 5.0
 		happiness_timer.one_shot = true
 		happiness_timer.timeout.connect(func():
-			_update_robot_mood("normal")
+			if robot_head_instance:
+				robot_head_instance.set_mood("normal")
 			happiness_timer.queue_free()
 		)
 		add_child(happiness_timer)
@@ -789,7 +677,7 @@ func _on_progress_updated(bundle_id: String, current: int, required: int):
 				"The vault trembles with anticipation...",
 				"Power grows restless..."
 			]
-			queue_dialog_sequence([subtle_encouragement[randi() % subtle_encouragement.size()]])
+			dialog_manager.queue_sequence([subtle_encouragement[randi() % subtle_encouragement.size()]])
 
 func _on_back_pressed():
 	if is_transitioning:
@@ -799,7 +687,7 @@ func _on_back_pressed():
 	play_ui_sound("button_click")
 
 	if accessed_from_game:
-		queue_dialog_sequence(["May fortune favor your battles..."])
+		dialog_manager.queue_sequence(["May fortune favor your battles..."])
 		await get_tree().create_timer(0.8).timeout
 		
 		if GlobalMusicManager:
@@ -815,7 +703,7 @@ func _on_back_pressed():
 func _on_refresh_pressed():
 	play_ui_sound("button_click")
 	load_shop_data()
-	queue_dialog_sequence(["The vault's knowledge refreshes itself..."])
+	dialog_manager.queue_sequence(["The vault's knowledge refreshes itself..."])
 
 func _on_debug_pressed():
 	if not UnlockManagers:
@@ -833,7 +721,7 @@ func _on_debug_pressed():
 		UnlockManagers.save_progress()
 		
 		load_shop_data()
-		queue_dialog_sequence(["*The vault bends to your will* All secrets revealed."])
+		dialog_manager.queue_sequence(["*The vault bends to your will* All secrets revealed."])
 		
 		debug_button.text = "RESET ALL"
 		debug_mode_unlock = false
@@ -842,7 +730,7 @@ func _on_debug_pressed():
 		UnlockManagers.reset_all_progress()
 		
 		load_shop_data()
-		queue_dialog_sequence(["*The vault seals itself once more* Prove yourself again, warrior."])
+		dialog_manager.queue_sequence(["*The vault seals itself once more* Prove yourself again, warrior."])
 		
 		debug_button.text = "UNLOCK ALL"
 		debug_mode_unlock = true
@@ -946,12 +834,8 @@ func _input(event):
 
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
-		_cleanup_dialog_tweens()
-		
-		if dialog_timer and is_instance_valid(dialog_timer):
-			dialog_timer.stop()
-		if robot_speaking_timer and is_instance_valid(robot_speaking_timer):
-			robot_speaking_timer.stop()
+		if dialog_manager:
+			dialog_manager.cleanup()
 
 		if GlobalMusicManager and GlobalMusicManager.is_challenge_music_playing():
 			GlobalMusicManager.stop_all_music(0.3)

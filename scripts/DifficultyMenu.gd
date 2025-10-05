@@ -69,16 +69,14 @@ func update_difficulty_stats(difficulty: String):
 	var card = get_card_node(difficulty)
 	if not card:
 		return
-	
-	# Actualizar título con descripción de dificultad
+
 	var title_label = card.get_node_or_null("Content/TitleLabel")
 	if title_label:
 		title_label.text = difficulty.to_upper() + " - " + balance_stats.description
 	
-	# Actualizar estadísticas del jugador
 	var player_stats = card.get_node_or_null("Content/StatsContainer/PlayerStats")
 	if player_stats:
-		player_stats.text = "PLAYER:\n%d HP | %d Mana\n%d card%s/turn | %d max hand" % [
+		player_stats.text = "\n%d HP | %d Mana\n%d card%s/turn | %d max hand" % [
 			player_config.hp,
 			player_config.mana,
 			player_config.cards_per_turn,
@@ -86,11 +84,10 @@ func update_difficulty_stats(difficulty: String):
 			player_config.hand_size
 		]
 	
-	# Actualizar estadísticas de la IA
 	var ai_stats = card.get_node_or_null("Content/StatsContainer/AIStats")
 	if ai_stats:
 		var behavior = get_ai_behavior_text(ai_config)
-		ai_stats.text = "AI:\n%d HP | %d Mana\n%d card%s/turn | %s" % [
+		ai_stats.text = "\n%d HP | %d Mana\n%d card%s/turn | %s" % [
 			ai_config.hp,
 			ai_config.mana,
 			ai_config.cards_per_turn,
@@ -98,7 +95,6 @@ func update_difficulty_stats(difficulty: String):
 			behavior
 		]
 	
-	# Mostrar distribución de cartas
 	var card_dist_label = card.get_node_or_null("Content/CardDistribution")
 	if card_dist_label:
 		card_dist_label.text = "Cards: %d%% ATK | %d%% HEAL | %d%% SHIELD | %d%% HYBRID" % [
@@ -108,7 +104,6 @@ func update_difficulty_stats(difficulty: String):
 			int((1.0 - (balance_stats.attack_percentage + balance_stats.heal_percentage + balance_stats.shield_percentage) / 100.0) * 100)
 		]
 	
-	# Mostrar ratio de balance (opcional, para debugging)
 	var balance_label = card.get_node_or_null("Content/BalanceInfo")
 	if balance_label:
 		var ratio_text = "Balance: %.2f" % balance_stats.balance_ratio
@@ -117,19 +112,15 @@ func update_difficulty_stats(difficulty: String):
 		balance_label.text = ratio_text
 		balance_label.modulate = Color.LIME_GREEN if balance_stats.balanced else Color.YELLOW
 	
-	# Mostrar información adicional (si existe el nodo)
 	var details_label = card.get_node_or_null("Content/DetailsLabel")
 	if details_label:
 		var details = []
 		
-		# Deck size
 		details.append("Deck: %d cards" % player_config.deck_size)
 		
-		# AI aggression
 		var aggr_percent = int(ai_config.aggression * 100)
 		details.append("AI Aggression: %d%%" % aggr_percent)
 		
-		# Heal threshold
 		var heal_percent = int(ai_config.heal_threshold * 100)
 		details.append("AI Heals at: <%d%% HP" % heal_percent)
 		

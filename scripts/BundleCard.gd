@@ -18,6 +18,16 @@ extends Control
 @onready var border_highlight = $CardPanel/BorderHighlight
 @onready var card_shadow = $CardPanel/CardShadow
 
+const ICON_PATH = "res://assets/ui/"  # Ajusta esta ruta según tu proyecto
+
+# Diccionario para mapear tipos de cartas a sus íconos
+const TYPE_ICONS = {
+	"attack": "sword_loading.png",
+	"heal": "heal.png",
+	"shield": "shield_loading.png",
+	"hybrid": "magic.png"
+}
+
 var bundle_info: Dictionary = {}
 var original_scale: Vector2
 var hover_tween: Tween
@@ -271,21 +281,21 @@ func create_card_list_item(card_template: Dictionary) -> Control:
 	
 	var type_icon = Label.new()
 	type_icon.custom_minimum_size = Vector2(20, 20)
-	type_icon.add_theme_font_size_override("font_size", 16)
+	type_icon.add_theme_font_size_override("font_size", 12)
 	
 	var card_type = card_template.get("type", "attack")
 	match card_type:
 		"attack":
-			type_icon.text = "⚔️"
+			type_icon.text = "Attack   ->  "
 			type_icon.modulate = Color(1.1, 0.4, 0.4, 1.0)
 		"heal":
-			type_icon.text = "💚"
+			type_icon.text = "Heal   ->  "
 			type_icon.modulate = Color(0.4, 1.1, 0.4, 1.0)
 		"shield":
-			type_icon.text = "🛡️"
+			type_icon.text = "Shield   ->  "
 			type_icon.modulate = Color(0.4, 0.6, 1.1, 1.0)
 		"hybrid":
-			type_icon.text = "✨"
+			type_icon.text = "Hybrid   ->  "
 			type_icon.modulate = Color(1.1, 0.8, 0.3, 1.0)
 		_:
 			type_icon.text = "❓"

@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bdyxe6g72tfji" path="res://scripts/StatisticsMenu.gd" id="1_hri28"]
 [ext_resource type="Shader" uid="uid://cstqok5jb3sb" path="res://shaders/DifficultyMenu.gdshader" id="2_5iwgg"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_u0la7"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5iwgg"]
 shader = ExtResource("2_5iwgg")
 shader_parameter/color1 = Color(0.5, 0.15, 0.25, 0.6)
 shader_parameter/color2 = Color(0.2, 0.3, 0.6, 0.7)
@@ -36,10 +36,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.6949606, 0.117702045, 0.1384432, 1)
+color = Color(0, 0, 0, 1)
 
 [node name="BackgroundPattern" type="ColorRect" parent="BackgroundLayer"]
-material = SubResource("ShaderMaterial_u0la7")
+material = SubResource("ShaderMaterial_5iwgg")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
