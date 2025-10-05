@@ -361,7 +361,7 @@ static func get_joker_templates() -> Array[Dictionary]:
 			"type": "shield",
 			"is_joker": true,
 			"joker_effect": "cost_reduction",
-			"description": "4 shield + next card -1 mana (this turn)"
+			"description": "4 shield + next card -3 mana (this turn)"
 		},
 		{
 			"name": "Coringa Hybrid",

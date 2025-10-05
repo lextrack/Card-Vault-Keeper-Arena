@@ -28,8 +28,6 @@ var input_manager: InputManager
 var audio_helper: AudioHelper
 var confirmation_dialog: ExitConfirmationDialog
 var returning_from_challengehub: bool = false
-var bundle_celebration_queue: Array = []
-var is_showing_bundle_celebration: bool = false
 var player: Player
 var ai: Player
 var ai_notification: AICardNotification
@@ -350,22 +348,10 @@ func _on_bundle_unlocked(bundle_id: String, cards: Array):
 
 func _wait_for_celebrations_to_complete():
 	if not bundle_celebration_system:
-		print("No bundle celebration system, skipping wait")
+		print("No bundle celebration system available")
 		return
-	
-	var max_wait_time = 2.0
-	var wait_time = 0.0
-	var check_interval = 0.05
-	
-	while wait_time < max_wait_time:
-		if bundle_celebration_system.is_celebrations_complete():
-			print("Celebrations completed after ", wait_time, "s")
-			return
 
-		await get_tree().create_timer(check_interval).timeout
-		wait_time += check_interval
-	
-	print("Celebration wait timed out after ", max_wait_time, "s")
+	await bundle_celebration_system.wait_for_celebrations_to_complete()
 
 func _wait_for_actions_to_complete():
 	var max_wait_time = 3.0
@@ -813,15 +799,12 @@ func _on_player_died():
 	
 	_track_game_end(false)
 	
-	var start_time = Time.get_ticks_msec() / 1000.0
 	await _wait_for_actions_to_complete()
-	var actions_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
-
+	
 	game_manager.finalize_game_end()
 	
-	start_time = Time.get_ticks_msec() / 1000.0
-	await _wait_for_celebrations_to_complete()
-	var celebrations_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
+	if bundle_celebration_system:
+		await bundle_celebration_system.wait_for_celebrations_to_complete()
 	
 	await cleanup_notifications()
 	await get_tree().create_timer(0.3).timeout
@@ -861,15 +844,12 @@ func _on_ai_died():
 	
 	_track_game_end(true)
 	
-	var start_time = Time.get_ticks_msec() / 1000.0
 	await _wait_for_actions_to_complete()
-	var actions_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
 	
 	game_manager.finalize_game_end()
 	
-	start_time = Time.get_ticks_msec() / 1000.0
-	await _wait_for_celebrations_to_complete()
-	var celebrations_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
+	if bundle_celebration_system:
+		await bundle_celebration_system.wait_for_celebrations_to_complete()
 	
 	await cleanup_notifications()
 	await get_tree().create_timer(0.3).timeout
@@ -929,7 +909,7 @@ func _track_game_end(player_won: bool):
 		if damage_taken == 0:
 			UnlockManagers.track_progress("perfect_victory", 1, extra_data)
 		
-		if difficulty == "hard" and game_time <= 480:
+		if difficulty == "hard" and game_time <= 420:
 			UnlockManagers.track_progress("speed_win_hard", 1, extra_data)
 	
 	UnlockManagers.track_progress("game_ended", 1, extra_data)

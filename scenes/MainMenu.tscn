@@ -18,20 +18,6 @@ corner_radius_bottom_left = 4
 shadow_size = 4
 shadow_offset = Vector2(0, 2)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_start_hover"]
-bg_color = Color(0.2, 0.35, 0.2, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.5, 0.7, 0.5, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_size = 6
-shadow_offset = Vector2(0, 3)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_start_pressed"]
 bg_color = Color(0.12, 0.2, 0.12, 0.95)
 border_width_left = 1
@@ -45,6 +31,20 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 shadow_size = 2
 shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_start_hover"]
+bg_color = Color(0.2, 0.35, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.7, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
 bg_color = Color(0.1, 0.1, 0.1, 0.85)
@@ -60,20 +60,6 @@ corner_radius_bottom_left = 4
 shadow_size = 4
 shadow_offset = Vector2(0, 2)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal_hover"]
-bg_color = Color(0.15, 0.15, 0.18, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.4, 0.4, 0.5, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_size = 6
-shadow_offset = Vector2(0, 3)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal_pressed"]
 bg_color = Color(0.08, 0.08, 0.08, 0.95)
 border_width_left = 1
@@ -87,6 +73,20 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 shadow_size = 2
 shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal_hover"]
+bg_color = Color(0.15, 0.15, 0.18, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.4, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_challenge_normal"]
 bg_color = Color(0.2, 0.1, 0.15, 0.85)
@@ -102,20 +102,6 @@ corner_radius_bottom_left = 4
 shadow_size = 4
 shadow_offset = Vector2(0, 2)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_challenge_hover"]
-bg_color = Color(0.28, 0.15, 0.22, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.6, 0.4, 0.5, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_size = 6
-shadow_offset = Vector2(0, 3)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_challenge_pressed"]
 bg_color = Color(0.17, 0.08, 0.12, 0.95)
 border_width_left = 1
@@ -129,6 +115,20 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 shadow_size = 2
 shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_challenge_hover"]
+bg_color = Color(0.28, 0.15, 0.22, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.4, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_normal"]
 bg_color = Color(0.22, 0.2, 0.05, 0.85)
@@ -144,20 +144,6 @@ corner_radius_bottom_left = 4
 shadow_size = 4
 shadow_offset = Vector2(0, 2)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_hover"]
-bg_color = Color(0.3, 0.27, 0.1, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.6, 0.55, 0.3, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_size = 6
-shadow_offset = Vector2(0, 3)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_pressed"]
 bg_color = Color(0.18, 0.16, 0.04, 0.95)
 border_width_left = 1
@@ -171,6 +157,20 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 shadow_size = 2
 shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_hover"]
+bg_color = Color(0.3, 0.27, 0.1, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.55, 0.3, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -281,8 +281,8 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_start_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_start_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_start_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_start_hover")
 text = "START GAME"
 
 [node name="OptionsButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -291,8 +291,8 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_normal_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_normal_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_normal_hover")
 text = "OPTIONS"
 
 [node name="HelpButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -301,8 +301,8 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_normal_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_normal_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_normal_hover")
 text = "HELP"
 
 [node name="ChallengeButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -311,8 +311,8 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_challenge_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_challenge_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_challenge_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_challenge_hover")
 text = "CHALLENGE HUB"
 
 [node name="CreditsButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -321,8 +321,8 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_normal_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_normal_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_normal_hover")
 text = "CREDITS"
 
 [node name="StatsButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -331,8 +331,8 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_normal_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_normal_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_normal_hover")
 text = "STATS"
 
 [node name="ExitButton" type="Button" parent="MenuContainer/ButtonsContainer"]
@@ -341,8 +341,8 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_exit_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_exit_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_exit_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_exit_hover")
 text = "EXIT"
 
 [node name="FooterContainer" type="VBoxContainer" parent="."]

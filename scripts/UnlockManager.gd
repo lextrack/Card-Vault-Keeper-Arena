@@ -40,7 +40,7 @@ var bundles: Dictionary = {
 	"speed_runner": {
 		"name": "Speed Fighter",
 		"description": "Cards for quick victories",
-		"requirement_text": "Win a Hard game in under 8 minutes",
+		"requirement_text": "Win a Hard game in under 7 minutes",
 		"requirement_type": "speed_win_hard",
 		"requirement_value": 1,
 		"cards": ["Divine Cure", "Vampire Blade", "Combat Medic"],
@@ -303,7 +303,7 @@ func _calculate_progress(bundle: Dictionary, progress_type: String, value: int, 
 		"speed_win_hard":
 			if progress_type == "game_won" and extra_data.get("difficulty", "") == "hard":
 				var game_time = extra_data.get("time", 999)
-				if game_time <= 480:
+				if game_time <= 420:
 					return bundle.requirement_value
 				return old_progress
 		"hybrid_cards_played":

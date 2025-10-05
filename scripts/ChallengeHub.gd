@@ -60,7 +60,8 @@ var casual_dialogs = [
 	"Unlock more bundles so we have more cards to play together.",
 	"A single card can turn the tide of battle... if you know when to play it. Make sure to check you mana.",
 	"Besides dueling you and keeping these bundles, I also keep track of your actions in the statistics section.",
-	"Use Coringas (Jokers) wisely. They are very helpful in most situations."
+	"Use Coringas (Jokers) wisely. They are very helpful in most situations.",
+	"During combat, press H or RB on the controller to view the controls I have chosen to play with."
 ]
 
 var mysterious_dialogs = [

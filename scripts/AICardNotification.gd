@@ -111,9 +111,9 @@ func _animate_entrance(card_type: String):
 		"attack":
 			position.x = original_position.x
 			scale = Vector2(1.3, 1.3)
-			tween.tween_property(self, "modulate:a", 1.0, 0.2).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
-			tween.tween_property(self, "scale", Vector2(0.95, 0.95), 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-			tween.chain().tween_property(self, "scale", Vector2(1.0, 1.0), 0.1).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+			tween.tween_property(self, "modulate:a", 1.0, 0.25).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+			tween.tween_property(self, "scale", Vector2(0.95, 0.95), 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			tween.chain().tween_property(self, "scale", Vector2(1.0, 1.0), 0.15).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 			
 		"heal":
 			position.y = original_position.y + 30
@@ -163,7 +163,7 @@ func _setup_card_display(card: CardData, player_name: String):
 			if card.heal > 0:
 				effects.append("+" + str(card.heal) + " hp")
 			if card.shield > 0:
-				effects.append("+" + str(card.shield) + " shld")
+				effects.append("+" + str(card.shield) + " shield")
 			card_effect.text = " | ".join(effects)
 		_:
 			card_effect.text = card.description if card.description != "" else "Special effect"

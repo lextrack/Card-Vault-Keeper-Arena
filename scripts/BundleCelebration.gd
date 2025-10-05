@@ -69,17 +69,9 @@ func _show_celebration(bundle_info: Dictionary, cards: Array):
 	
 	timer.timeout.connect(_close_celebration_safely.bind(overlay))
 	timer.start()
-
-	var max_wait = 2.0
-	var wait_time = 0.0
 	
-	while is_instance_valid(overlay) and wait_time < max_wait:
-		await main_scene.get_tree().create_timer(0.05).timeout
-		wait_time += 0.05
+	await timer.timeout
 	
-	if is_instance_valid(overlay):
-		overlay.queue_free()
-		
 func _close_celebration_safely(overlay: Control):
 	if not is_instance_valid(overlay):
 		return
@@ -167,12 +159,10 @@ func _animate_entrance(overlay: Control, panel: Panel):
 	await tween.finished
 
 func _spawn_particles(overlay: Control):
-	var particles = ["✨", "🎉", "⭐", "💫", "🌟"]
-	
-	for i in range(6): 
-		var particle = Label.new()
-		particle.text = particles[randi() % particles.size()]
-		particle.add_theme_font_size_override("font_size", 24)
+	for i in range(6):
+		var particle = ColorRect.new()
+		particle.size = Vector2(8, 8)
+		particle.color = Color(1, 0.8, 0.2, 1)
 		particle.position = Vector2(
 			randf_range(50, overlay.size.x - 50),
 			randf_range(50, overlay.size.y - 200)
@@ -183,24 +173,11 @@ func _spawn_particles(overlay: Control):
 		tween.set_parallel(true)
 		tween.tween_property(particle, "position:y", particle.position.y - 100, 1.5)
 		tween.tween_property(particle, "modulate:a", 0.0, 1.5)
-		
-		var cleanup_callable = func(): _cleanup_particle(particle)
-		tween.finished.connect(cleanup_callable)
+		tween.tween_property(particle, "rotation", randf_range(-PI, PI), 1.5)
 
-func _cleanup_particle(particle: Label):
-	if is_instance_valid(particle):
+func _cleanup_particle(particle: ColorRect):
+	if is_instance_valid(particle) and particle.is_inside_tree():
 		particle.queue_free()
-
-func _close_celebration(overlay: Control):
-	if not is_instance_valid(overlay):
-		return
-		
-	var fade_tween = main_scene.create_tween()
-	fade_tween.tween_property(overlay, "modulate:a", 0.0, 0.2)
-	await fade_tween.finished
-	
-	if is_instance_valid(overlay):
-		overlay.queue_free()
 
 func wait_for_celebrations_to_complete() -> void:
 	var max_wait = 3.0

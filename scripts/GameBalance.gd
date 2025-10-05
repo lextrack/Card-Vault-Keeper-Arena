@@ -34,7 +34,7 @@ const GAME_NOTIFICATION_AUTO_TURN_DURATION: float = 1.5
 const MIN_HEAL_RATIO: float = 0.10
 const MIN_SHIELD_RATIO: float = 0.08
 const MIN_ATTACK_RATIO: float = 0.60
-const MIN_HYBRID_RATIO: float = 0.05
+const MIN_HYBRID_RATIO: float = 0.07
 
 enum Difficulty {
 	NORMAL,
@@ -62,7 +62,7 @@ static func get_player_config(difficulty: String) -> Dictionary:
 			}
 		"expert":
 			return {
-				"hp": 55,
+				"hp": 50,
 				"mana": 9,
 				"cards_per_turn": 2,
 				"hand_size": 5,
@@ -95,7 +95,7 @@ static func get_ai_config(difficulty: String) -> Dictionary:
 			}
 		"expert":
 			return {
-				"hp": 50,
+				"hp": 45,
 				"mana": 11, 
 				"cards_per_turn": 2,
 				"hand_size": 6,
