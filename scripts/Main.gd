@@ -590,6 +590,10 @@ func start_ai_turn():
 	var is_bonus_turn = GameBalance.is_damage_bonus_turn(ai.turn_number)
 
 	if is_bonus_turn and current_bonus > 0 and last_bonus_notification_turn != ai.turn_number:
+		if game_notification and game_notification.is_showing:
+			await game_notification.hide_notification()
+			await get_tree().create_timer(0.2).timeout
+		
 		last_bonus_notification_turn = ai.turn_number
 		audio_helper.play_bonus_sound()
 		game_notification.show_damage_bonus_notification(ai.turn_number, current_bonus)
@@ -784,6 +788,10 @@ func _on_turn_changed(turn_num: int, damage_bonus: int):
 	ui_manager.update_damage_bonus_indicator(player, damage_bonus_label)
 	
 	if is_player_turn and damage_bonus > 0 and GameBalance.is_damage_bonus_turn(turn_num) and last_bonus_notification_turn != turn_num:
+		if game_notification and game_notification.is_showing:
+			await game_notification.hide_notification()
+			await get_tree().create_timer(0.2).timeout
+		
 		last_bonus_notification_turn = turn_num
 		audio_helper.play_bonus_sound()
 		game_notification.show_damage_bonus_notification(turn_num, damage_bonus)
@@ -816,6 +824,7 @@ func _on_player_died():
 	var celebrations_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
 	
 	await cleanup_notifications()
+	await get_tree().create_timer(0.3).timeout
 	
 	if audio_manager and audio_manager.lose_player:
 		audio_manager.lose_player.play()
@@ -863,6 +872,7 @@ func _on_ai_died():
 	var celebrations_wait_time = (Time.get_ticks_msec() / 1000.0) - start_time
 	
 	await cleanup_notifications()
+	await get_tree().create_timer(0.3).timeout
 
 	if audio_manager and audio_manager.win_player:
 		audio_manager.win_player.play()
@@ -1007,13 +1017,11 @@ func _on_end_turn_pressed():
 		await game_manager.restart_for_no_cards()
 		return
 	
-	# Actualizar el estado del botón inmediatamente
 	if end_turn_button:
 		end_turn_button.text = "Ending Turn..."
 		end_turn_button.disabled = true
 		end_turn_button.modulate = Color(0.7, 0.7, 0.7, 1.0)
 	
-	# Deshabilitar los otros botones también
 	set_bottom_buttons_enabled(false)
 	
 	start_ai_turn()

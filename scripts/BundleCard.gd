@@ -18,16 +18,6 @@ extends Control
 @onready var border_highlight = $CardPanel/BorderHighlight
 @onready var card_shadow = $CardPanel/CardShadow
 
-const ICON_PATH = "res://assets/ui/"  # Ajusta esta ruta según tu proyecto
-
-# Diccionario para mapear tipos de cartas a sus íconos
-const TYPE_ICONS = {
-	"attack": "sword_loading.png",
-	"heal": "heal.png",
-	"shield": "shield_loading.png",
-	"hybrid": "magic.png"
-}
-
 var bundle_info: Dictionary = {}
 var original_scale: Vector2
 var hover_tween: Tween

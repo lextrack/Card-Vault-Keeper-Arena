@@ -261,7 +261,7 @@ func play_entrance_animation():
 	
 	tween.tween_property(self, "modulate:a", 1.0, entrance_duration)
 	tween.tween_property(self, "scale", Vector2(1.0, 1.0), scale_duration)
-	tween.tween_property(self, "position:y", 0.0, entrance_duration * 0.9)
+	tween.tween_property(self, "position:y", 0.0, entrance_duration * 0.5)
 
 	await tween.finished
 	

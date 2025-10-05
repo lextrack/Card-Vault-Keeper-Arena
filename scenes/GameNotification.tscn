@@ -1,6 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://do23whji38qbb"]
+[gd_scene load_steps=3 format=3 uid="uid://do23whji38qbb"]
 
 [ext_resource type="Script" uid="uid://c7vc7s8rm8n7f" path="res://scripts/GameNotification.gd" id="1_game_notification"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress"]
+bg_color = Color(0.3, 0.5, 0.8, 0.8)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [node name="GameNotification" type="Control"]
 layout_mode = 3
@@ -16,6 +23,19 @@ offset_bottom = -63.0
 grow_horizontal = 0
 grow_vertical = 0
 script = ExtResource("1_game_notification")
+
+[node name="Shadow" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -83,7 +103,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 16
-text = "📥 Main"
+text = "Main"
 horizontal_alignment = 1
 autowrap_mode = 2
 
@@ -96,6 +116,22 @@ theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 16
 text = "Details"
 horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="Background"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -8.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress")
+value = 100.0
+show_percentage = false
 
 [node name="ParticleEffect" type="GPUParticles2D" parent="."]
 position = Vector2(129, 1)
