@@ -60,6 +60,16 @@ func _ready():
 		await initialize_game_from_saved_state()
 	else:
 		await initialize_game()
+		
+	buttons_connections()
+		
+func buttons_connections():
+	if options_button:
+		options_button.pressed.connect(_on_options_button_pressed)
+	if challengehub_button:
+		challengehub_button.pressed.connect(_on_challengehub_button_pressed)
+	if exit_button:
+		exit_button.pressed.connect(_on_exit_button_pressed)
 
 func _connect_player_buff_signals():
 	await get_tree().process_frame
@@ -71,12 +81,6 @@ func _connect_player_buff_signals():
 			player.buff_consumed.connect(_on_player_buff_consumed)
 		if not player.buff_cleared.is_connected(_on_player_buff_cleared):
 			player.buff_cleared.connect(_on_player_buff_cleared)
-		if options_button:
-			options_button.pressed.connect(_on_options_button_pressed)
-		if challengehub_button:
-			challengehub_button.pressed.connect(_on_challengehub_button_pressed)
-		if exit_button:
-			exit_button.pressed.connect(_on_exit_button_pressed)
 
 func _on_player_buff_applied(buff_type: String, buff_value: Variant):
 	var buff_message = _get_buff_display_message(buff_type, buff_value)
@@ -175,6 +179,14 @@ func _setup_options_menu():
 	options_menu.options_closed.connect(_on_options_menu_closed)
 	ui_layer.add_child(options_menu)
 	options_menu.visible = false
+	
+func set_bottom_buttons_enabled(enabled: bool):
+	if options_button:
+		options_button.disabled = not enabled
+	if challengehub_button:
+		challengehub_button.disabled = not enabled
+	if exit_button:
+		exit_button.disabled = not enabled
 	
 func _on_options_button_pressed():
 	if not is_player_turn or is_game_transitioning:
@@ -553,6 +565,8 @@ func start_player_turn():
 	if end_turn_button:
 		ui_manager.reset_turn_button(end_turn_button, input_manager.gamepad_mode)
 		ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
+
+	set_bottom_buttons_enabled(true)
 	
 	controls_panel.update_player_turn(true)
 	controls_panel.update_cards_available(player.hand.size() > 0)
@@ -583,6 +597,8 @@ func start_ai_turn():
 	
 	if StatisticsManagers:
 		StatisticsManagers.turn_completed()
+	
+	set_bottom_buttons_enabled(false)
 	
 	controls_panel.force_hide()
 	audio_helper.play_turn_change_sound(false)
@@ -990,6 +1006,15 @@ func _on_end_turn_pressed():
 	if game_manager.should_restart_for_no_cards():
 		await game_manager.restart_for_no_cards()
 		return
+	
+	# Actualizar el estado del botón inmediatamente
+	if end_turn_button:
+		end_turn_button.text = "Ending Turn..."
+		end_turn_button.disabled = true
+		end_turn_button.modulate = Color(0.7, 0.7, 0.7, 1.0)
+	
+	# Deshabilitar los otros botones también
+	set_bottom_buttons_enabled(false)
 	
 	start_ai_turn()
 

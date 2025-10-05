@@ -2,6 +2,7 @@ extends Control
 
 @onready var title_label = $MainContainer/HeaderContainer/TitleLabel
 @onready var credits_container = $MainContainer/CreditsContainer
+@onready var back_button = $MainContainer/FooterContainer/ButtonContainer/BackButton
 
 var is_transitioning: bool = false
 var entrance_tween: Tween
@@ -11,7 +12,7 @@ var last_input_was_gamepad: bool = false
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	
+	back_button.pressed.connect(_on_exit_credits)
 	await handle_scene_entrance()
 
 func handle_scene_entrance():

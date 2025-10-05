@@ -225,6 +225,7 @@ func start_player_turn(player: Player, difficulty: String):
 		var input_manager = main_scene.input_manager
 		var gamepad_mode = input_manager.gamepad_mode if input_manager else false
 		update_turn_button_text(player, end_turn_button, gamepad_mode)
+		
 
 	_update_existing_cards_playability(player)
 	_restore_gamepad_selection_immediate(player)
@@ -413,7 +414,7 @@ func update_turn_button_text(player: Player, end_turn_button: Button, gamepad_mo
 		return
 
 	if not main_scene.is_player_turn:
-		end_turn_button.text = "AI Turn"
+		end_turn_button.text = "AI Turn..."
 		end_turn_button.disabled = true
 		end_turn_button.modulate = Color(0.6, 0.6, 0.6, 1.0)
 		return
@@ -425,14 +426,14 @@ func update_turn_button_text(player: Player, end_turn_button: Button, gamepad_mo
 	end_turn_button.disabled = false
    
 	if cards_played >= max_cards:
-		end_turn_button.text = "Turn Ending..."
+		end_turn_button.text = "Turn Limit Reached"
 		end_turn_button.disabled = true
 		end_turn_button.modulate = Color(0.7, 0.7, 0.7, 1.0)
-	elif playable_cards.size() == 0:
-		end_turn_button.text = "No Playable Cards"
+	elif playable_cards.size() == 0 and player.get_hand_size() > 0:
+		end_turn_button.text = "No Mana - End Turn"
 		end_turn_button.modulate = Color(0.8, 0.8, 0.8, 1.0)
 	elif player.get_hand_size() == 0:
-		end_turn_button.text = "No Cards in Hand"
+		end_turn_button.text = "Empty Hand - End Turn"
 		end_turn_button.modulate = Color(0.8, 0.8, 0.8, 1.0)
 	else:
 		end_turn_button.modulate = Color.WHITE

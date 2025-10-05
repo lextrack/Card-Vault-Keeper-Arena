@@ -737,7 +737,7 @@ func _on_debug_pressed():
 
 func _on_button_hover(button: Button):
 	var tween = create_tween()
-	tween.tween_property(button, "scale", Vector2(1.05, 1.05), 0.1)
+	tween.tween_property(button, "scale", Vector2(1.02, 1.02), 0.1)
 	
 	if not button.mouse_exited.is_connected(_on_button_unhover):
 		button.mouse_exited.connect(_on_button_unhover.bind(button))
