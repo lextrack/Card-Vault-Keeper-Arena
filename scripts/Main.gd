@@ -16,6 +16,9 @@ extends Control
 @onready var damage_bonus_label = $UILayer/TopPanel/StatsContainer/CenterInfo/DamageBonusLabel
 @onready var audio_manager = $AudioManager
 @onready var joker_buff_label: Label = $UILayer/TopPanel/StatsContainer/CenterInfo/JokerBuffLabel
+@onready var options_button = $UILayer/BottomPanel/TurnButtonsContainer/OptionsButton
+@onready var challengehub_button = $UILayer/BottomPanel/TurnButtonsContainer/ChallengeHubButton
+@onready var exit_button = $UILayer/BottomPanel/TurnButtonsContainer/ExitButton
 
 var last_bonus_notification_turn: int = -1
 var options_menu: OptionsMenu
@@ -68,6 +71,12 @@ func _connect_player_buff_signals():
 			player.buff_consumed.connect(_on_player_buff_consumed)
 		if not player.buff_cleared.is_connected(_on_player_buff_cleared):
 			player.buff_cleared.connect(_on_player_buff_cleared)
+		if options_button:
+			options_button.pressed.connect(_on_options_button_pressed)
+		if challengehub_button:
+			challengehub_button.pressed.connect(_on_challengehub_button_pressed)
+		if exit_button:
+			exit_button.pressed.connect(_on_exit_button_pressed)
 
 func _on_player_buff_applied(buff_type: String, buff_value: Variant):
 	var buff_message = _get_buff_display_message(buff_type, buff_value)
@@ -166,6 +175,24 @@ func _setup_options_menu():
 	options_menu.options_closed.connect(_on_options_menu_closed)
 	ui_layer.add_child(options_menu)
 	options_menu.visible = false
+	
+func _on_options_button_pressed():
+	if not is_player_turn or is_game_transitioning:
+		return
+	audio_helper.play_ui_click_sound()
+	show_options_menu()
+
+func _on_challengehub_button_pressed():
+	if not is_player_turn or is_game_transitioning:
+		return
+	audio_helper.play_ui_click_sound()
+	open_challengehub()
+
+func _on_exit_button_pressed():
+	if is_game_transitioning:
+		return
+	audio_helper.play_ui_click_sound()
+	show_exit_confirmation()
 	
 func _on_options_menu_closed():
 	if is_player_turn:

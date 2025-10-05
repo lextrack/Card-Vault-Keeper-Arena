@@ -613,14 +613,15 @@ color = Color(0.101960786, 0.14901961, 0.2509804, 0.9019608)
 
 [node name="TurnButtonsContainer" type="HBoxContainer" parent="UILayer/BottomPanel"]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -80.0
-offset_top = 4.0
-offset_right = 80.0
-offset_bottom = 44.0
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -20.5
+offset_bottom = 10.5
 grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
 alignment = 1
 
 [node name="EndTurnButton" type="Button" parent="UILayer/BottomPanel/TurnButtonsContainer"]
@@ -629,6 +630,27 @@ size_flags_horizontal = 4
 focus_mode = 0
 theme_override_font_sizes/font_size = 20
 text = "End Turn"
+
+[node name="OptionsButton" type="Button" parent="UILayer/BottomPanel/TurnButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_font_sizes/font_size = 20
+text = "Options"
+
+[node name="ChallengeHubButton" type="Button" parent="UILayer/BottomPanel/TurnButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_font_sizes/font_size = 20
+text = "Challenges"
+
+[node name="ExitButton" type="Button" parent="UILayer/BottomPanel/TurnButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_font_sizes/font_size = 20
+text = "Exit"
 
 [node name="GameOverLabel" type="Label" parent="UILayer"]
 visible = false
