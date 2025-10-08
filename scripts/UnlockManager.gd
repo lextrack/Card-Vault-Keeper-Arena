@@ -135,7 +135,126 @@ var bundles: Dictionary = {
 		"requirement_value": 100,
 		"cards": ["Guardian's Touch", "Blessed Strike"],
 		"rarity_info": "2 Uncommon"
-	}
+	},
+	"aggressor": {
+		"name": "Aggressor",
+		"description": "Offense is your best defense",
+		"requirement_text": "Play 150 attack cards total",
+		"requirement_type": "attack_cards_played",
+		"requirement_value": 150,
+		"cards": ["Flame Strike", "Ice Shard", "Thunder Strike"],
+		"rarity_info": "3 Uncommon Attack"
+	},
+
+	"berserker_path": {
+		"name": "Berserker Path",
+		"description": "Live by the sword",
+		"requirement_text": "Play 300 attack cards total",
+		"requirement_type": "attack_cards_played",
+		"requirement_value": 300,
+		"cards": ["Lightning Bolt", "Cataclysm"],
+		"rarity_info": "1 Rare, 1 Epic Attack"
+	},
+
+	"healer_initiate": {
+		"name": "Healer Initiate",
+		"description": "The path of restoration",
+		"requirement_text": "Play 100 heal cards total",
+		"requirement_type": "heal_cards_played",
+		"requirement_value": 100,
+		"cards": ["Spring Water", "Meditation", "Emergency Heal"],
+		"rarity_info": "3 Uncommon Heal"
+	},
+
+	"master_healer": {
+		"name": "Master Healer",
+		"description": "Life flows through your hands",
+		"requirement_text": "Play 250 heal cards total",
+		"requirement_type": "heal_cards_played",
+		"requirement_value": 250,
+		"cards": ["Nature's Gift", "Phoenix Rebirth"],
+		"rarity_info": "1 Rare, 1 Epic Heal"
+	},
+
+	"journeyman": {
+		"name": "Journeyman",
+		"description": "Experience through persistence",
+		"requirement_text": "Win 25 games on any difficulty",
+		"requirement_type": "total_wins",
+		"requirement_value": 25,
+		"cards": ["Blade Flurry", "Barrier", "Draining Touch"],
+		"rarity_info": "3 Uncommon"
+	},
+
+	"veteran_champion": {
+		"name": "Veteran Champion",
+		"description": "A true warrior emerges",
+		"requirement_text": "Win 50 games on any difficulty",
+		"requirement_type": "total_wins",
+		"requirement_value": 50,
+		"cards": ["Vengeful Strike", "Reaper's Touch", "Dragon Strike"],
+		"rarity_info": "3 Rare"
+	},
+
+	"legendary_hero": {
+		"name": "Legendary Hero",
+		"description": "Your name echoes through time",
+		"requirement_text": "Win 100 games on any difficulty",
+		"requirement_type": "total_wins",
+		"requirement_value": 100,
+		"cards": ["Inferno", "Archangel's Wrath"],
+		"rarity_info": "2 Epic"
+	},
+
+	"wildcard_apprentice": {
+		"name": "Wildcard Apprentice",
+		"description": "Embrace chaos and opportunity",
+		"requirement_text": "Play 20 Coringa cards",
+		"requirement_type": "jokers_played",
+		"requirement_value": 20,
+		"cards": ["Mystic Barrier", "Stone Skin", "Storm Blade"],
+		"rarity_info": "3 Uncommon Hybrid"
+	},
+
+	"joker_master": {
+		"name": "Joker Master",
+		"description": "Chaos is your greatest ally",
+		"requirement_text": "Play 50 Coringa cards",
+		"requirement_type": "jokers_played",
+		"requirement_value": 50,
+		"cards": ["Elemental Fury", "Immortal Warrior"],
+		"rarity_info": "1 Rare, 1 Epic Hybrid"
+	},
+
+	"minimal_damage_expert": {
+		"name": "Minimal Damage Expert",
+		"description": "Win while taking minimal punishment",
+		"requirement_text": "Win 3 games taking 10 damage or less",
+		"requirement_type": "low_damage_victories_10",
+		"requirement_value": 3,
+		"cards": ["Aegis", "Titan's Guard"],
+		"rarity_info": "1 Uncommon, 1 Rare"
+	},
+
+	"resilient_champion": {
+		"name": "Resilient Champion",
+		"description": "Victory through superior defense",
+		"requirement_text": "Win 10 games taking 15 damage or less",
+		"requirement_type": "low_damage_victories_15",
+		"requirement_value": 10,
+		"cards": ["Invulnerability", "Divine Balance", "Absolute Defense"],
+		"rarity_info": "3 Epic"
+	},
+
+	"elemental_master": {
+		"name": "Elemental Master",
+		"description": "Command the forces of nature",
+		"requirement_text": "Win 15 games on any difficulty",
+		"requirement_type": "total_wins",
+		"requirement_value": 15,
+		"cards": ["Diamond Shield", "Full Recovery"],
+		"rarity_info": "2 Rare"
+	},
 }
 
 var _starter_cards: Array[String] = [
@@ -341,6 +460,30 @@ func _calculate_progress(bundle: Dictionary, progress_type: String, value: int, 
 				var card_type = extra_data.get("card_type", "")
 				if card_type == "shield" or (card_type == "hybrid" and extra_data.get("shield_value", 0) > 0):
 					return min(old_progress + value, bundle.requirement_value)
+		"attack_cards_played":
+			if progress_type == "card_played" and extra_data.get("card_type", "") == "attack":
+				return min(old_progress + value, bundle.requirement_value)
+
+		"heal_cards_played":
+			if progress_type == "card_played" and extra_data.get("card_type", "") == "heal":
+				return min(old_progress + value, bundle.requirement_value)
+
+		"jokers_played":
+			if progress_type == "joker_played":
+				return min(old_progress + value, bundle.requirement_value)
+				
+		"low_damage_victories_10":
+			if progress_type == "game_won":
+				var damage_taken = extra_data.get("damage_taken", 999)
+				if damage_taken <= 10:
+					return min(old_progress + 1, bundle.requirement_value)
+			return old_progress
+
+		"low_damage_victories_15":
+			if progress_type == "game_won":
+				var damage_taken = extra_data.get("damage_taken", 999)
+				if damage_taken <= 15:
+					return min(old_progress + 1, bundle.requirement_value)
 	return old_progress
 
 func get_progress_text(bundle_id: String) -> String:
@@ -384,6 +527,17 @@ func get_progress_text(bundle_id: String) -> String:
 			return "0/1 high damage games" if displayed_current < required else "COMPLETED"
 		"shield_cards_played":
 			return str(displayed_current) + "/" + str(required) + " shield cards"
+		"attack_cards_played":
+			return str(displayed_current) + "/" + str(required) + " attack cards"
+		"heal_cards_played":
+			return str(displayed_current) + "/" + str(required) + " heal cards"
+		"jokers_played":
+			return str(displayed_current) + "/" + str(required) + " jokers played"
+		"low_damage_victories_10":
+			return str(displayed_current) + "/" + str(required) + " wins (<=10 damage)"
+		"low_damage_victories_15":
+			return str(displayed_current) + "/" + str(required) + " wins (<=15 damage)"
+			
 	return str(displayed_current) + "/" + str(required)
 
 func save_progress():

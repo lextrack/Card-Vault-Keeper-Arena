@@ -970,6 +970,9 @@ func _on_card_clicked(card):
 		}
 		UnlockManagers.track_progress("card_played", 1, extra_data)
 		
+		if card_data.is_joker:
+			UnlockManagers.track_progress("joker_played", 1, {})
+		
 		if card_type == "hybrid":
 			UnlockManagers.track_progress("hybrid_cards_played", 1, extra_data)
 	

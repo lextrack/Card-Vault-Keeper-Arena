@@ -31,13 +31,21 @@ static func _initialize_card_data():
 		{"name": "Fierce Attack", "cost": 5, "damage": 7, "type": "attack", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 30},
 		{"name": "Power Strike", "cost": 4, "damage": 5, "type": "attack", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 42},
 		{"name": "Heavy Blow", "cost": 5, "damage": 7, "type": "attack", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 32},
-		
+		{"name": "Flame Strike", "cost": 5, "damage": 7, "type": "attack", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 33},
+		{"name": "Ice Shard", "cost": 4, "damage": 6, "type": "attack", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 36},
+		{"name": "Thunder Strike", "cost": 6, "damage": 8, "type": "attack", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 35},
+		{"name": "Blade Flurry", "cost": 3, "damage": 5, "type": "attack", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 38},
+
 		# ATTACK CARDS - Rare
 		{"name": "Deep Cut", "cost": 7, "damage": 8, "type": "attack", "rarity": RaritySystem.Rarity.RARE, "weight": 20},
 		{"name": "Critical Strike", "cost": 9, "damage": 22, "type": "attack", "rarity": RaritySystem.Rarity.RARE, "weight": 11},
 		{"name": "Piercing Blow", "cost": 5, "damage": 9, "type": "attack", "rarity": RaritySystem.Rarity.RARE, "weight": 19},
+		{"name": "Lightning Bolt", "cost": 6, "damage": 9, "type": "attack", "rarity": RaritySystem.Rarity.RARE, "weight": 16},
+		{"name": "Dragon Strike", "cost": 7, "damage": 11, "type": "attack", "rarity": RaritySystem.Rarity.RARE, "weight": 14},
 		
 		# ATTACK CARDS - Epic
+		{"name": "Cataclysm", "cost": 10, "damage": 24, "type": "attack", "rarity": RaritySystem.Rarity.EPIC, "weight": 3},
+		{"name": "Inferno", "cost": 9, "damage": 20, "type": "attack", "rarity": RaritySystem.Rarity.EPIC, "weight": 4},
 		{"name": "Devastating Blow", "cost": 7, "damage": 12, "type": "attack", "rarity": RaritySystem.Rarity.EPIC, "weight": 8},
 		{"name": "Berserker Fury", "cost": 8, "damage": 14, "type": "attack", "rarity": RaritySystem.Rarity.EPIC, "weight": 6},
 		{"name": "Execution", "cost": 9, "damage": 16, "type": "attack", "rarity": RaritySystem.Rarity.EPIC, "weight": 4},
@@ -53,12 +61,18 @@ static func _initialize_card_data():
 		{"name": "Potion", "cost": 4, "heal": 5, "type": "heal", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 25},
 		{"name": "Healing", "cost": 4, "heal": 6, "type": "heal", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 20},
 		{"name": "Restoration", "cost": 4, "heal": 5, "type": "heal", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 22},
+		{"name": "Spring Water", "cost": 3, "heal": 5, "type": "heal", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 26},
+		{"name": "Meditation", "cost": 5, "heal": 8, "type": "heal", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 20},
+		{"name": "Emergency Heal", "cost": 3, "heal": 6, "type": "heal", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 24},
 		
 		# HEAL CARDS - Rare
 		{"name": "Major Healing", "cost": 8, "heal": 16, "type": "heal", "rarity": RaritySystem.Rarity.RARE, "weight": 12},
 		{"name": "Divine Cure", "cost": 6, "heal": 10, "type": "heal", "rarity": RaritySystem.Rarity.RARE, "weight": 10},
+		{"name": "Nature's Gift", "cost": 7, "heal": 14, "type": "heal", "rarity": RaritySystem.Rarity.RARE, "weight": 11},
+		{"name": "Full Recovery", "cost": 9, "heal": 20, "type": "heal", "rarity": RaritySystem.Rarity.RARE, "weight": 9},
 		
 		# HEAL CARDS - Epic
+		{"name": "Phoenix Rebirth", "cost": 8, "heal": 18, "type": "heal", "rarity": RaritySystem.Rarity.EPIC, "weight": 6},
 		{"name": "Regeneration", "cost": 5, "heal": 12, "type": "heal", "rarity": RaritySystem.Rarity.EPIC, "weight": 5},
 		
 		# SHIELD CARDS - Common
@@ -70,13 +84,19 @@ static func _initialize_card_data():
 		{"name": "Basic Shield", "cost": 3, "shield": 4, "type": "shield", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 25},
 		{"name": "Shield", "cost": 4, "shield": 5, "type": "shield", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 20},
 		{"name": "Iron Defense", "cost": 5, "shield": 6, "type": "shield", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 18},
+		{"name": "Stone Skin", "cost": 5, "shield": 7, "type": "shield", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 19},
+		{"name": "Barrier", "cost": 6, "shield": 7, "type": "shield", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 18},
+		{"name": "Aegis", "cost": 4, "shield": 5, "type": "shield", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 22},
 		
 		# SHIELD CARDS - Rare
+		{"name": "Diamond Shield", "cost": 7, "shield": 9, "type": "shield", "rarity": RaritySystem.Rarity.RARE, "weight": 9},
 		{"name": "Reinforced Shield", "cost": 5, "shield": 6, "type": "shield", "rarity": RaritySystem.Rarity.RARE, "weight": 10},
 		{"name": "Steel Wall", "cost": 6, "shield": 8, "type": "shield", "rarity": RaritySystem.Rarity.RARE, "weight": 8},
 		
 		# SHIELD CARDS - Epic
 		{"name": "Fortress", "cost": 7, "shield": 9, "type": "shield", "rarity": RaritySystem.Rarity.EPIC, "weight": 5},
+		{"name": "Invulnerability", "cost": 8, "shield": 12, "type": "shield", "rarity": RaritySystem.Rarity.EPIC, "weight": 3},
+		{"name": "Absolute Defense", "cost": 9, "shield": 14, "type": "shield", "rarity": RaritySystem.Rarity.EPIC, "weight": 2},
 		
 		# HYBRID CARDS - Common
 		{"name": "Quick Recovery", "cost": 4, "damage": 2, "heal": 3, "type": "hybrid", "rarity": RaritySystem.Rarity.COMMON, "weight": 45},
@@ -92,17 +112,27 @@ static func _initialize_card_data():
 		{"name": "Blessed Strike", "cost": 5, "damage": 3, "heal": 2, "type": "hybrid", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 15},
 		{"name": "Vampire Blade", "cost": 6, "damage": 3, "heal": 10, "type": "hybrid", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 22},
 		{"name": "Armored Strike", "cost": 4, "damage": 3, "shield": 3, "type": "hybrid", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 19},
+		{"name": "Draining Touch", "cost": 4, "damage": 5, "heal": 5, "type": "hybrid", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 21},
+		{"name": "Mystic Barrier", "cost": 6, "heal": 5, "shield": 5, "type": "hybrid", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 19},
+		{"name": "Storm Blade", "cost": 5, "damage": 4, "shield": 4, "type": "hybrid", "rarity": RaritySystem.Rarity.UNCOMMON, "weight": 20},
 		
 		# HYBRID CARDS - Rare
 		{"name": "Paladin's Resolve", "cost": 4, "damage": 4, "heal": 3, "type": "hybrid", "rarity": RaritySystem.Rarity.RARE, "weight": 12},
 		{"name": "Divine Retribution", "cost": 6, "damage": 4, "heal": 5, "type": "hybrid", "rarity": RaritySystem.Rarity.RARE, "weight": 10},
 		{"name": "Fortress Guard", "cost": 7, "damage": 2, "shield": 5, "type": "hybrid", "rarity": RaritySystem.Rarity.RARE, "weight": 8},
 		{"name": "Battle Healer", "cost": 5, "damage": 3, "heal": 4, "type": "hybrid", "rarity": RaritySystem.Rarity.RARE, "weight": 11},
+		{"name": "Vengeful Strike", "cost": 5, "damage": 6, "shield": 4, "type": "hybrid", "rarity": RaritySystem.Rarity.RARE, "weight": 10},
+		{"name": "Reaper's Touch", "cost": 7, "damage": 8, "heal": 6, "type": "hybrid", "rarity": RaritySystem.Rarity.RARE, "weight": 9},
+		{"name": "Titan's Guard", "cost": 8, "damage": 6, "shield": 7, "type": "hybrid", "rarity": RaritySystem.Rarity.RARE, "weight": 7},
+		{"name": "Elemental Fury", "cost": 8, "damage": 7, "heal": 6, "type": "hybrid", "rarity": RaritySystem.Rarity.RARE, "weight": 8},
 		
 		# HYBRID CARDS - Epic
 		{"name": "Warrior Saint", "cost": 6, "damage": 5, "heal": 4, "type": "hybrid", "rarity": RaritySystem.Rarity.EPIC, "weight": 5},
 		{"name": "Divine Champion", "cost": 7, "damage": 5, "shield": 6, "type": "hybrid", "rarity": RaritySystem.Rarity.EPIC, "weight": 4},
-		{"name": "Sacred Guardian", "cost": 7, "heal": 7, "shield": 5, "type": "hybrid", "rarity": RaritySystem.Rarity.EPIC, "weight": 3}
+		{"name": "Sacred Guardian", "cost": 7, "heal": 7, "shield": 5, "type": "hybrid", "rarity": RaritySystem.Rarity.EPIC, "weight": 3},
+		{"name": "Archangel's Wrath", "cost": 9, "damage": 10, "heal": 8, "type": "hybrid", "rarity": RaritySystem.Rarity.EPIC, "weight": 4},
+		{"name": "Immortal Warrior", "cost": 8, "damage": 8, "shield": 8, "type": "hybrid", "rarity": RaritySystem.Rarity.EPIC, "weight": 3},
+		{"name": "Divine Balance", "cost": 10, "heal": 10, "shield": 10, "type": "hybrid", "rarity": RaritySystem.Rarity.EPIC, "weight": 2}
 	]
 
 static func _build_lookup_caches():
