@@ -12,8 +12,8 @@ var is_showing: bool = false
 
 var custom_title: String = ""
 var custom_message: String = ""
-var confirm_text: String = "✓ YES, RETURN"
-var cancel_text: String = "✗ CANCEL"
+var confirm_text: String = "YES, RETURN"
+var cancel_text: String = "CANCEL"
 
 func setup(main: Control, title: String = "", message: String = ""):
 	main_scene = main
@@ -113,8 +113,8 @@ func _connect_signals():
 
 func set_options_context():
 	custom_message = "Exit without saving?\nUnsaved changes will be lost"
-	confirm_text = "✓ YES, EXIT"
-	cancel_text = "✗ STAY IN MENU"
+	confirm_text = "YES, EXIT"
+	cancel_text = "STAY IN MENU"
 	
 	if confirmation_label:
 		confirmation_label.text = custom_message
