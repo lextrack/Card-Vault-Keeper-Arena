@@ -229,8 +229,8 @@ var bundles: Dictionary = {
 	"minimal_damage_expert": {
 		"name": "Minimal Damage Expert",
 		"description": "Win while taking minimal punishment",
-		"requirement_text": "Win 3 games taking 10 damage or less",
-		"requirement_type": "low_damage_victories_10",
+		"requirement_text": "Win 3 games taking 40 damage or less",
+		"requirement_type": "low_damage_victories_40",
 		"requirement_value": 3,
 		"cards": ["Aegis", "Titan's Guard"],
 		"rarity_info": "1 Uncommon, 1 Rare"
@@ -239,8 +239,8 @@ var bundles: Dictionary = {
 	"resilient_champion": {
 		"name": "Resilient Champion",
 		"description": "Victory through superior defense",
-		"requirement_text": "Win 10 games taking 15 damage or less",
-		"requirement_type": "low_damage_victories_15",
+		"requirement_text": "Win 10 games taking 60 damage or less",
+		"requirement_type": "low_damage_victories_60",
 		"requirement_value": 10,
 		"cards": ["Invulnerability", "Divine Balance", "Absolute Defense"],
 		"rarity_info": "3 Epic"
@@ -472,17 +472,17 @@ func _calculate_progress(bundle: Dictionary, progress_type: String, value: int, 
 			if progress_type == "joker_played":
 				return min(old_progress + value, bundle.requirement_value)
 				
-		"low_damage_victories_10":
+		"low_damage_victories_40":
 			if progress_type == "game_won":
 				var damage_taken = extra_data.get("damage_taken", 999)
-				if damage_taken <= 10:
+				if damage_taken <= 40:
 					return min(old_progress + 1, bundle.requirement_value)
 			return old_progress
 
-		"low_damage_victories_15":
+		"low_damage_victories_60":
 			if progress_type == "game_won":
 				var damage_taken = extra_data.get("damage_taken", 999)
-				if damage_taken <= 15:
+				if damage_taken <= 60:
 					return min(old_progress + 1, bundle.requirement_value)
 	return old_progress
 
@@ -533,10 +533,10 @@ func get_progress_text(bundle_id: String) -> String:
 			return str(displayed_current) + "/" + str(required) + " heal cards"
 		"jokers_played":
 			return str(displayed_current) + "/" + str(required) + " jokers played"
-		"low_damage_victories_10":
-			return str(displayed_current) + "/" + str(required) + " wins (<=10 damage)"
-		"low_damage_victories_15":
-			return str(displayed_current) + "/" + str(required) + " wins (<=15 damage)"
+		"low_damage_victories_40":
+			return str(displayed_current) + "/" + str(required) + " wins (<=40 damage)"
+		"low_damage_victories_60":
+			return str(displayed_current) + "/" + str(required) + " wins (<=60 damage)"
 			
 	return str(displayed_current) + "/" + str(required)
 

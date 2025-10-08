@@ -115,6 +115,11 @@ func play_hybrid_sound() -> bool:
 	if not is_initialized or sfx_muted:
 		return false
 	return audio_manager.play_hybrid_sound()
+	
+func play_joker_sound() -> bool:
+	if not is_initialized or sfx_muted:
+		return false
+	return audio_manager.play_joker_sound()
 
 func play_ui_click_sound() -> bool:
 	if not is_initialized or sfx_muted:

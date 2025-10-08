@@ -10,6 +10,7 @@ extends Node
 @onready var shield_player = $CombatSounds/ShieldPlayer
 @onready var damage_player = $CombatSounds/DamagePlayer
 @onready var hybrid_player = $CombatSounds/HybridPlayer
+@onready var joker_player = $CombatSounds/JokerPlayer
 
 @onready var ai_attack_player = $AISounds/AIAttackPlayer
 @onready var ai_heal_player = $AISounds/AIHealPlayer
@@ -34,7 +35,7 @@ func _ready():
 func _assign_base_players_to_sfx_bus():
 	var base_players = [
 		card_play_player, card_draw_player, card_hover_player, hybrid_player,
-		attack_player, heal_player, shield_player, damage_player,
+		joker_player, attack_player, heal_player, shield_player, damage_player,
 		ai_attack_player, ai_heal_player, ai_shield_player, ai_card_play_player,
 		turn_change_player, win_player, lose_player,
 		bonus_player, ui_click_player, ui_hover_player
@@ -47,27 +48,28 @@ func _assign_base_players_to_sfx_bus():
 func _create_player_pools():
 	_create_pool("card_play", card_play_player, 3)
 	_create_pool("card_draw", card_draw_player, 3)
-	_create_pool("card_hover", card_hover_player, 2)
-	_create_pool("attack", attack_player, 5)
-	_create_pool("heal", heal_player, 3)
-	_create_pool("shield", shield_player, 3)
+	_create_pool("card_hover", card_hover_player, 6)
+	_create_pool("attack", attack_player, 2)
+	_create_pool("heal", heal_player, 2)
+	_create_pool("shield", shield_player, 2)
 	_create_pool("damage", damage_player, 4)
-	_create_pool("hybrid", hybrid_player, 3)
+	_create_pool("hybrid", hybrid_player, 2)
+	_create_pool("joker_play", joker_player, 1)
 	
-	_create_pool("ai_attack", ai_attack_player, 3)
-	_create_pool("ai_heal", ai_heal_player, 3)
-	_create_pool("ai_shield", ai_shield_player, 3)
-	_create_pool("ai_card_play", ai_card_play_player, 3)
+	_create_pool("ai_attack", ai_attack_player, 2)
+	_create_pool("ai_heal", ai_heal_player, 2)
+	_create_pool("ai_shield", ai_shield_player, 2)
+	_create_pool("ai_card_play", ai_card_play_player, 2)
 	
 	_create_pool("turn_change", turn_change_player, 2)
 	_create_pool("win", win_player, 1)
 	_create_pool("lose", lose_player, 1)
 	_create_pool("bonus", bonus_player, 2)
 	
-	_create_pool("ui_click", ui_click_player, 3)
+	_create_pool("ui_click", ui_click_player, 5)
 	_create_pool("ui_hover", ui_hover_player, 2)
-	_create_pool("button_click", ui_click_player, 3)
-	_create_pool("button_hover", ui_hover_player, 2)
+	_create_pool("button_click", ui_click_player, 5)
+	_create_pool("button_hover", ui_hover_player, 5)
 
 func _create_pool(pool_name: String, base_player: AudioStreamPlayer, pool_size: int):
 	if not base_player or not base_player.stream:
@@ -129,6 +131,9 @@ func play_hybrid_sound():
 
 func _play_delayed_hybrid():
 	_play_sound("hybrid")
+	
+func play_joker_sound() -> bool:
+	return _play_sound("joker_play")
 
 func play_ai_attack_sound() -> bool:
 	return _play_sound("ai_attack")

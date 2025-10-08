@@ -429,7 +429,7 @@ volume_db = 5.0
 
 [node name="JokerPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("11_qmy6f")
-pitch_scale = 1.5
+pitch_scale = 1.8
 
 [node name="GameSounds" type="Node" parent="AudioManager"]
 

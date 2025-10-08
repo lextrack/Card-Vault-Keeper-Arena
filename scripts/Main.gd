@@ -98,7 +98,7 @@ func _on_player_buff_applied(buff_type: String, buff_value: Variant):
 			settle.tween_property(joker_buff_label, "scale", Vector2(1.0, 1.0), 0.3)
 		)
 	
-	audio_helper.play_bonus_sound()
+	audio_helper.play_joker_sound()
 	print("Joker buff applied: ", buff_message)
 
 func _on_player_buff_consumed(buff_type: String):
