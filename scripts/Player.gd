@@ -276,9 +276,9 @@ func spend_mana(amount: int) -> bool:
 func _get_ai_joker_chance() -> float:
 	match difficulty:
 		"normal":
-			return 0.85
+			return 0.15
 		"hard":
-			return 0.19
+			return 0.20
 		"expert":
 			return 0.25
 		_:
@@ -293,7 +293,7 @@ func start_turn():
 	clear_buffs()
 	
 	#JOKER PROBABILITY FOR THE PLAYER
-	var joker_chance = 0.45 if not is_ai else _get_ai_joker_chance()
+	var joker_chance = 0.30 if not is_ai else _get_ai_joker_chance()
 	var refill_result = DeckManager.refill_hand(
 		hand, 
 		deck, 

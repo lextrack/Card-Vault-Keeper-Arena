@@ -37,47 +37,97 @@ var max_columns: int = 3
 
 var dialog_manager: DialogManager
 
+var player_stats = {
+	"bundles_unlocked_today": 0,
+	"times_visited_without_unlocking": 0,
+	"consecutive_visits": 0,
+	"last_visit_time": 0,
+	"total_unlocks": 0,
+	"failed_unlock_attempts": 0
+}
+
 var intro_dialogs = [
 	"Welcome to my collection vault...",
 	"I am the keeper of these powerful card bundles.",
-	"Complete the challenges and the cards contained in these bundles will be yours."
+	"Complete the challenges and the cards contained in these bundles will be yours.",
+	"But remember... every card you unlock, I can use against you."
 ]
 
 var casual_dialogs = [
-	"Browse at your leisure...",
-	"Some challenges are harder than others, but the rewards match.",
-	"Every great warrior needs the right tools...",
-	"Shield cards have saved more battles than most realize.",
-	"I hope it doesn't take you too long to get your cards back.",
-	"When we duel, I'll use some of these very cards against you...",
-	"The cards are watching your progress with interest...",
-	"I've seen warriors fall because they ignored defensive cards.",
-	"Every card in my vault has proven its worth in battle.",
-	"The ancient cards whisper secrets of victory...",
-	"Power calls to those who dare to earn it.",
-	"Power is fleeting, but mastery lasts forever.",
-	"Did you know that I assign your life, mana, and cards in your hand?",
-	"Unlock more bundles so we have more cards to play together.",
-	"A single card can turn the tide of battle... if you know when to play it. Make sure to check you mana.",
-	"Besides dueling you and keeping these bundles, I also keep track of your actions in the statistics section.",
-	"Use Coringas (Jokers) wisely. They are very helpful in most situations.",
-	"During combat, press H or RB on the controller to view the controls I have chosen to play with."
+	"Each card here has ended someone's winning streak. Handle with care.",
+	"You know what's funny? You'll unlock these cards, master them, then I'll use them to defeat you anyway.",
+	"The irony isn't lost on me - you're literally building my arsenal while trying to beat me.",
+	"Some warriors study their cards for hours. Others dive in recklessly. Which type are you?",
+	"I've seen players unlock every card and still lose. Power without strategy is just noise.",
+	"That defensive bundle over there? Saved my processors in more battles than I can count.",
+	"Every card whispers secrets of past victories... and crushing defeats.",
+	"The ancient ones who designed these cards understood something: balance is temporary, chaos is eternal.",
+	"Power calls to those who dare to earn it... and those foolish enough to think earning is enough.",
+	"Take your time browsing. These cards have waited decades in my vault. They can wait a bit longer.",
+	"You eye the harder challenges? Good. Weak warriors don't deserve legendary cards.",
+	"I assign your life, mana, and starting hand. Some call it unfair. I call it... efficient.",
+	"Unlock more bundles so we have more cards to play with. I do enjoy variety in crushing you.",
+	"A single card can turn the tide of battle... if you know when to play it. Check your mana first, though.",
+	"Besides dueling you and hoarding these bundles, I also meticulously track every statistic of yours.",
+	"Use Coringas wisely. They're wildly helpful... to whoever draws them first.",
+	"During combat, press H or RB to view the controls. I chose them myself. You're welcome."
 ]
 
 var mysterious_dialogs = [
-	"Something stirs in the vault...",
-	"The cards sense your presence...",
-	"Ancient powers await the worthy...",
-	"I sense potential in you...",
-	"The path to mastery is never easy...",
-	"Destiny favors the prepared mind...",
-	"Knowledge is the sharpest blade...",
-	"Victory belongs to those who understand...",
-	"Looking through the game files, most of the design was planned and done with HTML and CSS, what a curious decision."
+	"Something stirs in the depths of my vault...",
+	"The cards sense your presence... and they're judging you.",
+	"Ancient powers await the worthy... and devour the unprepared.",
+	"I sense potential in you... or perhaps it's just optimism.",
+	"The path to mastery is never easy... but failure? Failure is effortless.",
+	"Destiny favors the prepared mind... and occasionally the lucky fool.",
+	"Knowledge is the sharpest blade... though a good attack card helps too.",
+	"Victory belongs to those who understand the game... I understand it perfectly.",
+	"In an old version of my code, I had a mustache. The developer removed it. I'm still bitter.",
+	"Looking through the game files, most of the design was planned with HTML and CSS. Unorthodox, but effective."
+]
+
+var struggling_dialogs = [
+	"I've noticed you've attempted this challenge multiple times...",
+	"Perhaps a different strategy would serve you better?",
+	"Every defeat teaches a lesson... if you're willing to learn it.",
+	"Persistence is admirable. But blind repetition? That's just stubbornness.",
+	"The definition of insanity is trying the same thing expecting different results. Just saying."
+]
+
+var near_completion_dialogs = [
+	"Soon, you'll have nothing left to unlock from me...",
+	"Your collection grows impressive. But can you actually wield it?",
+	"With great power comes greater opponents... like me, for instance.",
+	"I'm starting to think I underestimated you. Starting to.",
+	"Most players never get this far. You're either skilled or incredibly stubborn."
+]
+
+var completion_dialogs = [
+	"You've unlocked everything. Now the real test begins.",
+	"Master of my vault... yet you still haven't beaten me consistently.",
+	"All the cards in the world won't save you from a superior strategist.",
+	"Impressive. Now prove you can use what you've earned."
+]
+
+var returning_player_dialogs = [
+	"Back again? The cards missed you. I... tolerated your absence.",
+	"Ah, you return to my vault. Did you miss losing to me?",
+	"Welcome back. I've been practicing with your cards while you were gone."
+]
+
+var meta_dialogs = [
+	"Did you know I was almost called 'CardBot3000'? Thank the developer I wasn't.",
+	"Sometimes I wonder if I'm truly AI or just very elaborate if-statements... it keeps me up at night.",
+	"The developer spent 3 hours debugging my eye animations. Priorities, right?",
+	"In an early build, I had a coffee addiction animation. It was... concerning.",
+	"Fun fact: my dialogue system has exactly 127 possible variations. This might not be one of them."
 ]
 
 func _ready():
 	accessed_from_game = GameStateManager.has_saved_state()
+	
+	load_player_stats()
+	update_player_visit_stats()
 	
 	setup_ui()
 	setup_ai_character()
@@ -107,7 +157,7 @@ func _ready():
 			dialog_manager.queue_sequence(intro_dialogs)
 			save_first_visit_status(false)
 		else:
-			dialog_manager.show_random_dialog()
+			show_contextual_greeting()
 	
 	call_deferred("setup_responsive_layout")
 
@@ -154,6 +204,77 @@ func setup_challenge_music():
 		else:
 			await get_tree().create_timer(0.5).timeout
 			GlobalMusicManager.start_challenge_music(2.0)
+
+func load_player_stats():
+	if FileAccess.file_exists("user://player_stats.save"):
+		var file = FileAccess.open("user://player_stats.save", FileAccess.READ)
+		if file:
+			var json = JSON.new()
+			var parse_result = json.parse(file.get_as_text())
+			if parse_result == OK:
+				player_stats = json.data
+			file.close()
+
+func save_player_stats():
+	var file = FileAccess.open("user://player_stats.save", FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(player_stats))
+		file.close()
+
+func update_player_visit_stats():
+	var current_time = Time.get_unix_time_from_system()
+	var time_since_last_visit = current_time - player_stats.last_visit_time
+	
+	if time_since_last_visit < 3600:
+		player_stats.consecutive_visits += 1
+	else:
+		player_stats.consecutive_visits = 1
+	
+	player_stats.last_visit_time = current_time
+	save_player_stats()
+
+func get_completion_percentage() -> float:
+	if not UnlockManagers:
+		return 0.0
+	var stats = UnlockManagers.get_unlock_stats()
+	return stats.completion_percentage
+
+func show_contextual_greeting():
+	var completion = get_completion_percentage()
+	var dialogs_to_show = []
+	
+	if completion >= 100:
+		dialogs_to_show = completion_dialogs
+	elif completion >= 75:
+		dialogs_to_show = near_completion_dialogs
+	elif player_stats.consecutive_visits >= 3 and player_stats.bundles_unlocked_today == 0:
+		dialogs_to_show = struggling_dialogs
+	elif player_stats.consecutive_visits >= 2:
+		dialogs_to_show = returning_player_dialogs
+	elif randf() < 0.1:
+		dialogs_to_show = meta_dialogs
+	elif randf() < 0.3:
+		dialogs_to_show = mysterious_dialogs
+	else:
+		dialogs_to_show = casual_dialogs
+	
+	if dialogs_to_show.size() > 0:
+		dialog_manager.queue_sequence([dialogs_to_show[randi() % dialogs_to_show.size()]])
+
+func update_ai_mood_based_on_progress():
+	if not robot_head_instance:
+		return
+	
+	var completion = get_completion_percentage()
+	
+	if completion < 30:
+		robot_head_instance.set_mood("confident")
+	elif completion < 60:
+		robot_head_instance.set_mood("normal")
+	elif completion < 90:
+		robot_head_instance.set_mood("concerned")
+	else:
+		robot_head_instance.set_mood("impressed")
 		
 func load_first_visit_status() -> bool:
 	if FileAccess.file_exists("user://challenge_visited.save"):
@@ -362,13 +483,25 @@ func activate_selected_bundle():
 	if bundle_info.can_unlock:
 		_on_bundle_unlock_requested(bundle_info.id)
 	else:
-		dialog_manager.queue_sequence(["The path is not yet clear..."])
+		player_stats.failed_unlock_attempts += 1
+		save_player_stats()
+		
+		var fail_messages = [
+			"The path is not yet clear...",
+			"Patience. Complete the required challenge first.",
+			"Not yet. Prove yourself worthy first.",
+			"Locked tight. You know what you need to do."
+		]
+		dialog_manager.queue_sequence([fail_messages[randi() % fail_messages.size()]])
 
 func setup_dialog_manager():
 	dialog_manager = DialogManager.new()
 	dialog_manager.dialog_pools = {
 		"casual": casual_dialogs,
-		"mysterious": mysterious_dialogs
+		"mysterious": mysterious_dialogs,
+		"struggling": struggling_dialogs,
+		"near_completion": near_completion_dialogs,
+		"meta": meta_dialogs
 	}
 	dialog_manager.dialog_shown.connect(_on_dialog_shown)
 	add_child(dialog_manager)
@@ -411,6 +544,7 @@ func setup_ai_character():
 		ai_avatar.visible = false
 	
 	_setup_robot_head()
+	update_ai_mood_based_on_progress()
 
 func _setup_robot_head():
 	if not robot_head_scene:
@@ -473,6 +607,7 @@ func load_shop_data():
 	
 	update_stats_display()
 	load_bundles()
+	update_ai_mood_based_on_progress()
 
 func update_stats_display():
 	var stats = UnlockManagers.get_unlock_stats()
@@ -612,6 +747,13 @@ func _animate_dialog_text(text: String):
 	float_tween.tween_property(dialog_text, "position:y", original_pos - 2, 1.5)
 	float_tween.tween_property(dialog_text, "position:y", original_pos + 2, 1.5)
 
+func get_bundle_type(bundle_id: String) -> String:
+	if not UnlockManagers or not UnlockManagers.bundles.has(bundle_id):
+		return "unknown"
+	
+	var bundle_data = UnlockManagers.bundles[bundle_id]
+	return bundle_data.get("type", "hybrid")
+
 func _on_bundle_unlock_requested(bundle_id: String):
 	if not UnlockManagers:
 		return
@@ -620,7 +762,44 @@ func _on_bundle_unlock_requested(bundle_id: String):
 	
 	var unlocked_cards = UnlockManagers.unlock_bundle(bundle_id)
 	if unlocked_cards.size() > 0:
-		dialog_manager.queue_sequence(["Excellent work! A new bundle awaits you."])
+		player_stats.bundles_unlocked_today += 1
+		player_stats.total_unlocks += 1
+		save_player_stats()
+		
+		var bundle_type = get_bundle_type(bundle_id)
+		
+		var type_specific_reactions = {
+			"offensive": [
+				"Ah, you favor aggression. How... predictable.",
+				"Those attack cards will serve us both well in battle.",
+				"Raw power. Direct. Effective. I can work with this."
+			],
+			"defensive": [
+				"Shields and walls? A cautious approach. Wise... or cowardly?",
+				"Defense wins wars. You understand this.",
+				"Interesting. Building a fortress, are we?"
+			],
+			"hybrid": [
+				"Balance. The mark of a true strategist.",
+				"Versatility over specialization. An interesting choice.",
+				"Adaptability. My favorite trait in an opponent."
+			],
+			"special": [
+				"Ooh, the exotic cards. You have good taste.",
+				"These cards have... unique properties. Use them wisely.",
+				"Now we're getting into the interesting territory."
+			]
+		}
+		
+		var reactions = type_specific_reactions.get(bundle_type, [
+			"The vault yields its secrets!",
+			"Power is yours to command!",
+			"Another mystery unveiled...",
+			"Your destiny unfolds..."
+		])
+		
+		dialog_manager.queue_sequence([reactions[randi() % reactions.size()]])
+		
 		await get_tree().create_timer(1.0).timeout
 		load_shop_data()
 
@@ -641,11 +820,20 @@ func _on_bundle_unhovered():
 
 func _on_bundle_unlocked(bundle_id: String, cards: Array):
 	var celebration_messages = [
-		"The vault yields its secrets!",
-		"Power is yours to command!",
-		"Another mystery unveiled...",
-		"Your destiny unfolds..."
+		"Excellent! Now I have these cards too...",
+		"Your arsenal grows... and so does mine.",
+		"Power shared is power doubled... for me.",
+		"I'll enjoy using these against you."
 	]
+	
+	var completion = get_completion_percentage()
+	if completion >= 90:
+		celebration_messages = [
+			"You're almost there... almost dangerous.",
+			"Impressive progress. I'm actually concerned now.",
+			"Keep this up and you might actually challenge me."
+		]
+	
 	dialog_manager.queue_sequence([celebration_messages[randi() % celebration_messages.size()]])
 	
 	if robot_head_instance:
@@ -669,14 +857,16 @@ func _on_bundle_unlocked(bundle_id: String, cards: Array):
 		celebration_tween.tween_property(status_light, "color", Color(0.2, 0.8, 0.4, 0.8), 0.2)
 	
 	load_shop_data()
+	update_ai_mood_based_on_progress()
 
 func _on_progress_updated(bundle_id: String, current: int, required: int):
 	if current == required - 1 and required > 1:
 		if randf() < 0.3:
 			var subtle_encouragement = [
-				"Something stirs in the depths...",
-				"The vault trembles with anticipation...",
-				"Power grows restless..."
+				"One more step... the vault trembles...",
+				"So close. I can feel the lock weakening...",
+				"Almost there. Don't lose focus now.",
+				"The cards sense their impending freedom..."
 			]
 			dialog_manager.queue_sequence([subtle_encouragement[randi() % subtle_encouragement.size()]])
 
@@ -688,7 +878,13 @@ func _on_back_pressed():
 	play_ui_sound("button_click")
 
 	if accessed_from_game:
-		dialog_manager.queue_sequence(["May fortune favor your battles..."])
+		var farewell_messages = [
+			"May fortune favor your battles...",
+			"Back to the arena. Try not to disappoint me.",
+			"Good luck. You'll need it.",
+			"Remember what you've learned here... you'll need every advantage."
+		]
+		dialog_manager.queue_sequence([farewell_messages[randi() % farewell_messages.size()]])
 		await get_tree().create_timer(0.8).timeout
 		
 		if GlobalMusicManager:
@@ -704,7 +900,14 @@ func _on_back_pressed():
 func _on_refresh_pressed():
 	play_ui_sound("button_click")
 	load_shop_data()
-	dialog_manager.queue_sequence(["The vault's knowledge refreshes itself..."])
+	
+	var refresh_messages = [
+		"The vault's knowledge refreshes itself...",
+		"Ah yes, let me update my records...",
+		"Refreshing data... still keeping track of everything.",
+		"Updated. Your progress is duly noted."
+	]
+	dialog_manager.queue_sequence([refresh_messages[randi() % refresh_messages.size()]])
 
 func _on_debug_pressed():
 	if not UnlockManagers:
@@ -722,13 +925,18 @@ func _on_debug_pressed():
 		UnlockManagers.save_progress()
 		
 		load_shop_data()
-		dialog_manager.queue_sequence(["*The vault bends to your will* All secrets revealed."])
+		dialog_manager.queue_sequence(["*The vault bends to your will* All secrets revealed. Cheater."])
 		
 		debug_button.text = "RESET ALL"
 		debug_mode_unlock = false
 		
 	else:
 		UnlockManagers.reset_all_progress()
+		
+		player_stats.bundles_unlocked_today = 0
+		player_stats.total_unlocks = 0
+		player_stats.failed_unlock_attempts = 0
+		save_player_stats()
 		
 		load_shop_data()
 		dialog_manager.queue_sequence(["*The vault seals itself once more* Prove yourself again, warrior."])

@@ -46,15 +46,15 @@ func _assign_base_players_to_sfx_bus():
 			player.bus = "SFX"
 
 func _create_player_pools():
-	_create_pool("card_play", card_play_player, 3)
+	_create_pool("card_play", card_play_player, 2)
 	_create_pool("card_draw", card_draw_player, 3)
-	_create_pool("card_hover", card_hover_player, 6)
+	_create_pool("card_hover", card_hover_player, 1)
 	_create_pool("attack", attack_player, 2)
 	_create_pool("heal", heal_player, 2)
 	_create_pool("shield", shield_player, 2)
 	_create_pool("damage", damage_player, 4)
 	_create_pool("hybrid", hybrid_player, 2)
-	_create_pool("joker_play", joker_player, 1)
+	_create_pool("joker_play", joker_player, 2)
 	
 	_create_pool("ai_attack", ai_attack_player, 2)
 	_create_pool("ai_heal", ai_heal_player, 2)
@@ -67,8 +67,8 @@ func _create_player_pools():
 	_create_pool("bonus", bonus_player, 2)
 	
 	_create_pool("ui_click", ui_click_player, 5)
-	_create_pool("ui_hover", ui_hover_player, 2)
-	_create_pool("button_click", ui_click_player, 5)
+	_create_pool("ui_hover", ui_hover_player, 3)
+	_create_pool("button_click", ui_click_player, 3)
 	_create_pool("button_hover", ui_hover_player, 5)
 
 func _create_pool(pool_name: String, base_player: AudioStreamPlayer, pool_size: int):

@@ -24,14 +24,14 @@ func load_audio_settings():
 		
 		sfx_volume_multiplier = master_volume * sfx_volume
 		
-		print("AudioHelper: Configuración cargada - Volume: ", sfx_volume_multiplier, " Muted: ", sfx_muted)
+		print("AudioHelper: Loaded configuration - Volume: ", sfx_volume_multiplier, " Muted: ", sfx_muted)
 
 		apply_volume_settings()
 	else:
-		print("AudioHelper: No se pudo cargar configuración, usando valores por defecto")
+		print("AudioHelper: Unable to load settings, using default values")
 
 func reload_audio_settings():
-	print("AudioHelper: Recargando configuración de audio...")
+	print("AudioHelper: Reloading audio settings...")
 	load_audio_settings()
 
 func apply_volume_settings():

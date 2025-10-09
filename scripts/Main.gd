@@ -601,7 +601,7 @@ func start_ai_turn():
 			await game_manager.restart_for_no_cards()
 			return
 		
-		await get_tree().create_timer(0.4).timeout
+		await get_tree().create_timer(0.3).timeout
 		
 		if not game_manager.is_game_ended():
 			start_player_turn()
@@ -652,7 +652,7 @@ func restart_game():
 	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	
 	await tween.finished
-	await get_tree().create_timer(0.7).timeout
+	await get_tree().create_timer(0.8).timeout
 	
 	setup_game_with_new_music()
 	
@@ -776,7 +776,7 @@ func _on_turn_changed(turn_num: int, damage_bonus: int):
 	if is_player_turn and damage_bonus > 0 and GameBalance.is_damage_bonus_turn(turn_num) and last_bonus_notification_turn != turn_num:
 		if game_notification and game_notification.is_showing:
 			await game_notification.hide_notification()
-			await get_tree().create_timer(0.2).timeout
+			await get_tree().create_timer(0.3).timeout
 		
 		last_bonus_notification_turn = turn_num
 		audio_helper.play_bonus_sound()
@@ -980,7 +980,7 @@ func _on_card_clicked(card):
 	
 	card.play_card_animation()
 
-	await get_tree().create_timer(0.15).timeout
+	await get_tree().create_timer(0.2).timeout
 	
 	match card_type:
 		"attack":
@@ -1096,7 +1096,7 @@ func open_challengehub():
 	cleanup_notifications()
 	stop_game_music(0.8)
 	
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(0.3).timeout
 	TransitionManager.fade_to_scene("res://scenes/ChallengeHub.tscn", 1.0)
 
 func show_exit_confirmation():
@@ -1109,5 +1109,5 @@ func return_to_menu():
 		return
 	cleanup_notifications()
 	stop_game_music(0.8)
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(0.3).timeout
 	TransitionManager.fade_to_scene("res://scenes/MainMenu.tscn", 1.0)

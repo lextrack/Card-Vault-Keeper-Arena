@@ -403,7 +403,7 @@ script = ExtResource("2_vcsgt")
 
 [node name="CardHoverPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
 stream = ExtResource("3_q8u5g")
-volume_db = -4.0
+volume_db = -5.0
 
 [node name="CombatSounds" type="Node" parent="AudioManager"]
 
