@@ -32,6 +32,7 @@ var is_playable: bool = true
 var is_being_played: bool = false
 var gamepad_selected: bool = false
 var current_tween: Tween
+var cached_styles: Dictionary = {}
 
 const HOVER_SCALE = 1.07
 const GAMEPAD_SCALE = 1.07
@@ -163,11 +164,8 @@ func _on_mouse_entered():
 	if is_being_played or gamepad_selected or mouse_filter == Control.MOUSE_FILTER_IGNORE:
 		return
 	
-	var main_scene_node = get_tree().get_first_node_in_group("main_scene")
-	if main_scene_node and main_scene_node.has("input_manager"):
-		var input_manager = main_scene_node.input_manager
-		if input_manager and input_manager.has("gamepad_mode") and input_manager.gamepad_mode:
-			return
+	if GameState.gamepad_mode:
+		return
 	
 	if not is_hovered and is_playable:
 		is_hovered = true
@@ -291,12 +289,23 @@ func update_display():
 	_update_stat_display()
 
 func _update_panel_color(panel: Panel, color: Color):
-	if panel:
-		var style = panel.get_theme_stylebox("panel")
-		if style is StyleBoxFlat:
-			var unique_style = style.duplicate()
-			unique_style.bg_color = color
-			panel.add_theme_stylebox_override("panel", unique_style)
+	if not panel:
+		return
+	
+	var cache_key = panel.get_instance_id()
+	var style: StyleBoxFlat
+	
+	if cached_styles.has(cache_key):
+		style = cached_styles[cache_key]
+	else:
+		var original_style = panel.get_theme_stylebox("panel")
+		if original_style is StyleBoxFlat:
+			style = original_style.duplicate()
+			cached_styles[cache_key] = style
+			panel.add_theme_stylebox_override("panel", style)
+	
+	if style:
+		style.bg_color = color
 
 func _update_stat_display():
 	var total_power = card_data.damage + card_data.heal + card_data.shield
@@ -327,3 +336,4 @@ func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
 		is_being_played = true
 		_stop_current_tween()
+		cached_styles.clear()

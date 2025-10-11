@@ -14,7 +14,7 @@ var queue_timer: Timer
 var random_timer: Timer
 
 const WORDS_PER_SECOND: float = 4.0
-const MIN_DIALOG_TIME: float = 3.5
+const MIN_DIALOG_TIME: float = 3.0
 const RANDOM_DIALOG_MIN: float = 8.0
 const RANDOM_DIALOG_MAX: float = 15.0
 

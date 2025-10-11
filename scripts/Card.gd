@@ -36,6 +36,8 @@ var current_tween: Tween
 
 var cached_type_colors: Dictionary = {}
 var cached_rarity_multiplier: float = 1.0
+var cached_styles: Dictionary = {}
+var base_stat_modulate: Color = Color.WHITE
 
 const HOVER_SCALE = 1.07
 const GAMEPAD_SCALE = 1.07
@@ -169,11 +171,8 @@ func _on_mouse_entered():
 	if is_being_played or gamepad_selected or mouse_filter == Control.MOUSE_FILTER_IGNORE:
 		return
 	
-	var main_scene_node = get_tree().get_first_node_in_group("main_scene")
-	if main_scene_node and main_scene_node.has("input_manager"):
-		var input_manager = main_scene_node.input_manager
-		if input_manager and input_manager.has("gamepad_mode") and input_manager.gamepad_mode:
-			return
+	if GameState.gamepad_mode:
+		return
 	
 	if not is_hovered and is_playable:
 		is_hovered = true
@@ -309,31 +308,44 @@ func update_display():
 	_update_stat_display()
 
 func _update_panel_color(panel: Panel, color: Color):
-	if panel:
-		var style = panel.get_theme_stylebox("panel")
-		if style is StyleBoxFlat:
-			var unique_style = style.duplicate()
-			unique_style.bg_color = color
-			panel.add_theme_stylebox_override("panel", unique_style)
+	if not panel:
+		return
+	
+	var cache_key = panel.get_instance_id()
+	var style: StyleBoxFlat
+	
+	if cached_styles.has(cache_key):
+		style = cached_styles[cache_key]
+	else:
+		var original_style = panel.get_theme_stylebox("panel")
+		if original_style is StyleBoxFlat:
+			style = original_style.duplicate()
+			cached_styles[cache_key] = style
+			panel.add_theme_stylebox_override("panel", style)
+	
+	if style:
+		style.bg_color = color
 
 func _update_stat_display():
 	match card_data.card_type:
 		"attack":
 			stat_value.text = str(card_data.damage)
-			stat_value.modulate = Color.ORANGE_RED
+			base_stat_modulate = Color.ORANGE_RED
 		"heal":
 			stat_value.text = str(card_data.heal)
-			stat_value.modulate = Color.LIME_GREEN
+			base_stat_modulate = Color.LIME_GREEN
 		"shield":
 			stat_value.text = str(card_data.shield)
-			stat_value.modulate = Color.CYAN
+			base_stat_modulate = Color.CYAN
 		"hybrid":
 			var total_power = card_data.damage + card_data.heal + card_data.shield
 			stat_value.text = str(total_power)
-			stat_value.modulate = Color.GOLD
+			base_stat_modulate = Color.GOLD
 		_:
 			stat_value.text = "?"
-			stat_value.modulate = Color.GRAY
+			base_stat_modulate = Color.GRAY
+	
+	stat_value.modulate = base_stat_modulate
 
 func _load_card_illustration():
 	var video_stream: VideoStream = null
@@ -412,13 +424,13 @@ func _apply_rarity_effects(rarity: String):
 		"rare":
 			name_label.modulate = Color(0.8, 1.0, 1.6, 1.0)
 			cost_label.modulate = Color(0.9, 1.1, 1.7, 1.0)
-			stat_value.modulate = stat_value.modulate * Color(0.7, 1.0, 1.8, 1.0)
+			stat_value.modulate = base_stat_modulate * Color(0.7, 1.0, 1.8, 1.0)
 			card_icon.modulate = Color(0.9, 1.0, 1.4, 1.0)
 			card_border.modulate = Color(1.0, 1.15, 1.5, 1.0)
 		"epic":
 			name_label.modulate = Color(1.6, 1.1, 1.8, 1.0)
 			cost_label.modulate = Color(1.7, 1.2, 1.6, 1.0)
-			stat_value.modulate = stat_value.modulate * Color(2.2, 1.3, 2.0, 1.0)
+			stat_value.modulate = base_stat_modulate * Color(2.2, 1.3, 2.0, 1.0)
 			card_icon.modulate = Color(1.5, 1.2, 1.7, 1.0)
 			modulate = Color(1.15, 1.05, 1.2, 1.0)
 			card_border.modulate = Color(1.6, 1.2, 1.5, 1.0)
@@ -427,3 +439,4 @@ func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
 		is_being_played = true
 		_stop_current_tween()
+		cached_styles.clear()

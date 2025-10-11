@@ -376,12 +376,15 @@ func _on_unlock_progress_updated(bundle_id: String, current: int, required: int)
 
 func _setup_components():
 	ui_manager = UIManager.new()
+	add_child(ui_manager)
 	ui_manager.setup(self, joker_card_scene)
 	
 	game_manager = GameManager.new()
+	add_child(game_manager)
 	game_manager.setup(self)
 	
 	input_manager = InputManager.new()
+	add_child(input_manager)
 	input_manager.setup(self)
 	
 	audio_helper = AudioHelper.new()
@@ -476,7 +479,7 @@ func setup_game():
 		damage_bonus_label.visible = false
 
 	if end_turn_button:
-		ui_manager.reset_turn_button(end_turn_button, input_manager.gamepad_mode)
+		ui_manager.reset_turn_button(end_turn_button, GameState.gamepad_mode)
 	
 	ui_manager.update_all_labels(player, ai)
 	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
@@ -534,7 +537,7 @@ func start_player_turn():
 		
 	is_player_turn = true
 	
-	if input_manager.last_input_was_gamepad:
+	if GameState.gamepad_mode:
 		await get_tree().process_frame
 		await get_tree().process_frame
 		input_manager.start_player_turn()
@@ -549,15 +552,15 @@ func start_player_turn():
 	ui_manager.start_player_turn(player, difficulty)
 
 	if end_turn_button:
-		ui_manager.reset_turn_button(end_turn_button, input_manager.gamepad_mode)
-		ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
+		ui_manager.reset_turn_button(end_turn_button, GameState.gamepad_mode)
+		ui_manager.update_turn_button_text(player, end_turn_button, GameState.gamepad_mode)
 
 	set_bottom_buttons_enabled(true)
 	
 	controls_panel.update_player_turn(true)
 	controls_panel.update_cards_available(player.hand.size() > 0)
 	
-	if input_manager.last_input_was_gamepad:
+	if GameState.gamepad_mode:
 		await get_tree().process_frame
 		await get_tree().process_frame
 		input_manager.start_player_turn()
@@ -700,7 +703,7 @@ func setup_game_with_new_music():
 		damage_bonus_label.visible = false
 	
 	if end_turn_button:
-		ui_manager.reset_turn_button(end_turn_button, input_manager.gamepad_mode)
+		ui_manager.reset_turn_button(end_turn_button, GameState.gamepad_mode)
 	
 	turn_label.text = "Your turn"
 	game_info_label.text = "Game #%d | %s" % [game_count, difficulty.to_upper()]
@@ -729,7 +732,7 @@ func _on_player_damage_taken(damage_amount: int):
 
 func _on_player_cards_played_changed(cards_played: int, max_cards: int):
 	ui_manager.update_hand_display(player, card_scene, hand_container)
-	ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
+	ui_manager.update_turn_button_text(player, end_turn_button, GameState.gamepad_mode)
 	ui_manager.update_cards_played_info(cards_played, max_cards, difficulty)
 	
 	if not game_manager.is_game_ended():
@@ -745,14 +748,14 @@ func _on_player_hand_changed():
 		return
 		
 	var was_gamepad_selection_active = (
-		input_manager.gamepad_mode and
+		GameState.gamepad_mode and
 		is_player_turn and
 		ui_manager.gamepad_selection_active and
 		player.cards_played_this_turn > 0
 	)
 	
 	ui_manager.update_hand_display(player, card_scene, hand_container)
-	ui_manager.update_turn_button_text(player, end_turn_button, input_manager.gamepad_mode)
+	ui_manager.update_turn_button_text(player, end_turn_button, GameState.gamepad_mode)
 	
 	if was_gamepad_selection_active:
 		ui_manager.gamepad_selection_active = true

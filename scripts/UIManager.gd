@@ -1,5 +1,5 @@
 class_name UIManager
-extends RefCounted
+extends Node
 
 var main_scene: Control
 var player_hp_label: Label
@@ -222,10 +222,7 @@ func start_player_turn(player: Player, difficulty: String):
 	var end_turn_button = main_scene.end_turn_button
 	if end_turn_button:
 		end_turn_button.disabled = false
-		var input_manager = main_scene.input_manager
-		var gamepad_mode = input_manager.gamepad_mode if input_manager else false
-		update_turn_button_text(player, end_turn_button, gamepad_mode)
-		
+		update_turn_button_text(player, end_turn_button, GameState.gamepad_mode)
 
 	_update_existing_cards_playability(player)
 	_restore_gamepad_selection_immediate(player)

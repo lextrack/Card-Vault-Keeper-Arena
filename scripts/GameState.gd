@@ -2,11 +2,33 @@ extends Node
 
 var selected_difficulty: String = "normal"
 
+var gamepad_mode: bool = false:
+	set(value):
+		if gamepad_mode != value:
+			gamepad_mode = value
+			gamepad_mode_changed.emit(value)
+			if has_node("/root/CursorManager"):
+				CursorManager.set_gamepad_mode(value)
+
+var input_enabled: bool = true:
+	set(value):
+		if input_enabled != value:
+			input_enabled = value
+			input_enabled_changed.emit(value)
+
+var is_processing_input: bool = false
+
+signal gamepad_mode_changed(enabled: bool)
+signal input_enabled_changed(enabled: bool)
+
 func _ready():
 	print("GameState initialized")
 
 	if StatisticsManagers:
 		StatisticsManagers.milestone_reached.connect(_on_milestone_reached)
+
+func can_process_input() -> bool:
+	return input_enabled and not is_processing_input
 
 func get_selected_difficulty() -> String:
 	return selected_difficulty

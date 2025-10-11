@@ -136,8 +136,7 @@ func show():
 	
 	await tween.finished
 	
-	var input_manager = main_scene.get("input_manager")
-	if input_manager and (input_manager.gamepad_mode or input_manager.last_input_was_gamepad):
+	if GameState.gamepad_mode:
 		cancel_button.grab_focus()
 	else:
 		cancel_button.grab_focus()

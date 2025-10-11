@@ -41,8 +41,7 @@ func save_game_state(main_scene: Control):
 		"difficulty": main_scene.difficulty,
 		"game_count": main_scene.game_count,
 		"selected_card_index": main_scene.ui_manager.selected_card_index,
-		"gamepad_mode": main_scene.input_manager.gamepad_mode,
-		"last_input_was_gamepad": main_scene.input_manager.last_input_was_gamepad,
+		"gamepad_mode": GameState.gamepad_mode,
 		
 		"available_cards_snapshot": available_cards_snapshot,
 		"save_timestamp": Time.get_ticks_msec()
@@ -119,9 +118,7 @@ func restore_game_state(main_scene: Control) -> bool:
 	if main_scene.ui_manager:
 		main_scene.ui_manager.selected_card_index = saved_game_state.get("selected_card_index", 0)
 	
-	if main_scene.input_manager:
-		main_scene.input_manager.gamepad_mode = saved_game_state.get("gamepad_mode", false)
-		main_scene.input_manager.last_input_was_gamepad = saved_game_state.get("last_input_was_gamepad", false)
+	GameState.gamepad_mode = saved_game_state.get("gamepad_mode", false)
 	
 	print("Game state restored successfully")
 	return true

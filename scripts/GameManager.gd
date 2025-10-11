@@ -1,27 +1,14 @@
 class_name GameManager
-extends RefCounted
+extends Node
 
 var main_scene: Control
 var player: Player
 var ai: Player
-var game_ended: bool = false
-var pending_game_end: bool = false
-var restart_in_progress: bool = false
-
-func print(_value):
-	pass
-
-func _ready():
-	Engine.print_error_messages = false
 
 func setup(main: Control):
 	main_scene = main
 
 func setup_new_game(difficulty: String):
-	game_ended = false
-	pending_game_end = false
-	restart_in_progress = false
-
 	_cleanup_existing_players()
 	
 	player = Player.new()
@@ -151,12 +138,10 @@ func _cleanup_existing_players():
 		await main_scene.get_tree().process_frame
 
 func restart_game(game_count: int, difficulty: String):
-	if restart_in_progress:
+	if main_scene.is_game_transitioning:
 		return
 	
-	restart_in_progress = true
-	game_ended = false
-	pending_game_end = false
+	main_scene.is_game_transitioning = true
 	
 	if main_scene and main_scene.input_manager:
 		main_scene.input_manager.disable_input()
@@ -171,7 +156,7 @@ func restart_game(game_count: int, difficulty: String):
 	main_scene.game_info_label.text = "Game #" + str(game_count) + " | " + difficulty.to_upper()
 
 func should_restart_for_no_cards() -> bool:
-	if game_ended or pending_game_end or restart_in_progress or not player or not ai:
+	if main_scene.is_game_transitioning or not player or not ai:
 		return false
 		
 	return DeckManager.should_restart_game(
@@ -182,14 +167,13 @@ func should_restart_for_no_cards() -> bool:
 	)
 	
 func restart_for_no_cards():
-	if game_ended or restart_in_progress:
+	if main_scene.is_game_transitioning:
 		return
 	
 	if main_scene and main_scene.input_manager:
 		main_scene.input_manager.disable_input()
 	
-	restart_in_progress = true
-	game_ended = true
+	main_scene.is_game_transitioning = true
 	
 	main_scene.turn_label.text = "Both out of cards!"
 	main_scene.game_info_label.text = "Restarting game..."
@@ -198,17 +182,7 @@ func restart_for_no_cards():
 	
 	main_scene.restart_game()
 
-func mark_game_ended() -> bool:
-	if pending_game_end or game_ended:
-		return false
-	
-	pending_game_end = true
-	return true
-
 func can_end_game() -> bool:
-	if not pending_game_end:
-		return false
-	
 	if ai and ai.has_method("is_ai_turn_active") and ai.is_ai_turn_active():
 		print("Cannot end game: AI turn still active")
 		return false
@@ -229,34 +203,11 @@ func _has_critical_pending_animations() -> bool:
 					return true
 	return false
 
-func _has_pending_card_animations() -> bool:
-	if main_scene and main_scene.ui_manager and main_scene.ui_manager.card_instances:
-		for card in main_scene.ui_manager.card_instances:
-			if is_instance_valid(card) and card.has_method("_cleanup_tweens"):
-				if card.play_tween or card.selection_tween or card.hover_tween:
-					return true
-	return false
-
-func finalize_game_end():
-	if game_ended:
-		print("Game end already finalized")
-		return
-		
-	game_ended = true
-	pending_game_end = false
-	print("Game end finalized - all actions completed")
-
 func is_game_ended() -> bool:
-	return game_ended
-
-func is_game_ending() -> bool:
-	return pending_game_end or game_ended
-
-func is_restart_in_progress() -> bool:
-	return restart_in_progress
+	return main_scene.is_game_transitioning
 
 func end_turn_limit_reached():
-	if game_ended or restart_in_progress:
+	if main_scene.is_game_transitioning:
 		return
 		
 	main_scene.turn_label.text = "Limit reached!"
@@ -264,17 +215,9 @@ func end_turn_limit_reached():
 	await main_scene.get_tree().create_timer(GameBalance.get_timer_delay("turn_end")).timeout
 
 func end_turn_no_cards():
-	if game_ended or restart_in_progress:
+	if main_scene.is_game_transitioning:
 		return
 		
 	main_scene.turn_label.text = "No cards!"
 	main_scene.game_info_label.text = "Ending turn automatically..."
 	await main_scene.get_tree().create_timer(GameBalance.get_timer_delay("turn_end")).timeout
-	
-func is_safe_to_process_actions() -> bool:
-	return not game_ended and not pending_game_end and not restart_in_progress and not _is_game_transitioning()
-
-func _is_game_transitioning() -> bool:
-	if main_scene and main_scene.has_method("get") and main_scene.get("is_game_transitioning"):
-		return main_scene.is_game_transitioning
-	return false

@@ -999,6 +999,7 @@ func _handle_gamepad_input(event):
 		
 		if handled:
 			get_viewport().set_input_as_handled()
+			
 	elif event.is_action_pressed("ui_down") and not bundles_scroll_container.has_focus():
 		if bundle_card_instances.size() > 0:
 			bundles_scroll_container.grab_focus()
