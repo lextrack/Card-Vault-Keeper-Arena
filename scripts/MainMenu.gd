@@ -28,6 +28,19 @@ var focusable_buttons: Array[Button] = []
 var current_focus_index: int = 0
 var returning_from_menu: bool = false
 
+const COLOR_NORMAL = Color(1.0, 1.0, 1.0, 1.0)
+const COLOR_HOVER = Color(1.113, 1.207, 1.3, 1.0)
+const COLOR_FOCUS = Color(1.2, 1.3, 1.4, 1.0)
+const SCALE_NORMAL = Vector2(1.0, 1.0)
+const SCALE_HOVER = Vector2(1.03, 1.03)
+const SCALE_FOCUS = Vector2(1.05, 1.05)
+const HOVER_LIFT = 3.0
+
+const ANIM_DURATION = 0.18
+const ANIM_EASE = Tween.EASE_OUT
+const ANIM_EASE_IN = Tween.EASE_IN
+const ANIM_TRANS = Tween.TRANS_CUBIC
+
 @export var entrance_duration: float = 0.8
 @export var scale_duration: float = 0.6
 @export var title_pulse_duration: float = 1.5
@@ -51,11 +64,9 @@ func _ready():
 	await handle_scene_entrance()
 
 	start_menu_music()
-	
 	_focus_first_button()
-	
 	_setup_options_menu()
-	
+
 func set_card_rain_intensity(intensity: float):
 	if card_rain_background:
 		card_rain_background.set_effect_intensity(intensity)
@@ -271,12 +282,33 @@ func play_entrance_animation():
 		push_warning("game_title is not assigned!")
 
 func animate_title():
-	var tween = create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	if not game_title:
+		return
 	
-	tween.tween_property(game_title, "modulate", Color(1.3, 1.3, 1.0, 1.0), title_pulse_duration)
-	tween.tween_property(game_title, "modulate", Color(0.8, 0.8, 0.7, 1.0), title_pulse_duration)
-	tween.tween_property(game_title, "position:y", game_title.position.y + 10, title_pulse_duration)
-	tween.tween_property(game_title, "position:y", game_title.position.y, title_pulse_duration)
+	var glow_tween = create_tween()
+	glow_tween.set_loops()
+	glow_tween.set_trans(Tween.TRANS_SINE)
+	glow_tween.set_ease(Tween.EASE_IN_OUT)
+	
+	glow_tween.tween_property(game_title, "modulate", Color(1.25, 1.25, 1.05, 1.0), 2.0)
+	glow_tween.tween_property(game_title, "modulate", Color(0.9, 0.9, 0.8, 1.0), 2.0)
+	
+	var original_pos_y = game_title.position.y
+	var float_tween = create_tween()
+	float_tween.set_loops()
+	float_tween.set_trans(Tween.TRANS_SINE)
+	float_tween.set_ease(Tween.EASE_IN_OUT)
+	
+	float_tween.tween_property(game_title, "position:y", original_pos_y - 6, 2.0)
+	float_tween.tween_property(game_title, "position:y", original_pos_y + 6, 2.0)
+	
+	var scale_tween = create_tween()
+	scale_tween.set_loops()
+	scale_tween.set_trans(Tween.TRANS_QUAD)
+	scale_tween.set_ease(Tween.EASE_IN_OUT)
+	
+	scale_tween.tween_property(game_title, "scale", Vector2(1.015, 1.015), 2.0)
+	scale_tween.tween_property(game_title, "scale", Vector2(0.985, 0.985), 2.0)
 
 func _on_play_pressed():
 	if is_transitioning or popup_active:
@@ -393,26 +425,22 @@ func _on_button_hover(button: Button):
 	if popup_active or not is_instance_valid(button) or is_transitioning:
 		return
 	
+	if not gamepad_mode:
+		button.release_focus()
+	
 	if not gamepad_mode or (gamepad_mode and button.has_focus()):
 		play_hover_sound()
-		var tween = create_tween()
-		tween.set_parallel(true)
-		tween.set_ease(Tween.EASE_OUT)
-		tween.set_trans(Tween.TRANS_CUBIC)
-		tween.tween_property(button, "scale", Vector2(1.03, 1.03), 0.2)
-		tween.tween_property(button, "modulate", Color(1.2, 1.2, 1.1, 1.0), 0.2) # Blanco cálido suave
+		_animate_button_state(button, SCALE_HOVER, COLOR_HOVER)
 
 func _on_button_unhover(button: Button):
 	if not is_instance_valid(button):
 		return
 	
+	if not gamepad_mode:
+		button.release_focus()
+	
 	if not gamepad_mode or (gamepad_mode and not button.has_focus()):
-		var tween = create_tween()
-		tween.set_parallel(true)
-		tween.set_ease(Tween.EASE_IN)
-		tween.set_trans(Tween.TRANS_CUBIC)
-		tween.tween_property(button, "scale", Vector2(1.0, 1.0), 0.2)
-		tween.tween_property(button, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.2)
+		_animate_button_state(button, SCALE_NORMAL, COLOR_NORMAL, 0.0, ANIM_EASE_IN)
 
 func _on_button_focus(button: Button):
 	if popup_active or not is_instance_valid(button) or is_transitioning:
@@ -420,13 +448,9 @@ func _on_button_focus(button: Button):
 	
 	if gamepad_mode:
 		play_hover_sound()
-		var tween = create_tween()
-		tween.set_parallel(true)
-		tween.set_ease(Tween.EASE_OUT)
-		tween.set_trans(Tween.TRANS_CUBIC)
-		tween.tween_property(button, "scale", Vector2(1.04, 1.04), 0.2)
-		tween.tween_property(button, "modulate", Color(0.9, 1.1, 1.3, 1.0), 0.2) # Azul claro para foco
-		tween.tween_property(button, "position:y", button.position.y - 3.0, 0.2) # Subida sutil
+		_animate_button_state(button, SCALE_FOCUS, COLOR_FOCUS, -HOVER_LIFT)
+	else:
+		button.release_focus()
 	
 	var index = focusable_buttons.find(button)
 	if index != -1:
@@ -437,14 +461,23 @@ func _on_button_unfocus(button: Button):
 		return
 	
 	if gamepad_mode:
-		var tween = create_tween()
-		tween.set_parallel(true)
-		tween.set_ease(Tween.EASE_IN)
-		tween.set_trans(Tween.TRANS_CUBIC)
-		tween.tween_property(button, "scale", Vector2(1.0, 1.0), 0.2)
-		tween.tween_property(button, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.2)
-		tween.tween_property(button, "position:y", button.position.y + 3.0, 0.2)
-
+		_animate_button_state(button, SCALE_NORMAL, COLOR_NORMAL, HOVER_LIFT, ANIM_EASE_IN)
+		
+func _animate_button_state(button: Button, target_scale: Vector2, target_color: Color, lift_offset: float = 0.0, ease_type = ANIM_EASE):
+	if not is_instance_valid(button):
+		return
+	
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.set_ease(ease_type)
+	tween.set_trans(ANIM_TRANS)
+	
+	tween.tween_property(button, "scale", target_scale, ANIM_DURATION)
+	tween.tween_property(button, "modulate", target_color, ANIM_DURATION)
+	
+	if lift_offset != 0.0:
+		var target_y = button.position.y + lift_offset
+		tween.tween_property(button, "position:y", target_y, ANIM_DURATION)
 
 func exit_game():
 	is_transitioning = true

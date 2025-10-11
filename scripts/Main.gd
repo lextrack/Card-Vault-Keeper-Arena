@@ -713,6 +713,26 @@ func setup_game_with_new_music():
 	
 	start_player_turn()
 	
+func disable_game_input():
+	"""Desactiva completamente el input del juego mientras un diálogo está activo"""
+	if input_manager:
+		input_manager.disable_input()
+	
+	# Liberar el foco de todos los botones del juego
+	if end_turn_button and end_turn_button.has_focus():
+		end_turn_button.release_focus()
+	if options_button and options_button.has_focus():
+		options_button.release_focus()
+	if challengehub_button and challengehub_button.has_focus():
+		challengehub_button.release_focus()
+	if exit_button and exit_button.has_focus():
+		exit_button.release_focus()
+
+func enable_game_input():
+	"""Re-activa el input del juego después de cerrar un diálogo"""
+	if input_manager and is_player_turn:
+		input_manager.enable_input()
+	
 func start_game_music(is_new_game: bool = false):
 	if GlobalMusicManager:
 		if game_music_playlist.size() > 0:
@@ -1015,11 +1035,12 @@ func _on_end_turn_pressed():
 func _input(event):
 	if is_game_transitioning:
 		return
-		
-	if confirmation_dialog.is_showing:
+	
+	if confirmation_dialog and confirmation_dialog.is_showing:
 		confirmation_dialog.handle_input(event)
+		get_viewport().set_input_as_handled()
 		return
-		
+	
 	if event is InputEventJoypadButton and event.pressed:
 		CursorManager.set_gamepad_mode(true)
 	elif event is InputEventMouse:

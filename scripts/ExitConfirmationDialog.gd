@@ -131,10 +131,15 @@ func show():
 	confirmation_overlay.visible = true
 	confirmation_overlay.modulate.a = 0.0
 	
+	if main_scene.has_method("disable_game_input"):
+		main_scene.disable_game_input()
+	
 	var tween = main_scene.create_tween()
 	tween.tween_property(confirmation_overlay, "modulate:a", 1.0, 0.3)
 	
 	await tween.finished
+	
+	await main_scene.get_tree().process_frame
 	
 	if GameState.gamepad_mode:
 		cancel_button.grab_focus()
@@ -152,19 +157,30 @@ func hide():
 	
 	confirmation_overlay.visible = false
 	is_showing = false
+	
+	if main_scene.has_method("enable_game_input"):
+		main_scene.enable_game_input()
 
 func handle_input(event: InputEvent):
+	if not is_showing or not confirmation_overlay.visible:
+		return
+	
 	if event.is_action_pressed("ui_accept") or event.is_action_pressed("game_select"):
 		if confirm_button.has_focus():
 			_on_confirm_exit()
+			return
 		elif cancel_button.has_focus():
 			_on_cancel_exit()
+			return
 	elif event.is_action_pressed("ui_cancel") or event.is_action_pressed("game_back"):
 		_on_cancel_exit()
+		return
 	elif event.is_action_pressed("ui_left"):
 		confirm_button.grab_focus()
+		return
 	elif event.is_action_pressed("ui_right"):
 		cancel_button.grab_focus()
+		return
 
 func _on_confirm_exit():
 	if main_scene.has_method("_play_ui_sound"):

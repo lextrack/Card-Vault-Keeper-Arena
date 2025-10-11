@@ -24,6 +24,14 @@ var hover_tween: Tween
 var glow_tween: Tween
 var setup_complete: bool = false
 
+const HOVER_SCALE: float = 1.02
+const HOVER_DURATION: float = 0.15
+const HOVER_SHADOW_OFFSET: float = 8.0
+const NORMAL_SHADOW_OFFSET: float = 4.0
+const HOVER_SHADOW_ALPHA: float = 0.75
+const NORMAL_SHADOW_ALPHA: float = 0.4
+const MOUSE_SELECTION_COLOR: Color = Color(1.3, 1.276, 1.153, 1.0)
+
 signal bundle_unlock_requested(bundle_id: String)
 signal bundle_hovered(bundle_info: Dictionary)
 signal bundle_unhovered
@@ -62,25 +70,29 @@ func _validate_nodes() -> bool:
 	return true
 
 func setup_interactions():
-	mouse_filter = Control.MOUSE_FILTER_PASS
-	
-	_configure_mouse_filters_recursive(self)
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	
 	if unlock_button:
 		unlock_button.pressed.connect(_on_unlock_pressed)
 		unlock_button.mouse_entered.connect(_on_button_hover)
 		unlock_button.mouse_exited.connect(_on_button_unhover)
 		unlock_button.mouse_filter = Control.MOUSE_FILTER_STOP
-	
+
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 	
+	call_deferred("_configure_mouse_filters_recursive", self)
 
 func _configure_mouse_filters_recursive(node: Node):
 	for child in node.get_children():
+		if child == self:
+			continue
+			
 		if child.has_method("set") and "mouse_filter" in child:
 			if child is Button:
 				child.mouse_filter = Control.MOUSE_FILTER_STOP
+			elif child.name == "CardPanel":
+				child.mouse_filter = Control.MOUSE_FILTER_PASS
 			else:
 				child.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		
@@ -478,8 +490,8 @@ func start_ready_glow():
 	
 	glow_tween = create_tween()
 	glow_tween.set_loops()
-	glow_tween.tween_property(border_highlight, "modulate", Color(1.4, 1.2, 0.8, 1.0), 0.8)
-	glow_tween.tween_property(border_highlight, "modulate", Color(1.0, 0.9, 0.6, 1.0), 0.8)
+	glow_tween.tween_property(border_highlight, "modulate", Color(1.4, 1.176, 0.721, 1.0), 0.8)
+	glow_tween.tween_property(border_highlight, "modulate", Color(1.0, 0.873, 0.484, 1.0), 0.8)
 
 func stop_glow():
 	if glow_tween:
@@ -498,10 +510,19 @@ func _on_mouse_entered():
 	
 	hover_tween = create_tween()
 	hover_tween.set_parallel(true)
-	hover_tween.tween_property(self, "scale", original_scale * 1.02, 0.15)
-	hover_tween.tween_property(card_shadow, "offset_left", 6, 0.15)
-	hover_tween.tween_property(card_shadow, "offset_top", 6, 0.15)
-	hover_tween.tween_property(card_shadow, "color:a", 0.6, 0.15)
+	hover_tween.set_ease(Tween.EASE_OUT)
+	hover_tween.set_trans(Tween.TRANS_CUBIC)
+	hover_tween.tween_property(self, "scale", original_scale * HOVER_SCALE, HOVER_DURATION)
+	hover_tween.tween_property(self, "modulate", MOUSE_SELECTION_COLOR, HOVER_DURATION)
+	hover_tween.tween_property(card_shadow, "offset_left", HOVER_SHADOW_OFFSET, HOVER_DURATION) 
+	hover_tween.tween_property(card_shadow, "offset_top", HOVER_SHADOW_OFFSET, HOVER_DURATION)
+	hover_tween.tween_property(card_shadow, "color:a", HOVER_SHADOW_ALPHA, HOVER_DURATION)
+	
+	if border_highlight:
+		var highlight_tween = create_tween()
+		highlight_tween.set_ease(Tween.EASE_OUT)
+		highlight_tween.set_trans(Tween.TRANS_CUBIC)
+		highlight_tween.tween_property(border_highlight, "modulate:a", 1.0, HOVER_DURATION)
 
 func _on_mouse_exited():
 	bundle_unhovered.emit()
@@ -514,10 +535,19 @@ func _on_mouse_exited():
 	
 	hover_tween = create_tween()
 	hover_tween.set_parallel(true)
-	hover_tween.tween_property(self, "scale", original_scale, 0.15)
-	hover_tween.tween_property(card_shadow, "offset_left", 4, 0.15)
-	hover_tween.tween_property(card_shadow, "offset_top", 4, 0.15)
-	hover_tween.tween_property(card_shadow, "color:a", 0.4, 0.15)
+	hover_tween.set_ease(Tween.EASE_OUT)
+	hover_tween.set_trans(Tween.TRANS_CUBIC)
+	hover_tween.tween_property(self, "scale", original_scale, HOVER_DURATION)
+	hover_tween.tween_property(self, "modulate", Color.WHITE, HOVER_DURATION)
+	hover_tween.tween_property(card_shadow, "offset_left", NORMAL_SHADOW_OFFSET, HOVER_DURATION)
+	hover_tween.tween_property(card_shadow, "offset_top", NORMAL_SHADOW_OFFSET, HOVER_DURATION)
+	hover_tween.tween_property(card_shadow, "color:a", NORMAL_SHADOW_ALPHA, HOVER_DURATION)
+	
+	if border_highlight:
+		var highlight_tween = create_tween()
+		highlight_tween.set_ease(Tween.EASE_OUT)
+		highlight_tween.set_trans(Tween.TRANS_CUBIC)
+		highlight_tween.tween_property(border_highlight, "modulate:a", 0.8, HOVER_DURATION)
 
 func _on_button_hover():
 	if not unlock_button:

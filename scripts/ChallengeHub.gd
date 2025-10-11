@@ -14,6 +14,12 @@ extends Control
 @onready var ui_player = $AudioManager/UIPlayer
 @onready var hover_player = $AudioManager/HoverPlayer
 
+const GAMEPAD_SELECTION_COLOR: Color = Color(1.3, 1.276, 1.153, 1.0)
+const GAMEPAD_SELECTION_SCALE: float = 1.02
+const GAMEPAD_NAVIGATION_COOLDOWN: float = 0.15
+const GAMEPAD_SCROLL_MARGIN: float = 80
+const GAMEPAD_SCROLL_DURATION: float = 0.2
+
 var challenge_music_stream = preload("res://audio/music/challenge_hub_theme.ogg")
 var robot_head_scene = preload("res://scenes/RobotHead.tscn")
 var robot_head_instance: RobotHead
@@ -29,7 +35,7 @@ var selected_bundle_index: int = 0
 var last_input_was_gamepad: bool = false
 var scroll_speed: float = 200.0
 var input_cooldown: float = 0.0
-var input_cooldown_time: float = 0.15
+var input_cooldown_time: float = GAMEPAD_NAVIGATION_COOLDOWN
 
 var adaptive_columns: bool = true
 var min_card_width: float = 320.0
@@ -136,6 +142,9 @@ func _ready():
 	setup_challenge_music()
 	
 	get_viewport().size_changed.connect(_on_viewport_resized)
+	
+	bundles_scroll_container.mouse_filter = Control.MOUSE_FILTER_PASS
+	bundles_grid.mouse_filter = Control.MOUSE_FILTER_PASS
 
 	if accessed_from_game:
 		back_button.text = "BACK TO GAME"
@@ -338,20 +347,23 @@ func _enter_mouse_mode():
 	if gamepad_mode:
 		gamepad_mode = false
 		clear_bundle_selection()
+		if bundles_scroll_container.has_focus():
+			bundles_scroll_container.release_focus()
 
 func _detect_input_method(event: InputEvent):
-	if event is InputEventJoypadButton or event is InputEventJoypadMotion:
-		if not gamepad_mode and (event is InputEventJoypadButton and event.pressed):
-			last_input_was_gamepad = true
-			_enter_gamepad_mode()
-			if bundle_card_instances.size() > 0:
-				bundles_scroll_container.grab_focus()
-	elif (event is InputEventMouse and event.is_pressed()) or (event is InputEventKey and event.is_pressed()):
+	if event is InputEventJoypadButton and event.pressed:
+		if event.button_index in [JOY_BUTTON_DPAD_UP, JOY_BUTTON_DPAD_DOWN, 
+								   JOY_BUTTON_DPAD_LEFT, JOY_BUTTON_DPAD_RIGHT,
+								   JOY_BUTTON_A, JOY_BUTTON_B]:
+			if not gamepad_mode:
+				last_input_was_gamepad = true
+				_enter_gamepad_mode()
+				if bundle_card_instances.size() > 0:
+					bundles_scroll_container.grab_focus()
+	elif event is InputEventMouseMotion:
 		if gamepad_mode:
 			last_input_was_gamepad = false
 			_enter_mouse_mode()
-			if bundles_scroll_container.has_focus():
-				bundles_scroll_container.release_focus()
 
 func update_bundle_selection():
 	if not gamepad_mode or bundle_card_instances.size() == 0:
@@ -368,9 +380,9 @@ func update_bundle_selection():
 	
 	var selected_bundle = bundle_card_instances[selected_bundle_index]
 	if is_instance_valid(selected_bundle):
-		selected_bundle.modulate = Color(1.05, 1.05, 1.0, 1.0)
+		selected_bundle.modulate = GAMEPAD_SELECTION_COLOR
 		selected_bundle.z_index = 10
-		selected_bundle.scale = Vector2(1.02, 1.02)
+		selected_bundle.scale = Vector2(GAMEPAD_SELECTION_SCALE, GAMEPAD_SELECTION_SCALE)
 		
 		ensure_bundle_visible(selected_bundle_index)
 
@@ -382,6 +394,9 @@ func clear_bundle_selection():
 			bundle_card.scale = Vector2(1.0, 1.0)
 
 func ensure_bundle_visible(bundle_index: int):
+	if not gamepad_mode:
+		return
+		
 	if bundle_index < 0 or bundle_index >= bundle_card_instances.size():
 		return
 	
@@ -402,16 +417,17 @@ func ensure_bundle_visible(bundle_index: int):
 	var visible_bottom = visible_top + bundles_scroll_container.size.y
 	
 	var target_scroll = bundles_scroll_container.scroll_vertical
-	var margin = 60
 	
-	if bundle_top_relative + visible_top < visible_top + margin:
-		target_scroll = max(0, bundle_top_relative + visible_top - margin)
-	elif bundle_bottom_relative + visible_top > visible_bottom - margin:
-		target_scroll = bundle_bottom_relative + visible_top - bundles_scroll_container.size.y + margin
+	if bundle_top_relative + visible_top < visible_top + GAMEPAD_SCROLL_MARGIN:
+		target_scroll = max(0, bundle_top_relative + visible_top - GAMEPAD_SCROLL_MARGIN)
+	elif bundle_bottom_relative + visible_top > visible_bottom - GAMEPAD_SCROLL_MARGIN:
+		target_scroll = bundle_bottom_relative + visible_top - bundles_scroll_container.size.y + GAMEPAD_SCROLL_MARGIN
 	
 	if abs(target_scroll - bundles_scroll_container.scroll_vertical) > 5:
 		var tween = create_tween()
-		tween.tween_property(bundles_scroll_container, "scroll_vertical", target_scroll, 0.25)
+		tween.set_ease(Tween.EASE_OUT)
+		tween.set_trans(Tween.TRANS_CUBIC)
+		tween.tween_property(bundles_scroll_container, "scroll_vertical", target_scroll, GAMEPAD_SCROLL_DURATION)
 		await tween.finished
 
 func navigate_bundles(direction: Vector2) -> bool:
@@ -678,7 +694,6 @@ func create_bundle_card(bundle_info: Dictionary) -> BundleCard:
 	var bundle_card = bundle_card_scene.instantiate() as BundleCard
 	
 	bundle_card.setup_bundle(bundle_info)
-	bundle_card.mouse_filter = Control.MOUSE_FILTER_PASS
 	
 	if bundle_card.bundle_unlock_requested.connect(_on_bundle_unlock_requested) != OK:
 		print("Error connecting bundle_unlock_requested")
@@ -757,62 +772,59 @@ func get_bundle_type(bundle_id: String) -> String:
 func _on_bundle_unlock_requested(bundle_id: String):
 	if not UnlockManagers:
 		return
-	
+
 	play_ui_sound("unlock")
-	
-	var unlocked_cards = UnlockManagers.unlock_bundle(bundle_id)
-	if unlocked_cards.size() > 0:
-		player_stats.bundles_unlocked_today += 1
-		player_stats.total_unlocks += 1
-		save_player_stats()
-		
-		var bundle_type = get_bundle_type(bundle_id)
-		
-		var type_specific_reactions = {
-			"offensive": [
-				"Ah, you favor aggression. How... predictable.",
-				"Those attack cards will serve us both well in battle.",
-				"Raw power. Direct. Effective. I can work with this."
-			],
-			"defensive": [
-				"Shields and walls? A cautious approach. Wise... or cowardly?",
-				"Defense wins wars. You understand this.",
-				"Interesting. Building a fortress, are we?"
-			],
-			"hybrid": [
-				"Balance. The mark of a true strategist.",
-				"Versatility over specialization. An interesting choice.",
-				"Adaptability. My favorite trait in an opponent."
-			],
-			"special": [
-				"Ooh, the exotic cards. You have good taste.",
-				"These cards have... unique properties. Use them wisely.",
-				"Now we're getting into the interesting territory."
-			]
-		}
-		
-		var reactions = type_specific_reactions.get(bundle_type, [
-			"The vault yields its secrets!",
-			"Power is yours to command!",
-			"Another mystery unveiled...",
-			"Your destiny unfolds..."
-		])
-		
-		dialog_manager.queue_sequence([reactions[randi() % reactions.size()]])
-		
-		await get_tree().create_timer(1.0).timeout
-		load_shop_data()
 
 func _on_bundle_hovered(bundle_info: Dictionary):
 	if not robot_head_instance:
 		return
 	
-	if bundle_info.can_unlock:
+	if bundle_info.get("can_unlock", false):
 		robot_head_instance.react_to_event("hover_unlockable")
-	elif bundle_info.unlocked:
+		
+		if randf() < 0.4:
+			var unlockable_dialogs = [
+				"This one's ready for you...",
+				"The vault awaits your command.",
+				"Power within reach. Will you claim it?",
+				"Ready when you are, warrior.",
+				"One click away from power...",
+				"The seal weakens. Strike now."
+			]
+			dialog_manager.queue_sequence([unlockable_dialogs[randi() % unlockable_dialogs.size()]])
+			
+	elif bundle_info.get("unlocked", false):
 		robot_head_instance.react_to_event("hover_unlocked")
+		
+		if randf() < 0.25:
+			var unlocked_dialogs = [
+				"Already yours... and mine.",
+				"These cards serve us both now.",
+				"Unlocked. But mastered?",
+				"You earned these. Use them wisely.",
+				"I've been practicing with these...",
+				"Familiar cards. Dangerous cards."
+			]
+			dialog_manager.queue_sequence([unlocked_dialogs[randi() % unlocked_dialogs.size()]])
+			
 	else:
 		robot_head_instance.react_to_event("hover_locked")
+		
+		if randf() < 0.35:
+			var locked_dialogs = [
+				"Locked tight. Prove yourself first.",
+				"Not yet. Complete the challenge.",
+				"Patience. The vault guards its secrets.",
+				"Earn it through battle.",
+				"The seal holds. For now.",
+				"These cards don't give themselves away..."
+			]
+			dialog_manager.queue_sequence([locked_dialogs[randi() % locked_dialogs.size()]])
+	
+	if OS.is_debug_build():
+		print("Bundle hovered: ", bundle_info.get("name", "Unknown"), 
+			  " | Unlocked: ", bundle_info.get("unlocked", false),
+			  " | Can unlock: ", bundle_info.get("can_unlock", false))
 
 func _on_bundle_unhovered():
 	if robot_head_instance:
