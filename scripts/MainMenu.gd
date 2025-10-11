@@ -27,6 +27,7 @@ var popup_active: bool = false
 var focusable_buttons: Array[Button] = []
 var current_focus_index: int = 0
 var returning_from_menu: bool = false
+var entrance_complete: bool = false
 
 const COLOR_NORMAL = Color(1.0, 1.0, 1.0, 1.0)
 const COLOR_HOVER = Color(1.113, 1.207, 1.3, 1.0)
@@ -62,10 +63,22 @@ func _ready():
 			returning_from_menu = true
 	
 	await handle_scene_entrance()
-
 	start_menu_music()
-	_focus_first_button()
+	
+	entrance_complete = true
+	
+	_save_original_button_positions()
+	
+	await get_tree().process_frame
+	_focus_first_button_safe()
+	
 	_setup_options_menu()
+
+func _save_original_button_positions():
+	var buttons = [play_button, options_button, help_button, challenge_button, credits_button, stats_button, exit_button]
+	for button in buttons:
+		if button and is_instance_valid(button):
+			button.set_meta("original_y", button.position.y)
 
 func set_card_rain_intensity(intensity: float):
 	if card_rain_background:
@@ -154,12 +167,25 @@ func _setup_gamepad_navigation():
 			if focusable_buttons[prev_index]:
 				button.focus_neighbor_top = focusable_buttons[prev_index].get_path()
 
+func _focus_first_button_safe():
+	if not entrance_complete:
+		return
+	
+	if focusable_buttons.size() > 0 and focusable_buttons[0] and is_instance_valid(focusable_buttons[0]):
+		current_focus_index = 0
+		if not is_transitioning and not popup_active:
+			focusable_buttons[0].grab_focus()
+
 func _focus_first_button():
 	if focusable_buttons.size() > 0 and focusable_buttons[0]:
 		current_focus_index = 0
 		focusable_buttons[0].grab_focus()
 
 func _detect_input_method(event: InputEvent):
+	if event is InputEventJoypadMotion:
+		if abs(event.axis_value) < 0.3:
+			return
+	
 	if event is InputEventJoypadButton or event is InputEventJoypadMotion:
 		if not gamepad_mode:
 			gamepad_mode = true
@@ -176,18 +202,32 @@ func _detect_input_method(event: InputEvent):
 			_on_input_method_changed()
 
 func _reset_all_button_effects():
+	var had_focus = get_viewport().gui_get_focus_owner()
+	var focus_index = -1
+	
+	if had_focus and had_focus in focusable_buttons:
+		focus_index = focusable_buttons.find(had_focus)
+	
 	for button in focusable_buttons:
 		if button and is_instance_valid(button):
 			if button.has_method("create_tween"):
 				var tween = button.create_tween()
 				tween.kill()
 			
-			button.modulate = Color(1.0, 1.0, 1.0, 1.0)
-			button.scale = Vector2(1.0, 1.0)
+			button.modulate = COLOR_NORMAL
+			button.scale = SCALE_NORMAL
+
+			if button.has_meta("original_y"):
+				button.position.y = button.get_meta("original_y")
+	
+	if focus_index >= 0 and entrance_complete and not is_transitioning:
+		await get_tree().process_frame
+		if focusable_buttons[focus_index] and is_instance_valid(focusable_buttons[focus_index]):
+			focusable_buttons[focus_index].grab_focus()
 			
 func _on_input_method_changed():
-	if gamepad_mode and not get_viewport().gui_get_focus_owner():
-		_focus_first_button()
+	if gamepad_mode and not get_viewport().gui_get_focus_owner() and entrance_complete:
+		_focus_first_button_safe()
 
 func setup_audio():
 	if menu_music_player and menu_music_player.stream and GlobalMusicManager:
@@ -226,14 +266,15 @@ func handle_scene_entrance():
 			else:
 				await TransitionManager.current_overlay.fade_out(0.8)
 		else:
-			play_entrance_animation()
+			await play_entrance_animation()
 	else:
-		play_entrance_animation()
+		await play_entrance_animation()
 
 func _reset_menu_state():
 	returning_from_menu = false
 	is_transitioning = false
 	popup_active = false
+	entrance_complete = true
 	_reset_all_button_effects()
 	
 	set_card_rain_active(true)
@@ -383,8 +424,9 @@ func _enable_menu_input():
 
 	_reset_all_button_effects()
 	
-	if gamepad_mode:
-		_focus_first_button()
+	if gamepad_mode and entrance_complete:
+		await get_tree().process_frame
+		_focus_first_button_safe()
 
 func _on_options_menu_closed():
 	print("Options menu closed in main menu")
@@ -425,32 +467,31 @@ func _on_button_hover(button: Button):
 	if popup_active or not is_instance_valid(button) or is_transitioning:
 		return
 	
-	if not gamepad_mode:
-		button.release_focus()
+	if gamepad_mode:
+		return
 	
-	if not gamepad_mode or (gamepad_mode and button.has_focus()):
-		play_hover_sound()
-		_animate_button_state(button, SCALE_HOVER, COLOR_HOVER)
+	button.release_focus()
+	
+	play_hover_sound()
+	_animate_button_state(button, SCALE_HOVER, COLOR_HOVER)
 
 func _on_button_unhover(button: Button):
 	if not is_instance_valid(button):
 		return
 	
-	if not gamepad_mode:
-		button.release_focus()
+	if gamepad_mode:
+		return
 	
-	if not gamepad_mode or (gamepad_mode and not button.has_focus()):
-		_animate_button_state(button, SCALE_NORMAL, COLOR_NORMAL, 0.0, ANIM_EASE_IN)
+	button.release_focus()
+	_animate_button_state(button, SCALE_NORMAL, COLOR_NORMAL, 0.0, ANIM_EASE_IN)
 
 func _on_button_focus(button: Button):
 	if popup_active or not is_instance_valid(button) or is_transitioning:
 		return
 	
-	if gamepad_mode:
+	if gamepad_mode and entrance_complete:
 		play_hover_sound()
 		_animate_button_state(button, SCALE_FOCUS, COLOR_FOCUS, -HOVER_LIFT)
-	else:
-		button.release_focus()
 	
 	var index = focusable_buttons.find(button)
 	if index != -1:
@@ -476,7 +517,8 @@ func _animate_button_state(button: Button, target_scale: Vector2, target_color: 
 	tween.tween_property(button, "modulate", target_color, ANIM_DURATION)
 	
 	if lift_offset != 0.0:
-		var target_y = button.position.y + lift_offset
+		var original_y = button.get_meta("original_y", button.position.y)
+		var target_y = original_y + lift_offset
 		tween.tween_property(button, "position:y", target_y, ANIM_DURATION)
 
 func exit_game():
@@ -517,7 +559,7 @@ func _navigate_focus(direction: int):
 		current_focus_index = focusable_buttons.size() - 1
 	
 	var target_button = focusable_buttons[current_focus_index]
-	if target_button:
+	if target_button and is_instance_valid(target_button):
 		target_button.grab_focus()
 
 func _input(event):
@@ -576,6 +618,11 @@ func set_background_color(color: Color):
 
 func _on_scene_entered():
 	returning_from_menu = true
+	entrance_complete = true
 	_reset_menu_state()
 	resume_menu_music()
 	set_card_rain_active(true)
+	
+	if gamepad_mode:
+		await get_tree().process_frame
+		_focus_first_button_safe()

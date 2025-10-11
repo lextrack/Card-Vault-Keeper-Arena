@@ -178,7 +178,7 @@ func refresh_statistics():
 		cards.by_type.get("hybrid", 0),
 		float(cards.by_type.get("hybrid", 0)) / total_cards * 100.0
 	]
-	jokers_played_label.text = "Total Jokers used: %d (%.1f%%)" % [
+	jokers_played_label.text = "Total Coringas (Jokers) used: %d (%.1f%%)" % [
 	cards.jokers_played,
 	float(cards.jokers_played) / max(1, cards.total_played) * 100.0
 	]
