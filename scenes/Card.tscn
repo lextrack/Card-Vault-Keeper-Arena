@@ -75,6 +75,7 @@ grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1_0x2y3")
+number_of_images = 6
 
 [node name="CardShadow" type="Panel" parent="."]
 z_index = -1
@@ -189,7 +190,7 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_art")
 
-[node name="CardIcon" type="VideoStreamPlayer" parent="CardBackground/CardBorder/CardInner/VBox/ArtContainer"]
+[node name="CardIcon" type="TextureRect" parent="CardBackground/CardBorder/CardInner/VBox/ArtContainer"]
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -197,9 +198,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-autoplay = true
-expand = true
-loop = true
+expand_mode = 5
 
 [node name="HSeparator2" type="HSeparator" parent="CardBackground/CardBorder/CardInner/VBox"]
 layout_mode = 2

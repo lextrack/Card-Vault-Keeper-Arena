@@ -16,10 +16,10 @@ extends Control
 @onready var rarity_bg = $CardBackground/CardBorder/CardInner/VBox/RarityContainer
 @onready var art_bg = $CardBackground/CardBorder/CardInner/VBox/ArtContainer
 
-const ATTACK_VIDEO = preload("res://assets/backgrounds/attack1.ogv")
-const HEAL_VIDEO = preload("res://assets/backgrounds/heal1.ogv")
-const SHIELD_VIDEO = preload("res://assets/backgrounds/shield1.ogv")
-const HYBRID_VIDEO = preload("res://assets/backgrounds/hybrid1.ogv")
+# Configuración de imágenes (editable desde el inspector)
+@export var card_images_folder: String = "res://assets/backgrounds/"
+@export var number_of_images: int = 5
+@export var image_extension: String = ".jpg"
 
 signal card_clicked(card: Card)
 signal card_played(card: Card)
@@ -348,18 +348,19 @@ func _update_stat_display():
 	stat_value.modulate = base_stat_modulate
 
 func _load_card_illustration():
-	var video_stream: VideoStream = null
-	match card_data.card_type:
-		"attack": video_stream = ATTACK_VIDEO
-		"heal": video_stream = HEAL_VIDEO
-		"shield": video_stream = SHIELD_VIDEO
-		"hybrid": video_stream = HYBRID_VIDEO
+	# Seleccionar un número aleatorio entre 1 y number_of_images
+	var random_index = randi() % number_of_images + 1
 	
-	if video_stream and card_icon is VideoStreamPlayer:
-		card_icon.stream = video_stream
-		card_icon.loop = true
-		card_icon.autoplay = true
-		card_icon.play()
+	# Construir la ruta de la imagen
+	var image_path = card_images_folder + str(random_index) + image_extension
+	
+	# Cargar la textura
+	var texture = load(image_path)
+	
+	if card_icon is TextureRect and texture:
+		card_icon.texture = texture
+	else:
+		push_warning("No se pudo cargar la imagen: " + image_path)
 
 func _get_card_type_colors(card_type: String) -> Dictionary:
 	const COLOR_TABLE = {
