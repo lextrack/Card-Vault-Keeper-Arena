@@ -132,6 +132,3 @@ grow_vertical = 0
 theme_override_styles/fill = SubResource("StyleBoxFlat_progress")
 value = 100.0
 show_percentage = false
-
-[node name="ParticleEffect" type="GPUParticles2D" parent="."]
-position = Vector2(129, 1)

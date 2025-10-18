@@ -402,20 +402,22 @@ func _setup_notifications():
 	add_child(ai_notification)
 	add_child(game_notification)
 
+	await get_tree().process_frame
+
 func cleanup_notifications():
-	if ai_notification:
+	if ai_notification and is_instance_valid(ai_notification):
 		ai_notification.force_close()
 	
-	if game_notification:
+	if game_notification and is_instance_valid(game_notification):
 		game_notification.clear_all_notifications()
 	
-	if controls_panel:
+	if controls_panel and is_instance_valid(controls_panel):
 		controls_panel.force_hide()
 		
-	if options_menu:
+	if options_menu and is_instance_valid(options_menu):
 		options_menu.hide_options()
 	
-	if bundle_celebration_system:
+	if bundle_celebration_system and is_instance_valid(bundle_celebration_system):
 		bundle_celebration_system.clear_all_celebrations()
 	
 	await get_tree().process_frame

@@ -7,7 +7,6 @@ extends Control
 @onready var notification_title = $Background/VBox/NotificationTitle
 @onready var notification_text = $Background/VBox/NotificationText
 @onready var notification_detail = $Background/VBox/NotificationDetail
-@onready var particle_effect = $ParticleEffect
 @onready var shadow = $Shadow
 @onready var progress_bar = $Background/ProgressBar
 
@@ -16,6 +15,9 @@ var is_showing: bool = false
 var pulse_tween: Tween
 var progress_tween: Tween
 var original_position: Vector2
+
+# Pre-cache de StyleBoxes
+var progress_styles: Dictionary = {}
 
 signal notification_shown(title: String)
 signal notification_hidden
@@ -26,9 +28,10 @@ func _ready():
 		return
 	
 	_initialize_notification()
+	_precache_styles()
 
 func _validate_nodes() -> bool:
-	var base_nodes = background and border_highlight and inner_background and notification_title and notification_text and notification_detail and particle_effect
+	var base_nodes = background and border_highlight and inner_background and notification_title and notification_text and notification_detail
 	if not base_nodes:
 		return false
 	
@@ -46,6 +49,7 @@ func _initialize_notification():
 	
 	if shadow:
 		shadow.modulate.a = 0.0
+		shadow.visible = false
 	
 	if progress_bar:
 		progress_bar.value = 100
@@ -53,8 +57,30 @@ func _initialize_notification():
 	if not tree_exiting.is_connected(_cleanup):
 		tree_exiting.connect(_cleanup)
 
+func _precache_styles():
+	if not progress_bar:
+		return
+	
+	var types = ["damage", "victory", "defeat", "default"]
+	var colors = [
+		Color(1.0, 0.4, 0.2, 0.8),  # damage
+		Color(0.3, 0.8, 0.3, 0.8),  # victory
+		Color(0.9, 0.3, 0.3, 0.8),  # defeat
+		Color(0.3, 0.5, 0.8, 0.8)   # default
+	]
+	
+	for i in types.size():
+		var style = StyleBoxFlat.new()
+		style.corner_radius_top_left = 2
+		style.corner_radius_top_right = 2
+		style.corner_radius_bottom_right = 2
+		style.corner_radius_bottom_left = 2
+		style.bg_color = colors[i]
+		progress_styles[types[i]] = style
+
 func _cleanup():
 	_stop_all_tweens()
+	progress_styles.clear()
 
 func _stop_all_tweens():
 	if tween and tween.is_valid():
@@ -81,8 +107,7 @@ func show_notification(title: String, text: String, detail: String, highlight_co
 	await _animate_entrance(notification_type)
 	
 	_start_subtle_pulse()
-	_setup_particles(highlight_color)
-	_animate_progress_bar(duration)
+	_animate_progress_bar(duration, notification_type)
 	notification_shown.emit(title)
 	
 	await get_tree().create_timer(duration).timeout
@@ -140,11 +165,16 @@ func _animate_entrance(notification_type: String):
 	
 	await tween.finished
 
-func _animate_progress_bar(duration: float):
+func _animate_progress_bar(duration: float, notification_type: String):
 	if not progress_bar:
 		return
 	
 	progress_bar.value = 100
+	
+	# Usar StyleBox pre-cacheado
+	if notification_type in progress_styles:
+		progress_bar.add_theme_stylebox_override("fill", progress_styles[notification_type])
+	
 	progress_tween = create_tween()
 	progress_tween.tween_property(progress_bar, "value", 0, duration).set_trans(Tween.TRANS_LINEAR)
 
@@ -154,11 +184,6 @@ func _setup_notification_content(title: String, text: String, detail: String, hi
 	notification_detail.text = detail
 	border_highlight.color = highlight_color
 	inner_background.color = inner_color
-	
-	if progress_bar:
-		var style = progress_bar.get_theme_stylebox("fill")
-		if style:
-			style.bg_color = highlight_color
 
 func _start_subtle_pulse():
 	pulse_tween = create_tween()
@@ -166,34 +191,11 @@ func _start_subtle_pulse():
 	pulse_tween.tween_property(border_highlight, "modulate:a", 0.8, 1.5).set_trans(Tween.TRANS_SINE)
 	pulse_tween.tween_property(border_highlight, "modulate:a", 1.0, 1.5).set_trans(Tween.TRANS_SINE)
 
-func _setup_particles(color: Color):
-	if not particle_effect:
-		return
-	
-	if not particle_effect.process_material:
-		var material = ParticleProcessMaterial.new()
-		particle_effect.process_material = material
-	
-	var material = particle_effect.process_material as ParticleProcessMaterial
-	material.direction = Vector3(0, -1, 0)
-	material.initial_velocity_min = 30.0
-	material.initial_velocity_max = 70.0
-	material.gravity = Vector3(0, 20, 0)
-	material.scale_min = 1.0
-	material.scale_max = 2.0
-	material.color = color
-	
-	particle_effect.amount = 60
-	particle_effect.lifetime = 1.5
-	particle_effect.emitting = true
-	get_tree().create_timer(0.5).timeout.connect(func(): particle_effect.emitting = false)
-
 func hide_notification():
 	if not is_showing:
 		return
 	
 	_stop_all_tweens()
-	particle_effect.emitting = false
 	
 	tween = create_tween()
 	tween.set_parallel(true)
