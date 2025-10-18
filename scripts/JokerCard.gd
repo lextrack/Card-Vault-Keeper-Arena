@@ -88,6 +88,32 @@ func disable_shine_effect():
 	if card_icon and card_icon.material and card_icon.material is ShaderMaterial:
 		var shader_material = card_icon.material as ShaderMaterial
 		shader_material.set_shader_parameter("shine_enabled", false)
+		
+func _apply_selection_effects():
+	enable_shine_effect()
+	
+	_stop_current_tween()
+	current_tween = create_tween()
+	current_tween.set_parallel(true)
+	
+	current_tween.tween_property(self, "scale", original_scale * HOVER_SCALE, ANIMATION_SPEED)
+	current_tween.tween_property(self, "z_index", 10, ANIMATION_SPEED)
+	current_tween.tween_property(self, "modulate", Color(1.15, 1.1, 1.05, 1.0), ANIMATION_SPEED)
+	current_tween.tween_property(card_border, "modulate", Color(1.4, 1.25, 1.0, 1.0), ANIMATION_SPEED)
+
+func _remove_selection_effects():
+	disable_shine_effect()
+	
+	_stop_current_tween()
+	current_tween = create_tween()
+	current_tween.set_parallel(true)
+	
+	current_tween.tween_property(self, "scale", original_scale, ANIMATION_SPEED)
+	current_tween.tween_property(self, "z_index", 0, ANIMATION_SPEED)
+	current_tween.tween_property(card_border, "modulate", Color.WHITE, ANIMATION_SPEED)
+	
+	var target_modulate = Color.WHITE if is_playable else Color(0.4, 0.4, 0.4, 0.7)
+	current_tween.tween_property(self, "modulate", target_modulate, ANIMATION_SPEED)
 
 func _optimize_mouse_filter():
 	_set_mouse_filter_recursive(self, Control.MOUSE_FILTER_PASS)
@@ -127,35 +153,14 @@ func apply_gamepad_selection_style():
 	gamepad_selected = true
 	is_hovered = false
 	
-	enable_shine_effect()
-	
-	_stop_current_tween()
-	current_tween = create_tween()
-	current_tween.set_parallel(true)
-	
-	current_tween.tween_property(self, "scale", original_scale * GAMEPAD_SCALE, ANIMATION_SPEED)
-	current_tween.tween_property(self, "z_index", 10, ANIMATION_SPEED)
-	current_tween.tween_property(self, "modulate", Color(1.2, 1.1, 1.0, 1.0), ANIMATION_SPEED)
-	current_tween.tween_property(card_border, "modulate", Color(1.5, 1.3, 1.0, 1.0), ANIMATION_SPEED)
+	_apply_selection_effects()
 
 func remove_gamepad_selection_style():
 	if not gamepad_selected:
 		return
 	
 	gamepad_selected = false
-	
-	disable_shine_effect()
-	
-	_stop_current_tween()
-	current_tween = create_tween()
-	current_tween.set_parallel(true)
-	
-	current_tween.tween_property(self, "scale", original_scale, ANIMATION_SPEED)
-	current_tween.tween_property(self, "z_index", 0, ANIMATION_SPEED)
-	current_tween.tween_property(card_border, "modulate", Color.WHITE, ANIMATION_SPEED)
-	
-	var target_modulate = Color.WHITE if is_playable else Color(0.4, 0.4, 0.4, 0.7)
-	current_tween.tween_property(self, "modulate", target_modulate, ANIMATION_SPEED)
+	_remove_selection_effects()
 
 func play_disabled_animation():
 	if is_being_played:
@@ -202,8 +207,7 @@ func _on_mouse_entered():
 	if not is_hovered and is_playable:
 		is_hovered = true
 		card_hovered.emit(self)
-		enable_shine_effect()
-		_apply_hover_effects()
+		_apply_selection_effects()
 
 func _on_mouse_exited():
 	if is_being_played or not is_hovered or gamepad_selected:
@@ -211,31 +215,7 @@ func _on_mouse_exited():
 	
 	is_hovered = false
 	card_unhovered.emit(self)
-	if not gamepad_selected:
-		disable_shine_effect()
-	_remove_hover_effects()
-
-func _apply_hover_effects():
-	_stop_current_tween()
-	current_tween = create_tween()
-	current_tween.set_parallel(true)
-	
-	current_tween.tween_property(self, "scale", original_scale * HOVER_SCALE, ANIMATION_SPEED)
-	current_tween.tween_property(self, "z_index", 5, ANIMATION_SPEED)
-	current_tween.tween_property(self, "modulate", Color(1.1, 1.1, 1.05, 1.0), ANIMATION_SPEED)
-	current_tween.tween_property(card_border, "modulate", Color(1.3, 1.2, 1.0, 1.0), ANIMATION_SPEED)
-
-func _remove_hover_effects():
-	_stop_current_tween()
-	current_tween = create_tween()
-	current_tween.set_parallel(true)
-	
-	current_tween.tween_property(self, "scale", original_scale, ANIMATION_SPEED)
-	current_tween.tween_property(self, "z_index", 0, ANIMATION_SPEED)
-	current_tween.tween_property(card_border, "modulate", Color.WHITE, ANIMATION_SPEED)
-	
-	var target_modulate = Color.WHITE if is_playable else Color(0.4, 0.4, 0.4, 0.7)
-	current_tween.tween_property(self, "modulate", target_modulate, ANIMATION_SPEED)
+	_remove_selection_effects()
 
 func has_gamepad_selection_applied() -> bool:
 	return gamepad_selected
@@ -259,7 +239,7 @@ func set_playable(playable: bool):
 			mouse_filter = Control.MOUSE_FILTER_IGNORE
 		
 		if is_hovered:
-			_remove_hover_effects()
+			_remove_selection_effects()
 			is_hovered = false
 
 func force_reset_visual_state():
