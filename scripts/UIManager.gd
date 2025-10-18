@@ -362,7 +362,7 @@ func _animate_card_spawn(card: Control, index: int):
 		return
 	
 	var tween = main_scene.create_tween()
-	tween.tween_property(card, "modulate:a", 1.0, 0.15)
+	tween.tween_property(card, "modulate:a", 1.0, 0.2)
 
 func _update_existing_cards_playability(player: Player):
 	var hand_size = min(card_instances.size(), player.hand.size())

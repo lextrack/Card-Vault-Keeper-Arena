@@ -4,12 +4,15 @@ extends Node
 var main_scene: Control
 var player: Player
 var ai: Player
+var game_ended: bool = false
 
 func setup(main: Control):
 	main_scene = main
 
 func setup_new_game(difficulty: String):
 	_cleanup_existing_players()
+	
+	game_ended = false
 	
 	player = Player.new()
 	ai = Player.new()
@@ -33,6 +36,18 @@ func setup_new_game(difficulty: String):
 	connect_all_signals()
 	
 	print("Game setup complete - Turn numbers reset to 0")
+
+func mark_game_ended() -> bool:
+	if game_ended:
+		print("Game already ended, ignoring duplicate end game call")
+		return false
+	
+	game_ended = true
+	print("Game marked as ended")
+	return true
+
+func finalize_game_end():
+	print("Game end finalized")
 
 func connect_all_signals():
 	connect_player_signals()
@@ -204,10 +219,10 @@ func _has_critical_pending_animations() -> bool:
 	return false
 
 func is_game_ended() -> bool:
-	return main_scene.is_game_transitioning
-
+	return game_ended
+	
 func end_turn_limit_reached():
-	if main_scene.is_game_transitioning:
+	if game_ended:
 		return
 		
 	main_scene.turn_label.text = "Limit reached!"
@@ -215,7 +230,7 @@ func end_turn_limit_reached():
 	await main_scene.get_tree().create_timer(GameBalance.get_timer_delay("turn_end")).timeout
 
 func end_turn_no_cards():
-	if main_scene.is_game_transitioning:
+	if game_ended:
 		return
 		
 	main_scene.turn_label.text = "No cards!"

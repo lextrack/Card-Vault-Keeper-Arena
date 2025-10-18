@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Card Vault Keeper: Arena"
-config/version="1.0.0.9"
+config/version="1.0.1.0"
 run/main_scene="uid://cxw6tc65b0iwr"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 boot_splash/bg_color=Color(0, 0, 0, 1)

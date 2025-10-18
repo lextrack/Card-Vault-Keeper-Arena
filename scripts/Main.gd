@@ -678,6 +678,8 @@ func restart_game():
 
 	fade_rect.queue_free()
 	message_label.queue_free()
+
+	set_bottom_buttons_enabled(true)
 	
 	is_game_transitioning = false
 	input_manager.enable_input()
@@ -735,13 +737,15 @@ func _on_player_cards_played_changed(cards_played: int, max_cards: int):
 	ui_manager.update_turn_button_text(player, end_turn_button, GameState.gamepad_mode)
 	ui_manager.update_cards_played_info(cards_played, max_cards, difficulty)
 	
-	if not game_manager.is_game_ended():
-		if cards_played >= max_cards:
-			await game_manager.end_turn_limit_reached()
-			start_ai_turn()
-		elif is_player_turn and player.get_hand_size() == 0:
-			await game_manager.end_turn_no_cards()
-			start_ai_turn()
+	if not game_manager or game_manager.is_game_ended():
+		return
+	
+	if cards_played >= max_cards:
+		await game_manager.end_turn_limit_reached()
+		start_ai_turn()
+	elif is_player_turn and player.get_hand_size() == 0:
+		await game_manager.end_turn_no_cards()
+		start_ai_turn()
 
 func _on_player_hand_changed():
 	if not player:
