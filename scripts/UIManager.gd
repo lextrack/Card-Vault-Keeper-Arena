@@ -24,7 +24,7 @@ var last_playability_fingerprint: String = ""
 var gamepad_selection_active: bool = false
 
 var pending_update_timer: float = 0.0
-const UPDATE_DELAY: float = 0.016  # ~1 frame a 60fps
+const UPDATE_DELAY: float = 0.016  #1 frame a 60fps
 
 var player_turn_color = Color(0.08, 0.13, 0.18, 0.9)
 var ai_turn_color = Color(0.15, 0.08, 0.08, 0.9)
@@ -353,11 +353,8 @@ func _animate_card_spawn(card: Control, index: int):
 		return
 	
 	card.modulate.a = 0.0
-	card.scale = Vector2(0.5, 0.5)
-	var initial_y = card.position.y
-	card.position.y = initial_y
 	
-	var delay = index * 0.06
+	var delay = index * 0.05
 	
 	await main_scene.get_tree().create_timer(delay).timeout
 	
@@ -365,13 +362,7 @@ func _animate_card_spawn(card: Control, index: int):
 		return
 	
 	var tween = main_scene.create_tween()
-	tween.set_parallel(true)
-	tween.set_ease(Tween.EASE_OUT)
-	tween.set_trans(Tween.TRANS_BACK)
-	
-	tween.tween_property(card, "modulate:a", 1.0, 0.6)
-	tween.tween_property(card, "scale", Vector2(1.0, 1.0), 0.6)
-	tween.tween_property(card, "position:y", initial_y, 0.6)
+	tween.tween_property(card, "modulate:a", 1.0, 0.15)
 
 func _update_existing_cards_playability(player: Player):
 	var hand_size = min(card_instances.size(), player.hand.size())
@@ -544,8 +535,13 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 
 func _clear_all_gamepad_selection_styles():
 	for card in card_instances:
-		if is_instance_valid(card) and card.has_method("remove_gamepad_selection_style"):
-			card.remove_gamepad_selection_style()
+		if is_instance_valid(card):
+
+			if card.has_method("remove_gamepad_selection_style"):
+				card.remove_gamepad_selection_style()
+
+			if card.has_method("force_reset_visual_state"):
+				card.force_reset_visual_state()
 
 func update_hand_display_no_animation(player: Player, card_scene: PackedScene, hand_container: Container):
 	if not player or not card_scene or not hand_container or not player.hand:
@@ -588,8 +584,16 @@ func navigate_cards(direction: int, player: Player) -> bool:
 func _apply_navigation_change(old_index: int, new_index: int, player: Player):
 	if old_index < card_instances.size():
 		var old_card = card_instances[old_index]
-		if is_instance_valid(old_card) and old_card.has_method("force_reset_visual_state"):
-			old_card.force_reset_visual_state()
+		if is_instance_valid(old_card):
+			if old_card.has_method("remove_gamepad_selection_style"):
+				old_card.remove_gamepad_selection_style()
+
+			if old_card.has_method("force_reset_visual_state"):
+				old_card.force_reset_visual_state()
+
+			if old_index < player.hand.size():
+				var can_play = player.can_play_card(player.hand[old_index])
+				old_card.set_playable(can_play)
 
 	if new_index < card_instances.size():
 		var new_card = card_instances[new_index]

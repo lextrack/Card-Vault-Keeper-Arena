@@ -1,6 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://bmd1idc70kmiu"]
+[gd_scene load_steps=15 format=3 uid="uid://bmd1idc70kmiu"]
 
 [ext_resource type="Script" uid="uid://bmwtnxhcx165w" path="res://scripts/Card.gd" id="1_0x2y3"]
+[ext_resource type="Shader" uid="uid://b7c0lxakltxok" path="res://shaders/CardIcon.gdshader" id="2_tgmmg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shadow"]
 bg_color = Color(0, 0, 0, 0.4)
@@ -44,6 +45,17 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4dx8l"]
+shader = ExtResource("2_tgmmg")
+shader_parameter/shine_speed = 1.5
+shader_parameter/shine_width = 0.08
+shader_parameter/shine_intensity = 0.800000038
+shader_parameter/shine_color = Color(1, 1, 1, 0.4)
+shader_parameter/shine_angle_rad = 0.785398
+shader_parameter/shine_enabled = false
+shader_parameter/delay_between_shines = 0.8
+shader_parameter/time_offset = 0.0
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_desc"]
 bg_color = Color(0.08, 0.08, 0.13, 0.9)
 corner_radius_top_left = 4
@@ -57,6 +69,69 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="Animation" id="Animation_4dx8l"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CardBackground/CardBorder/CardInner/VBox/ArtContainer/CardIcon:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CardBackground/CardBorder/CardInner/VBox/ArtContainer/CardIcon:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_tgmmg"]
+resource_name = "cardicon_movement"
+length = 4.0
+loop_mode = 1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CardBackground/CardBorder/CardInner/VBox/ArtContainer/CardIcon:rotation")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(2, 2, 2),
+"update": 0,
+"values": [-0.01, 0.01, -0.01]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CardBackground/CardBorder/CardInner/VBox/ArtContainer/CardIcon:scale")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 2, 4),
+"transitions": PackedFloat32Array(2, 2, 2),
+"update": 0,
+"values": [Vector2(0.98, 0.98), Vector2(1.02, 1.02), Vector2(0.98, 0.98)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_4dx8l"]
+_data = {
+&"RESET": SubResource("Animation_4dx8l"),
+&"cardicon_movement": SubResource("Animation_tgmmg")
+}
 
 [node name="Card" type="Control"]
 custom_minimum_size = Vector2(205, 310)
@@ -75,7 +150,6 @@ grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1_0x2y3")
-number_of_images = 6
 
 [node name="CardShadow" type="Panel" parent="."]
 z_index = -1
@@ -191,13 +265,19 @@ size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_art")
 
 [node name="CardIcon" type="TextureRect" parent="CardBackground/CardBorder/CardInner/VBox/ArtContainer"]
+material = SubResource("ShaderMaterial_4dx8l")
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(93.5, 93.5)
 expand_mode = 5
 
 [node name="HSeparator2" type="HSeparator" parent="CardBackground/CardBorder/CardInner/VBox"]
@@ -281,3 +361,9 @@ theme_override_font_sizes/font_size = 12
 text = "[Common]"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_4dx8l")
+}
+autoplay = "cardicon_movement"

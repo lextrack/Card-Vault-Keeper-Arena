@@ -1,6 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://bjvt1tywkjr1"]
+[gd_scene load_steps=16 format=3 uid="uid://bjvt1tywkjr1"]
 
 [ext_resource type="Script" uid="uid://dxeen7d7itjk7" path="res://scripts/JokerCard.gd" id="1_1pto4"]
+[ext_resource type="Shader" uid="uid://dfmq0bmvigo20" path="res://shaders/JokerCard.gdshader" id="2_hwman"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shadow"]
 bg_color = Color(0.4, 0.2, 0.6, 0.5)
@@ -51,6 +52,17 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cgvvu"]
+shader = ExtResource("2_hwman")
+shader_parameter/shine_speed = 1.5000000679901202
+shader_parameter/shine_width = 0.1
+shader_parameter/shine_intensity = 0.7
+shader_parameter/shine_color = Color(1, 0.9, 0.3, 0.5)
+shader_parameter/shine_angle_rad = 0.785398
+shader_parameter/shine_enabled = false
+shader_parameter/delay_between_shines = 0.8
+shader_parameter/time_offset = 0.0
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_desc"]
 bg_color = Color(0.08, 0.04, 0.12, 0.9)
 corner_radius_top_left = 6
@@ -64,6 +76,69 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
+
+[sub_resource type="Animation" id="Animation_reset"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CardBackground/CardBorder/CardInner/VBox/ArtContainer/CardIcon:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CardBackground/CardBorder/CardInner/VBox/ArtContainer/CardIcon:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_joker"]
+resource_name = "cardicon_movement"
+length = 3.0
+loop_mode = 1
+step = 0.05
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CardBackground/CardBorder/CardInner/VBox/ArtContainer/CardIcon:rotation")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.5, 3),
+"transitions": PackedFloat32Array(2, 2, 2),
+"update": 0,
+"values": [-0.01, 0.01, -0.01]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CardBackground/CardBorder/CardInner/VBox/ArtContainer/CardIcon:scale")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1.5, 3),
+"transitions": PackedFloat32Array(2, 2, 2),
+"update": 0,
+"values": [Vector2(0.98, 0.98), Vector2(1.02, 1.02), Vector2(0.98, 0.98)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_joker"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"cardicon_movement": SubResource("Animation_joker")
+}
 
 [node name="JokerCard" type="Control"]
 custom_minimum_size = Vector2(205, 310)
@@ -229,17 +304,21 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_art")
 
-[node name="CardIcon" type="VideoStreamPlayer" parent="CardBackground/CardBorder/CardInner/VBox/ArtContainer"]
+[node name="CardIcon" type="TextureRect" parent="CardBackground/CardBorder/CardInner/VBox/ArtContainer"]
+material = SubResource("ShaderMaterial_cgvvu")
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
-autoplay = true
-expand = true
-loop = true
+pivot_offset = Vector2(93.5, 93.5)
+expand_mode = 1
 
 [node name="HSeparator2" type="HSeparator" parent="CardBackground/CardBorder/CardInner/VBox"]
 layout_mode = 2
@@ -322,3 +401,9 @@ theme_override_font_sizes/font_size = 12
 text = "[Joker]"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_joker")
+}
+autoplay = "cardicon_movement"

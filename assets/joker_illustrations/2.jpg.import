@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://473yklnjq5rw"
-path="res://.godot/imported/6.jpg-835c981111d1cd767fea3e791bd5e576.ctex"
+uid="uid://ctkjddbcp4my4"
+path="res://.godot/imported/2.jpg-5e6152bee477cb46965228391b2fd59e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/backgrounds/6.jpg"
-dest_files=["res://.godot/imported/6.jpg-835c981111d1cd767fea3e791bd5e576.ctex"]
+source_file="res://assets/joker_illustrations/2.jpg"
+dest_files=["res://.godot/imported/2.jpg-5e6152bee477cb46965228391b2fd59e.ctex"]
 
 [params]
 

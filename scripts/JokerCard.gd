@@ -16,10 +16,9 @@ extends Control
 @onready var joker_bg = $CardBackground/CardBorder/CardInner/VBox/JokerContainer
 @onready var art_bg = $CardBackground/CardBorder/CardInner/VBox/ArtContainer
 
-const ATTACK_VIDEO = preload("res://assets/backgrounds/joker_strike.ogv")
-const HEAL_VIDEO = preload("res://assets/backgrounds/joker_heal.ogv")
-const SHIELD_VIDEO = preload("res://assets/backgrounds/joker_shield.ogv")
-const HYBRID_VIDEO = preload("res://assets/backgrounds/joker_hybrid.ogv")
+@export var card_images_folder: String = "res://assets/joker_illustrations/"
+@export var number_of_images: int = 5
+@export var image_extension: String = ".jpg"
 
 signal card_clicked(card: JokerCard)
 signal card_played(card: JokerCard)
@@ -52,14 +51,43 @@ func _ready():
 	
 	if card_data:
 		update_display()
-	
+
+	_setup_unique_shader_material()
+	disable_shine_effect()
+	animate_cardicon()
 	_setup_signals()
 	_optimize_mouse_filter()
+	
+func animate_cardicon():
+	$AnimationPlayer.seek(randf() * 3.0)
+	$AnimationPlayer.play("cardicon_movement")
+
+func _setup_unique_shader_material():
+	if not card_icon:
+		return
+		
+	var material = card_icon.material
+	if not material or not material is ShaderMaterial:
+		return
+	
+	card_icon.material = material.duplicate()
+	
+	(card_icon.material as ShaderMaterial).set_shader_parameter("time_offset", randf() * 10.0)
 
 func _setup_signals():
 	gui_input.connect(_on_card_input)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
+
+func enable_shine_effect():
+	if card_icon and card_icon.material and card_icon.material is ShaderMaterial:
+		var shader_material = card_icon.material as ShaderMaterial
+		shader_material.set_shader_parameter("shine_enabled", true)
+
+func disable_shine_effect():
+	if card_icon and card_icon.material and card_icon.material is ShaderMaterial:
+		var shader_material = card_icon.material as ShaderMaterial
+		shader_material.set_shader_parameter("shine_enabled", false)
 
 func _optimize_mouse_filter():
 	_set_mouse_filter_recursive(self, Control.MOUSE_FILTER_PASS)
@@ -99,6 +127,8 @@ func apply_gamepad_selection_style():
 	gamepad_selected = true
 	is_hovered = false
 	
+	enable_shine_effect()
+	
 	_stop_current_tween()
 	current_tween = create_tween()
 	current_tween.set_parallel(true)
@@ -113,6 +143,8 @@ func remove_gamepad_selection_style():
 		return
 	
 	gamepad_selected = false
+	
+	disable_shine_effect()
 	
 	_stop_current_tween()
 	current_tween = create_tween()
@@ -170,6 +202,7 @@ func _on_mouse_entered():
 	if not is_hovered and is_playable:
 		is_hovered = true
 		card_hovered.emit(self)
+		enable_shine_effect()
 		_apply_hover_effects()
 
 func _on_mouse_exited():
@@ -178,6 +211,8 @@ func _on_mouse_exited():
 	
 	is_hovered = false
 	card_unhovered.emit(self)
+	if not gamepad_selected:
+		disable_shine_effect()
 	_remove_hover_effects()
 
 func _apply_hover_effects():
@@ -232,6 +267,8 @@ func force_reset_visual_state():
 	
 	gamepad_selected = false
 	is_hovered = false
+
+	disable_shine_effect()
 	
 	scale = original_scale
 	z_index = 0
@@ -266,12 +303,7 @@ func _stop_current_tween():
 func update_display():
 	name_label.text = card_data.card_name
 	cost_label.text = str(card_data.cost)
-	
 	description_label.text = card_data.description
-	print("DEBUG Joker description: ", card_data.description)
-	print("DescriptionLabel visible: ", description_label.visible)
-	print("DescriptionLabel size: ", description_label.size)
-	
 	joker_label.text = "JOKER"
 	
 	_update_panel_color(card_bg, JOKER_COLORS.background)
@@ -313,19 +345,16 @@ func _update_stat_display():
 	stat_value.modulate = Color(1.5, 1.2, 0.5, 1.0)
 
 func _load_card_illustration():
-	var video_stream: VideoStream = null
-	match card_data.card_type:
-		"attack": video_stream = ATTACK_VIDEO
-		"heal": video_stream = HEAL_VIDEO
-		"shield": video_stream = SHIELD_VIDEO
-		"hybrid": video_stream = HYBRID_VIDEO
+	var random_index = randi() % number_of_images + 1
+	var image_path = card_images_folder + str(random_index) + image_extension
 	
-	if video_stream and card_icon is VideoStreamPlayer:
-		card_icon.stream = video_stream
-		card_icon.loop = true
-		card_icon.autoplay = true
-		card_icon.play()
+	var texture = load(image_path)
+	
+	if card_icon is TextureRect and texture:
+		card_icon.texture = texture
 		card_icon.modulate = Color(1.2, 1.1, 0.8, 1.0)
+	else:
+		push_warning("Texture not found: " + image_path)
 
 func set_card_data(data: CardData):
 	card_data = data

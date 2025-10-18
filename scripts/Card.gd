@@ -16,9 +16,8 @@ extends Control
 @onready var rarity_bg = $CardBackground/CardBorder/CardInner/VBox/RarityContainer
 @onready var art_bg = $CardBackground/CardBorder/CardInner/VBox/ArtContainer
 
-# Configuración de imágenes (editable desde el inspector)
-@export var card_images_folder: String = "res://assets/backgrounds/"
-@export var number_of_images: int = 5
+@export var card_images_folder: String = "res://assets/card_illustrations/"
+@export var number_of_images: int = 10
 @export var image_extension: String = ".jpg"
 
 signal card_clicked(card: Card)
@@ -50,13 +49,42 @@ func _ready():
 		_cache_card_colors()
 		update_display()
 	
+	_setup_unique_shader_material()
+	disable_shine_effect()
+	animate_cardicon()
 	_setup_signals()
 	_optimize_mouse_filter()
+	
+func animate_cardicon():
+	$AnimationPlayer.seek(randf() * 5.0)
+	$AnimationPlayer.play("cardicon_movement")
+	
+func _setup_unique_shader_material():
+	if not card_icon:
+		return
+		
+	var material = card_icon.material
+	if not material or not material is ShaderMaterial:
+		return
+	
+	card_icon.material = material.duplicate()
+	
+	(card_icon.material as ShaderMaterial).set_shader_parameter("time_offset", randf() * 10.0)
 
 func _setup_signals():
 	gui_input.connect(_on_card_input)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
+	
+func enable_shine_effect():
+	if card_icon and card_icon.material and card_icon.material is ShaderMaterial:
+		var shader_material = card_icon.material as ShaderMaterial
+		shader_material.set_shader_parameter("shine_enabled", true)
+
+func disable_shine_effect():
+	if card_icon and card_icon.material and card_icon.material is ShaderMaterial:
+		var shader_material = card_icon.material as ShaderMaterial
+		shader_material.set_shader_parameter("shine_enabled", false)
 
 func _optimize_mouse_filter():
 	_set_mouse_filter_recursive(self, Control.MOUSE_FILTER_PASS)
@@ -106,6 +134,8 @@ func apply_gamepad_selection_style():
 	gamepad_selected = true
 	is_hovered = false
 	
+	enable_shine_effect()
+	
 	_stop_current_tween()
 	current_tween = create_tween()
 	current_tween.set_parallel(true)
@@ -120,6 +150,8 @@ func remove_gamepad_selection_style():
 		return
 	
 	gamepad_selected = false
+	
+	disable_shine_effect()
 	
 	_stop_current_tween()
 	current_tween = create_tween()
@@ -166,7 +198,7 @@ func play_card_animation():
 	
 	await current_tween.finished
 	queue_free()
-
+	
 func _on_mouse_entered():
 	if is_being_played or gamepad_selected or mouse_filter == Control.MOUSE_FILTER_IGNORE:
 		return
@@ -177,6 +209,7 @@ func _on_mouse_entered():
 	if not is_hovered and is_playable:
 		is_hovered = true
 		card_hovered.emit(self)
+		enable_shine_effect()
 		_apply_hover_effects()
 
 func _on_mouse_exited():
@@ -185,6 +218,9 @@ func _on_mouse_exited():
 	
 	is_hovered = false
 	card_unhovered.emit(self)
+
+	if not gamepad_selected:
+		disable_shine_effect()
 	_remove_hover_effects()
 
 func _apply_hover_effects():
@@ -237,6 +273,8 @@ func force_reset_visual_state():
 	
 	gamepad_selected = false
 	is_hovered = false
+
+	disable_shine_effect()
 	
 	scale = original_scale
 	z_index = 0
@@ -348,17 +386,13 @@ func _update_stat_display():
 	stat_value.modulate = base_stat_modulate
 
 func _load_card_illustration():
-	# Seleccionar un número aleatorio entre 1 y number_of_images
 	var random_index = randi() % number_of_images + 1
-	
-	# Construir la ruta de la imagen
 	var image_path = card_images_folder + str(random_index) + image_extension
-	
-	# Cargar la textura
 	var texture = load(image_path)
 	
 	if card_icon is TextureRect and texture:
 		card_icon.texture = texture
+
 	else:
 		push_warning("No se pudo cargar la imagen: " + image_path)
 
