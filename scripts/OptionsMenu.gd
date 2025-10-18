@@ -17,6 +17,7 @@ extends Control
 @onready var reset_button = $MainPanel/VBoxContainer/ButtonContainer/ResetButton
 @onready var scroll_container = $MainPanel/VBoxContainer/ScrollContainer
 @onready var main_panel = $MainPanel
+@onready var video_section = $MainPanel/VBoxContainer/ScrollContainer/SettingsContainer/VideoSection
 
 var audio_manager: AudioManager
 var is_in_game: bool = false
@@ -88,6 +89,7 @@ signal options_closed
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_hide_video_section_on_mobile_web()
 	_set_mouse_filters()
 	_setup_ui_connections()
 	_setup_video_options()
@@ -99,6 +101,12 @@ func _ready():
 	visible = false
 	
 	load_settings_from_files()
+
+func _hide_video_section_on_mobile_web():
+	if OS.has_feature("web") or OS.has_feature("android") or OS.get_name() == "Android":
+		if video_section:
+			video_section.visible = false
+			video_section.queue_free()
 
 func _set_mouse_filters():
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -624,11 +632,11 @@ func _show_control_help(control: Control):
 	var help_text = ""
 	
 	if control is HSlider:
-		help_text = "◀▶ Adjust | 🎮 Fine tune"
+		help_text = "Left/Right: Adjust | A: Fine tune"
 	elif control is OptionButton:
-		help_text = "◀▶ Change option"
+		help_text = "Left/Right: Change option"
 	elif control is Button:
-		help_text = "🎮 Press"
+		help_text = "A: Press"
 
 func _ensure_element_visible(element: Control):
 	if not scroll_container or not element:
@@ -898,6 +906,9 @@ func _apply_audio_settings():
 		_apply_sfx_settings_to_audio_buses()
 
 func _apply_video_settings():
+	if OS.get_name() == "Android" or OS.get_name() == "Web":
+		return
+	
 	var window = get_window()
 	if not window:
 		return
@@ -925,6 +936,9 @@ func _apply_video_settings():
 	_apply_vsync_setting()
 	
 func _apply_vsync_setting():
+	if OS.get_name() == "Android" or OS.get_name() == "Web":
+		return
+	
 	var target_mode = DisplayServer.VSYNC_ENABLED if vsync_enabled else DisplayServer.VSYNC_DISABLED
 	
 	var current_mode = DisplayServer.window_get_vsync_mode()
@@ -938,9 +952,9 @@ func _apply_vsync_setting():
 		if new_mode == target_mode:
 			print("VSync applied correctly: ", "ON" if vsync_enabled else "OFF")
 		else:
-			print("Warning: VSync could not be applied. Current mode: ", new_mode, " Esperado: ", target_mode)
+			print("Warning: VSync could not be applied. Current mode: ", new_mode, " Expected: ", target_mode)
 	else:
-		print("VSync is already in the correct mode.: ", "ON" if vsync_enabled else "OFF")
+		print("VSync is already in the correct mode: ", "ON" if vsync_enabled else "OFF")
 
 func _apply_sfx_settings_to_audio_manager():
 	if not audio_manager:
@@ -975,6 +989,9 @@ func _save_audio_settings():
 	config.save("user://audio_settings.cfg")
 
 func _save_video_settings():
+	if OS.get_name() == "Android" or OS.get_name() == "Web":
+		return
+	
 	var config = ConfigFile.new()
 	config.set_value("video", "window_mode", current_window_mode)
 	config.set_value("video", "resolution_index", current_resolution_index)
@@ -991,6 +1008,9 @@ func _update_audio_ui():
 	_update_volume_labels()
 
 func _update_video_ui():
+	if OS.get_name() == "Android" or OS.get_name() == "Web":
+		return
+	
 	if window_mode_option:
 		window_mode_option.selected = current_window_mode
 	if resolution_option:

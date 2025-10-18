@@ -55,7 +55,7 @@ func _ready():
 	setup_buttons()
 	setup_audio()
 	_setup_gamepad_navigation()
-	
+	_hide_exit_button_on_web()
 	_apply_initial_video_settings()
 	
 	if TransitionManager and TransitionManager.current_overlay:
@@ -73,6 +73,34 @@ func _ready():
 	_focus_first_button_safe()
 	
 	_setup_options_menu()
+	
+func _hide_exit_button_on_web():
+	if OS.has_feature("web") or OS.get_name() == "Web":
+		if exit_button:
+			for button in focusable_buttons:
+				if button and button != exit_button:
+					if button.focus_neighbor_top == exit_button.get_path():
+						button.focus_neighbor_top = NodePath()
+					if button.focus_neighbor_bottom == exit_button.get_path():
+						button.focus_neighbor_bottom = NodePath()
+					if button.focus_neighbor_left == exit_button.get_path():
+						button.focus_neighbor_left = NodePath()
+					if button.focus_neighbor_right == exit_button.get_path():
+						button.focus_neighbor_right = NodePath()
+			
+			var index = focusable_buttons.find(exit_button)
+			if index != -1:
+				focusable_buttons.remove_at(index)
+
+			exit_button.visible = false
+			exit_button.queue_free()
+			
+			_reconfigure_navigation_without_exit()
+
+func _reconfigure_navigation_without_exit():
+	if stats_button and play_button:
+		stats_button.focus_neighbor_bottom = play_button.get_path()
+		play_button.focus_neighbor_top = stats_button.get_path()
 
 func _save_original_button_positions():
 	var buttons = [play_button, options_button, help_button, challenge_button, credits_button, stats_button, exit_button]
@@ -205,7 +233,7 @@ func _reset_all_button_effects():
 	var had_focus = get_viewport().gui_get_focus_owner()
 	var focus_index = -1
 	
-	if had_focus and had_focus in focusable_buttons:
+	if had_focus is Button and had_focus in focusable_buttons:
 		focus_index = focusable_buttons.find(had_focus)
 	
 	for button in focusable_buttons:
