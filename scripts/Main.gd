@@ -471,7 +471,7 @@ func setup_game():
 		ui_manager.reset_turn_button(end_turn_button, GameState.gamepad_mode)
 	
 	ui_manager.update_all_labels(player, ai)
-	ui_manager.update_hand_display_no_animation(player, card_scene, hand_container)
+	ui_manager.update_hand_display_with_new_cards_animation(player, card_scene, hand_container, player.hand.size())
 	
 	start_game_music(not returning_from_challengehub)
 	start_player_turn()
@@ -625,7 +625,10 @@ func restart_game():
 		add_child(audio_player)
 		audio_player.play()
 		
-		audio_player.finished.connect(func(): audio_player.queue_free())
+		audio_player.finished.connect(func(): 
+			if is_instance_valid(audio_player):
+				audio_player.queue_free()
+		)
 
 	var tween = create_tween().set_parallel(true)
 	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 1), 1.3).set_ease(Tween.EASE_IN_OUT)
@@ -633,6 +636,11 @@ func restart_game():
 	tween.tween_property(message_label, "position:y", message_label.position.y - 30, 1.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	
 	await tween.finished
+	
+	if not is_instance_valid(fade_rect) or not is_instance_valid(message_label):
+		is_game_transitioning = false
+		return
+	
 	await _tree.create_timer(0.8).timeout
 	
 	setup_game_with_new_music()
@@ -647,6 +655,10 @@ func restart_game():
 		if is_instance_valid(card):
 			card.z_index = 50
 	
+	if not is_instance_valid(fade_rect) or not is_instance_valid(message_label):
+		is_game_transitioning = false
+		return
+	
 	tween = create_tween().set_parallel(true)
 	tween.tween_property(fade_rect, "color", Color(0, 0, 0, 0), 2.0).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(message_label, "modulate:a", 0, 1.0).set_delay(0.8).set_ease(Tween.EASE_IN)
@@ -654,8 +666,10 @@ func restart_game():
 	
 	await tween.finished
 
-	fade_rect.queue_free()
-	message_label.queue_free()
+	if is_instance_valid(fade_rect):
+		fade_rect.queue_free()
+	if is_instance_valid(message_label):
+		message_label.queue_free()
 
 	set_bottom_buttons_enabled(true)
 	
@@ -727,6 +741,9 @@ func _on_player_cards_played_changed(cards_played: int, max_cards: int):
 func _on_player_hand_changed():
 	if not player:
 		return
+	
+	await _tree.process_frame
+	await _tree.process_frame
 		
 	var was_gamepad_selection_active = (
 		GameState.gamepad_mode and
@@ -738,6 +755,8 @@ func _on_player_hand_changed():
 	ui_manager.update_hand_display(player, card_scene, hand_container)
 	ui_manager.update_turn_button_text(player, end_turn_button, GameState.gamepad_mode)
 	
+	await _tree.process_frame
+	
 	if was_gamepad_selection_active:
 		ui_manager.gamepad_selection_active = true
 		ui_manager.update_card_selection(true, player)
@@ -748,7 +767,7 @@ func _on_player_hand_changed():
 
 func _on_player_card_drawn(cards_count: int, from_deck: bool):
 	if cards_count > 0:
-		ui_manager.update_hand_display(player, card_scene, hand_container)
+		ui_manager.update_hand_display_with_new_cards_animation(player, card_scene, hand_container, cards_count)
 	
 	await _tree.create_timer(0.1).timeout
 	audio_helper.play_card_draw_sound()

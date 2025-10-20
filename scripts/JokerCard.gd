@@ -60,8 +60,6 @@ func _ready():
 	disable_shine_effect()
 	_setup_signals()
 	_optimize_mouse_filter()
-	
-	$AnimationPlayer.stop()
 
 func _cache_critical_children():
 	_critical_children = [
@@ -114,11 +112,16 @@ func disable_shine_effect():
 		shader_material.set_shader_parameter("shine_enabled", false)
 		
 func _apply_selection_effects():
+	if not is_instance_valid(self):
+		return
+	
 	enable_shine_effect()
 	
-	if $AnimationPlayer:
-		$AnimationPlayer.seek(randf() * 3.0)
-		$AnimationPlayer.play("cardicon_movement")
+	if has_node("AnimationPlayer"):
+		var anim_player = get_node("AnimationPlayer")
+		if anim_player and anim_player.has_animation("cardicon_movement"):
+			anim_player.seek(randf() * 3.0)
+			anim_player.play("cardicon_movement")
 	
 	_stop_current_tween()
 	current_tween = create_tween()
@@ -127,13 +130,20 @@ func _apply_selection_effects():
 	current_tween.tween_property(self, "scale", original_scale * HOVER_SCALE, ANIMATION_SPEED)
 	current_tween.tween_property(self, "z_index", 10, ANIMATION_SPEED)
 	current_tween.tween_property(self, "modulate", Color(1.15, 1.1, 1.05, 1.0), ANIMATION_SPEED)
-	current_tween.tween_property(card_border, "modulate", Color(1.4, 1.25, 1.0, 1.0), ANIMATION_SPEED)
+	
+	if is_instance_valid(card_border):
+		current_tween.tween_property(card_border, "modulate", Color(1.4, 1.25, 1.0, 1.0), ANIMATION_SPEED)
 
 func _remove_selection_effects():
+	if not is_instance_valid(self):
+		return
+	
 	disable_shine_effect()
 	
-	if $AnimationPlayer:
-		$AnimationPlayer.stop()
+	if has_node("AnimationPlayer"):
+		var anim_player = get_node("AnimationPlayer")
+		if anim_player:
+			anim_player.stop()
 	
 	_stop_current_tween()
 	current_tween = create_tween()
@@ -141,7 +151,9 @@ func _remove_selection_effects():
 	
 	current_tween.tween_property(self, "scale", original_scale, ANIMATION_SPEED)
 	current_tween.tween_property(self, "z_index", 0, ANIMATION_SPEED)
-	current_tween.tween_property(card_border, "modulate", Color.WHITE, ANIMATION_SPEED)
+	
+	if is_instance_valid(card_border):
+		current_tween.tween_property(card_border, "modulate", Color.WHITE, ANIMATION_SPEED)
 	
 	var target_modulate = Color.WHITE if is_playable else Color(0.4, 0.4, 0.4, 0.7)
 	current_tween.tween_property(self, "modulate", target_modulate, ANIMATION_SPEED)
@@ -161,7 +173,7 @@ func get_card_data() -> CardData:
 	return card_data
 
 func animate_mana_insufficient():
-	if is_being_played:
+	if is_being_played or not is_instance_valid(self):
 		return
 	
 	_stop_current_tween()
@@ -172,14 +184,21 @@ func animate_mana_insufficient():
 	current_tween.tween_property(self, "rotation", deg_to_rad(-3), 0.05).set_delay(0.05)
 	current_tween.tween_property(self, "rotation", 0.0, 0.05).set_delay(0.1)
 	
-	var cost_style = cost_bg.get_theme_stylebox("panel")
-	if cost_style is StyleBoxFlat:
-		var original_color = cost_style.bg_color
-		current_tween.tween_method(func(color): cost_style.bg_color = color, original_color, Color.RED, 0.1)
-		current_tween.tween_method(func(color): cost_style.bg_color = color, Color.RED, original_color, 0.1).set_delay(0.1)
+	if is_instance_valid(cost_bg):
+		var cost_style = cost_bg.get_theme_stylebox("panel")
+		if cost_style is StyleBoxFlat:
+			var original_color = cost_style.bg_color
+			current_tween.tween_method(func(color): 
+				if is_instance_valid(cost_bg):
+					cost_style.bg_color = color
+			, original_color, Color.RED, 0.1)
+			current_tween.tween_method(func(color): 
+				if is_instance_valid(cost_bg):
+					cost_style.bg_color = color
+			, Color.RED, original_color, 0.1).set_delay(0.1)
 
 func apply_gamepad_selection_style():
-	if gamepad_selected or is_being_played:
+	if gamepad_selected or is_being_played or not is_instance_valid(self):
 		return
 	
 	gamepad_selected = true
@@ -188,14 +207,14 @@ func apply_gamepad_selection_style():
 	_apply_selection_effects()
 
 func remove_gamepad_selection_style():
-	if not gamepad_selected:
+	if not gamepad_selected or not is_instance_valid(self):
 		return
 	
 	gamepad_selected = false
 	_remove_selection_effects()
 
 func play_disabled_animation():
-	if is_being_played:
+	if is_being_played or not is_instance_valid(self):
 		return
 	
 	_stop_current_tween()
@@ -212,11 +231,10 @@ func play_disabled_animation():
 	current_tween.tween_property(self, "modulate", return_color, 0.1).set_delay(0.1)
 
 func play_card_animation():
-	if is_being_played:
+	if is_being_played or not is_instance_valid(self):
 		return
 	
 	is_being_played = true
-	card_played.emit(self)
 	
 	_stop_current_tween()
 	current_tween = create_tween()
@@ -226,11 +244,14 @@ func play_card_animation():
 	current_tween.tween_property(self, "modulate", Color.TRANSPARENT, 0.3)
 	current_tween.tween_property(self, "rotation", deg_to_rad(15), 0.2)
 	
-	await current_tween.finished
-	queue_free()
+	current_tween.finished.connect(func():
+		if is_instance_valid(self):
+			card_played.emit(self)
+			queue_free()
+	)
 
 func _on_mouse_entered():
-	if is_being_played or gamepad_selected or mouse_filter == Control.MOUSE_FILTER_IGNORE:
+	if is_being_played or gamepad_selected or mouse_filter == Control.MOUSE_FILTER_IGNORE or not is_instance_valid(self):
 		return
 	
 	if GameState.gamepad_mode:
@@ -242,7 +263,7 @@ func _on_mouse_entered():
 		_apply_selection_effects()
 
 func _on_mouse_exited():
-	if is_being_played or not is_hovered or gamepad_selected:
+	if is_being_played or not is_hovered or gamepad_selected or not is_instance_valid(self):
 		return
 	
 	is_hovered = false
@@ -253,7 +274,7 @@ func has_gamepad_selection_applied() -> bool:
 	return gamepad_selected
 
 func set_playable(playable: bool):
-	if is_being_played or is_playable == playable:
+	if is_being_played or is_playable == playable or not is_instance_valid(self):
 		return
 	
 	is_playable = playable
@@ -274,6 +295,9 @@ func set_playable(playable: bool):
 			is_hovered = false
 
 func force_reset_visual_state():
+	if not is_instance_valid(self):
+		return
+	
 	_stop_current_tween()
 	
 	gamepad_selected = false
@@ -281,14 +305,16 @@ func force_reset_visual_state():
 
 	disable_shine_effect()
 	
-	if $AnimationPlayer:
-		$AnimationPlayer.stop()
+	if has_node("AnimationPlayer"):
+		var anim_player = get_node("AnimationPlayer")
+		if anim_player:
+			anim_player.stop()
 	
 	scale = original_scale
 	z_index = 0
 	rotation = 0.0
 
-	if card_border:
+	if is_instance_valid(card_border):
 		card_border.modulate = Color.WHITE
 
 	if is_playable:

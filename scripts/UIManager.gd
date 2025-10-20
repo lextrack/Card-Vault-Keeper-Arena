@@ -116,13 +116,18 @@ func update_all_labels(player: Player, ai: Player):
 	update_ai_shield(ai.current_shield)
 
 func animate_hp_change(hp_label: Label, new_hp: int, old_hp: int):
+	if not is_instance_valid(hp_label) or not is_instance_valid(main_scene):
+		return
+	
 	if new_hp < old_hp:
 		var tween = main_scene.create_tween()
 		tween.set_parallel(true)
 		tween.tween_property(hp_label, "scale", Vector2(1.3, 1.3), 0.2)
 		tween.tween_property(hp_label, "modulate", Color(1.5, 0.5, 0.5, 1.0), 0.2)
-   	
-		_tree.create_timer(0.2).timeout.connect(func():
+		
+		tween.finished.connect(func():
+			if not is_instance_valid(hp_label) or not is_instance_valid(main_scene):
+				return
 			var return_tween = main_scene.create_tween()
 			return_tween.set_parallel(true)
 			return_tween.tween_property(hp_label, "scale", Vector2(1.0, 1.0), 0.3)
@@ -133,8 +138,10 @@ func animate_hp_change(hp_label: Label, new_hp: int, old_hp: int):
 		tween.set_parallel(true)
 		tween.tween_property(hp_label, "scale", Vector2(1.4, 1.4), 0.25)
 		tween.tween_property(hp_label, "modulate", Color(0.5, 1.8, 0.8, 1.0), 0.25)
-   	
-		_tree.create_timer(0.25).timeout.connect(func():
+		
+		tween.finished.connect(func():
+			if not is_instance_valid(hp_label) or not is_instance_valid(main_scene):
+				return
 			var return_tween = main_scene.create_tween()
 			return_tween.set_parallel(true)
 			return_tween.tween_property(hp_label, "scale", Vector2(1.0, 1.0), 0.35)
@@ -256,6 +263,9 @@ func _darken_player_cards_for_ai_turn():
 			card.set_playable(false)
 
 func animate_turn_transition(is_player_turn: bool):
+	if not is_instance_valid(turn_label):
+		return
+	
 	var text = "Your turn" if is_player_turn else "AI turn"
 	var color = Color(0.3, 1.0, 0.8, 1.0) if is_player_turn else Color(1.0, 0.4, 0.4, 1.0)
    
@@ -271,6 +281,8 @@ func animate_turn_transition(is_player_turn: bool):
 	tween.tween_property(turn_label, "modulate", color * 1.2, 0.15)
    
 	tween.finished.connect(func():
+		if not is_instance_valid(turn_label) or not is_instance_valid(main_scene):
+			return
 		var settle_tween = main_scene.create_tween()
 		settle_tween.set_parallel(true)
 		settle_tween.set_ease(Tween.EASE_OUT)
@@ -296,7 +308,8 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 			_restore_gamepad_selection_immediate(player)
 		return
    
-	_rebuild_hand_display(player, card_scene, hand_container, false)
+	var should_animate = hand_changed and player.hand.size() > card_instances.size()
+	_rebuild_hand_display(player, card_scene, hand_container, should_animate)
    
 	selected_card_index = clamp(old_selected_index, 0, max(0, card_instances.size() - 1))
    
@@ -306,6 +319,7 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 
 	if should_preserve_gamepad:
 		_restore_gamepad_selection_immediate(player)
+
 		
 func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_container: Container, animate: bool = false):
 	for child in hand_container.get_children():
@@ -338,28 +352,36 @@ func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_contain
 		if card_instance.has_signal("mouse_entered"):
 			card_instance.mouse_entered.connect(_on_card_hover)
 		
+		if animate:
+			card_instance.modulate.a = 0.0
+		
 		hand_container.add_child(card_instance)
 		card_instances.append(card_instance)
 		
 		var can_play = main_scene.is_player_turn and player.can_play_card(card_data)
 		card_instance.set_playable(can_play)
 		
-		card_index += 1
-		
 		if animate:
 			_animate_card_spawn(card_instance, card_index)
 		else:
 			card_instance.modulate.a = 1.0
+		
+		card_index += 1
 
 func _animate_card_spawn(card: Control, index: int):
 	if not is_instance_valid(card):
 		return
 	
-	var delay = index * 0.05
+	card.modulate.a = 0.0
 	
-	var tween = create_tween()
-	tween.tween_delay(delay)
-	tween.tween_property(card, "modulate:a", 1.0, 0.4)
+	var delay = index * 0.05
+	var tween = card.create_tween()
+	tween.tween_interval(delay)
+	tween.tween_property(card, "modulate:a", 1.0, 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	
+	tween.finished.connect(func():
+		print("Card spawn animation finished - Index: ", index)
+	)
 
 func _update_existing_cards_playability(player: Player):
 	var hand_size = min(card_instances.size(), player.hand.size())
@@ -475,14 +497,19 @@ func play_damage_effects(damage_amount: int):
 	screen_shake(shake_intensity, 0.3)
 
 func screen_shake(intensity: float, duration: float):
-	if is_screen_shaking:
+	if is_screen_shaking or not is_instance_valid(ui_layer) or not is_instance_valid(main_scene):
 		return
+	
 	is_screen_shaking = true
 	
 	var shake_count = 8
 	var time_per_shake = duration / shake_count
 	
 	for i in range(shake_count):
+		if not is_instance_valid(ui_layer) or not is_instance_valid(main_scene):
+			is_screen_shaking = false
+			return
+		
 		var current_intensity = intensity * (1.0 - float(i) / shake_count)
 		var shake_x = randf_range(-current_intensity, current_intensity)
 		var shake_y = randf_range(-current_intensity, current_intensity)
@@ -491,10 +518,15 @@ func screen_shake(intensity: float, duration: float):
 		var tween = main_scene.create_tween()
 		tween.tween_property(ui_layer, "position", shake_position, time_per_shake)
 		await tween.finished
+		
+		if not is_instance_valid(ui_layer) or not is_instance_valid(main_scene):
+			is_screen_shaking = false
+			return
 	
-	var final_tween = main_scene.create_tween()
-	final_tween.tween_property(ui_layer, "position", original_ui_position, 0.1)
-	await final_tween.finished
+	if is_instance_valid(ui_layer) and is_instance_valid(main_scene):
+		var final_tween = main_scene.create_tween()
+		final_tween.tween_property(ui_layer, "position", original_ui_position, 0.1)
+		await final_tween.finished
 	
 	is_screen_shaking = false
 
@@ -559,7 +591,24 @@ func update_hand_display_no_animation(player: Player, card_scene: PackedScene, h
 		_restore_gamepad_selection_immediate(player)
 
 func update_hand_display_with_new_cards_animation(player: Player, card_scene: PackedScene, hand_container: Container, new_cards_count: int = 0):
-	update_hand_display(player, card_scene, hand_container)
+	if not player or not card_scene or not hand_container or not player.hand:
+		return
+
+	var should_preserve_gamepad = gamepad_selection_active and main_scene.is_player_turn
+	var old_selected_index = selected_card_index
+
+	_rebuild_hand_display(player, card_scene, hand_container, true)
+	current_hand_fingerprint = _generate_hand_fingerprint(player.hand)
+	
+	selected_card_index = clamp(old_selected_index, 0, max(0, card_instances.size() - 1))
+	
+	var controls_panel = main_scene.controls_panel
+	if controls_panel:
+		controls_panel.update_cards_available(card_instances.size() > 0)
+	
+	if should_preserve_gamepad:
+		await get_tree().process_frame
+		_restore_gamepad_selection_immediate(player)
 
 func navigate_cards(direction: int, player: Player) -> bool:
 	if card_instances.size() == 0:
