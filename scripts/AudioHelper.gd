@@ -24,14 +24,9 @@ func load_audio_settings():
 		
 		sfx_volume_multiplier = master_volume * sfx_volume
 		
-		print("AudioHelper: Loaded configuration - Volume: ", sfx_volume_multiplier, " Muted: ", sfx_muted)
-
 		apply_volume_settings()
-	else:
-		print("AudioHelper: Unable to load settings, using default values")
 
 func reload_audio_settings():
-	print("AudioHelper: Reloading audio settings...")
 	load_audio_settings()
 
 func apply_volume_settings():
@@ -44,17 +39,16 @@ func apply_volume_settings():
 		var pool = audio_manager.player_pools[pool_name]
 		for player in pool:
 			if player is AudioStreamPlayer:
-				if not player.has_meta("original_volume_db"):
-					player.set_meta("original_volume_db", player.volume_db)
+				if not player.has_meta("base_volume"):
+					player.set_meta("base_volume", player.volume_db)
 				
-				var original_volume = player.get_meta("original_volume_db")
-				player.volume_db = original_volume + volume_db
+				var base_volume = player.get_meta("base_volume")
+				player.volume_db = base_volume + volume_db
 
 func update_sfx_settings(master_vol: float, sfx_vol: float, muted: bool):
 	sfx_volume_multiplier = master_vol * sfx_vol
 	sfx_muted = muted
 	apply_volume_settings()
-	print("AudioHelper: SFX settings updated - Volume: ", sfx_volume_multiplier, " Muted: ", sfx_muted)
 
 func play_card_play_sound(card_type: String = "", damage: int = 0) -> bool:
 	if not is_initialized or sfx_muted:

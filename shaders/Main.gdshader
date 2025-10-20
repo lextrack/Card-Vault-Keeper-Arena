@@ -13,7 +13,7 @@ float fbm(vec2 p, float time) {
     float amplitude = 0.5;
     float frequency = 1.0;
 
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < 2; i++) {
         value += amplitude * sin(p.x * frequency + time) * cos(p.y * frequency - time * 0.7);
         p *= 2.0;
         amplitude *= 0.5;
@@ -43,9 +43,7 @@ void fragment() {
     float plasma = 0.0;
     plasma += sin(pulsed_uv.x * 2.5 + TIME * speed * 1.5);
     plasma += sin(pulsed_uv.y * 2.0 - TIME * speed * 1.2);
-    plasma += sin((pulsed_uv.x + pulsed_uv.y) * 1.8 + TIME * speed * 1.8);
-    plasma += cos((pulsed_uv.x - pulsed_uv.y) * 2.2 - TIME * speed);
-    plasma *= 0.3;
+    plasma *= 0.5;
 
     float noise_val = fbm(pulsed_uv + TIME * speed * 0.3, TIME * 1.5);
 
@@ -57,9 +55,8 @@ void fragment() {
     combined = combined * 0.8 + 0.5;
 
     float pulse = sin(TIME * speed * 1.8) * 0.5 + 0.5;
-    float glow = pow(sin(pulsed_uv.x * 2.0 + TIME * speed * 1.3) *
-                     cos(pulsed_uv.y * 1.8 - TIME * speed * 1.1), 2.0);
-    glow *= glow_intensity * pulse * 1.5;
+    float glow = sin(pulsed_uv.x * 2.0 + TIME * speed * 1.3) * cos(pulsed_uv.y * 1.8 - TIME * speed * 1.1);
+    glow = glow * glow * glow_intensity * pulse * 1.5;
 
     float blend1 = smoothstep(0.25, 0.55, combined);
     float blend2 = smoothstep(0.55, 0.85, combined);

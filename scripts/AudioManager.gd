@@ -26,9 +26,40 @@ extends Node
 @onready var ui_click_player = $UISounds/UIClickPlayer
 @onready var ui_hover_player = $UISounds/UIHoverPlayer
 
+var _tree: SceneTree
 var player_pools: Dictionary = {}
 
+enum Priority {
+	NORMAL = 0,
+	IMPORTANT = 1
+}
+
+var pool_priorities: Dictionary = {
+	"card_hover": Priority.NORMAL,
+	"ui_hover": Priority.NORMAL,
+	"button_hover": Priority.NORMAL,
+	"card_draw": Priority.NORMAL,
+	"card_play": Priority.IMPORTANT,
+	"attack": Priority.IMPORTANT,
+	"heal": Priority.IMPORTANT,
+	"shield": Priority.IMPORTANT,
+	"damage": Priority.IMPORTANT,
+	"hybrid": Priority.IMPORTANT,
+	"joker_play": Priority.IMPORTANT,
+	"ai_attack": Priority.IMPORTANT,
+	"ai_heal": Priority.IMPORTANT,
+	"ai_shield": Priority.IMPORTANT,
+	"ai_card_play": Priority.IMPORTANT,
+	"turn_change": Priority.IMPORTANT,
+	"win": Priority.IMPORTANT,
+	"lose": Priority.IMPORTANT,
+	"bonus": Priority.IMPORTANT,
+	"ui_click": Priority.NORMAL,
+	"button_click": Priority.NORMAL
+}
+
 func _ready():
+	_tree = get_tree()
 	_assign_base_players_to_sfx_bus()
 	_create_player_pools()
 
@@ -46,30 +77,30 @@ func _assign_base_players_to_sfx_bus():
 			player.bus = "SFX"
 
 func _create_player_pools():
-	_create_pool("card_play", card_play_player, 2)
-	_create_pool("card_draw", card_draw_player, 3)
-	_create_pool("card_hover", card_hover_player, 1)
-	_create_pool("attack", attack_player, 2)
-	_create_pool("heal", heal_player, 2)
-	_create_pool("shield", shield_player, 2)
-	_create_pool("damage", damage_player, 4)
-	_create_pool("hybrid", hybrid_player, 2)
-	_create_pool("joker_play", joker_player, 2)
+	_create_pool("card_play", card_play_player, 4)
+	_create_pool("card_draw", card_draw_player, 5)
+	_create_pool("card_hover", card_hover_player, 2)
+	_create_pool("attack", attack_player, 4)
+	_create_pool("heal", heal_player, 4)
+	_create_pool("shield", shield_player, 4)
+	_create_pool("damage", damage_player, 6)
+	_create_pool("hybrid", hybrid_player, 4)
+	_create_pool("joker_play", joker_player, 3)
 	
-	_create_pool("ai_attack", ai_attack_player, 2)
-	_create_pool("ai_heal", ai_heal_player, 2)
-	_create_pool("ai_shield", ai_shield_player, 2)
-	_create_pool("ai_card_play", ai_card_play_player, 2)
+	_create_pool("ai_attack", ai_attack_player, 4)
+	_create_pool("ai_heal", ai_heal_player, 4)
+	_create_pool("ai_shield", ai_shield_player, 4)
+	_create_pool("ai_card_play", ai_card_play_player, 4)
 	
 	_create_pool("turn_change", turn_change_player, 2)
 	_create_pool("win", win_player, 1)
 	_create_pool("lose", lose_player, 1)
-	_create_pool("bonus", bonus_player, 2)
+	_create_pool("bonus", bonus_player, 3)
 	
-	_create_pool("ui_click", ui_click_player, 5)
-	_create_pool("ui_hover", ui_hover_player, 3)
-	_create_pool("button_click", ui_click_player, 3)
-	_create_pool("button_hover", ui_hover_player, 5)
+	_create_pool("ui_click", ui_click_player, 8)
+	_create_pool("ui_hover", ui_hover_player, 4)
+	_create_pool("button_click", ui_click_player, 5)
+	_create_pool("button_hover", ui_hover_player, 6)
 
 func _create_pool(pool_name: String, base_player: AudioStreamPlayer, pool_size: int):
 	if not base_player or not base_player.stream:
@@ -82,6 +113,8 @@ func _create_pool(pool_name: String, base_player: AudioStreamPlayer, pool_size: 
 		player.volume_db = base_player.volume_db
 		player.pitch_scale = base_player.pitch_scale
 		player.bus = "SFX"
+		player.set_meta("base_volume", base_player.volume_db)
+		player.set_meta("priority", pool_priorities.get(pool_name, Priority.NORMAL))
 		add_child(player)
 		pool.append(player)
 	
@@ -92,11 +125,33 @@ func _get_available_player(pool_name: String) -> AudioStreamPlayer:
 		return null
 	
 	var pool = player_pools[pool_name]
+	
 	for player in pool:
 		if not player.playing:
 			return player
 	
+	var new_priority = pool_priorities.get(pool_name, Priority.NORMAL)
+	
+	if new_priority == Priority.IMPORTANT:
+		for player in pool:
+			var player_priority = player.get_meta("priority", Priority.NORMAL)
+			if player_priority == Priority.NORMAL:
+				_fade_out_and_stop(player)
+				return player
+	
 	return pool[0]
+
+func _fade_out_and_stop(player: AudioStreamPlayer):
+	if not player or not player.playing:
+		return
+	
+	var original_volume = player.volume_db
+	var tween = create_tween()
+	tween.tween_property(player, "volume_db", -80.0, 0.05)
+	tween.finished.connect(func():
+		player.stop()
+		player.volume_db = original_volume
+	)
 
 func play_card_play_sound(card_type: String = "", damage: int = 0) -> bool:
 	match card_type:
@@ -127,7 +182,7 @@ func play_ai_card_play_sound(card_type: String = "") -> bool:
 			return _play_sound("ai_card_play")
 
 func play_hybrid_sound():
-	get_tree().create_timer(0.2).timeout.connect(_play_delayed_hybrid)
+	_tree.create_timer(0.2).timeout.connect(_play_delayed_hybrid)
 
 func _play_delayed_hybrid():
 	_play_sound("hybrid")
@@ -192,6 +247,7 @@ func play_deck_shuffle_sound() -> bool:
 func _play_sound(sound_name: String) -> bool:
 	var player = _get_available_player(sound_name)
 	if player:
+		player.pitch_scale = randf_range(0.95, 1.05)
 		player.play()
 		return true
 	return false

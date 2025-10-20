@@ -1,10 +1,11 @@
 extends Node
 
+var _tree: SceneTree
 var menu_music_player: AudioStreamPlayer
 var challenge_music_player: AudioStreamPlayer
 var game_music_player: AudioStreamPlayer
 var current_music_type: String = ""
-var music_fade_tween: Tween
+var active_tweens: Array = []
 
 var game_music_playlist: Array = []
 var current_playlist_index: int = 0
@@ -19,6 +20,7 @@ var master_music_volume: float = 1.0
 var music_muted: bool = false
 
 func _ready():
+	_tree = get_tree()
 	_create_music_players()
 	_load_music_settings()
 
@@ -33,10 +35,6 @@ func _load_music_settings():
 		
 		master_music_volume = master_volume * music_volume
 		_update_all_volumes()
-		
-		print("GlobalMusicManager: - Volume: ", master_music_volume, " Muted: ", music_muted)
-	else:
-		print("GlobalMusicManager: Unable to load settings, using default values")
 
 func _create_music_players():
 	menu_music_player = AudioStreamPlayer.new()
@@ -173,7 +171,10 @@ func _transition_to_next_track(next_stream: AudioStream):
 		
 	var current_volume = game_music_player.volume_db
 	
+	_kill_all_tweens()
+	
 	var fade_out_tween = create_tween()
+	active_tweens.append(fade_out_tween)
 	fade_out_tween.tween_property(game_music_player, "volume_db", -60.0, 0.3)
 	await fade_out_tween.finished
 	
@@ -181,6 +182,7 @@ func _transition_to_next_track(next_stream: AudioStream):
 	game_music_player.play()
 	
 	var fade_in_tween = create_tween()
+	active_tweens.append(fade_in_tween)
 	fade_in_tween.tween_property(game_music_player, "volume_db", current_volume, 0.5)
 
 func start_menu_music(fade_duration: float = 1.5):
@@ -189,10 +191,10 @@ func start_menu_music(fade_duration: float = 1.5):
 
 	if current_music_type == "game" and game_music_player and game_music_player.playing:
 		stop_all_music(0.5)
-		await get_tree().create_timer(0.3).timeout
+		await _tree.create_timer(0.3).timeout
 	elif current_music_type == "challenge" and challenge_music_player and challenge_music_player.playing:
 		stop_all_music(0.5)
-		await get_tree().create_timer(0.3).timeout
+		await _tree.create_timer(0.3).timeout
 	
 	if not menu_music_player or not menu_music_player.stream:
 		return
@@ -202,19 +204,19 @@ func start_menu_music(fade_duration: float = 1.5):
 	menu_music_player.volume_db = -40.0
 	menu_music_player.play()
 	
-	if music_fade_tween:
-		music_fade_tween.kill()
+	_kill_all_tweens()
 	
-	music_fade_tween = create_tween()
+	var tween = create_tween()
+	active_tweens.append(tween)
 	var target_volume = _calculate_final_volume(default_menu_volume, master_music_volume if not music_muted else 0.0)
-	music_fade_tween.tween_property(menu_music_player, "volume_db", target_volume, fade_duration)
+	tween.tween_property(menu_music_player, "volume_db", target_volume, fade_duration)
 
 func start_challenge_music(fade_duration: float = 1.5):
 	if current_music_type == "challenge" and challenge_music_player and challenge_music_player.playing:
 		return
 
 	stop_all_music(0.5)
-	await get_tree().create_timer(0.3).timeout
+	await _tree.create_timer(0.3).timeout
 	
 	if not challenge_music_player or not challenge_music_player.stream:
 		return
@@ -224,19 +226,19 @@ func start_challenge_music(fade_duration: float = 1.5):
 	challenge_music_player.volume_db = -40.0
 	challenge_music_player.play()
 	
-	if music_fade_tween:
-		music_fade_tween.kill()
+	_kill_all_tweens()
 	
-	music_fade_tween = create_tween()
+	var tween = create_tween()
+	active_tweens.append(tween)
 	var target_volume = _calculate_final_volume(default_challenge_volume, master_music_volume if not music_muted else 0.0)
-	music_fade_tween.tween_property(challenge_music_player, "volume_db", target_volume, fade_duration)
+	tween.tween_property(challenge_music_player, "volume_db", target_volume, fade_duration)
 
 func start_game_music(fade_duration: float = 1.5, force_new_track: bool = false):
 	if current_music_type == "game" and game_music_player.playing and not force_new_track:
 		return
 	
 	stop_all_music(0.5)
-	await get_tree().create_timer(0.3).timeout
+	await _tree.create_timer(0.3).timeout
 	
 	if is_playlist_mode:
 		if force_new_track:
@@ -255,16 +257,15 @@ func start_game_music(fade_duration: float = 1.5, force_new_track: bool = false)
 	game_music_player.volume_db = -40.0
 	game_music_player.play()
 	
-	if music_fade_tween:
-		music_fade_tween.kill()
+	_kill_all_tweens()
 	
-	music_fade_tween = create_tween()
+	var tween = create_tween()
+	active_tweens.append(tween)
 	var target_volume = _calculate_final_volume(default_game_volume, master_music_volume if not music_muted else 0.0)
-	music_fade_tween.tween_property(game_music_player, "volume_db", target_volume, fade_duration)
+	tween.tween_property(game_music_player, "volume_db", target_volume, fade_duration)
 
 func stop_all_music(fade_duration: float = 1.0):
-	if music_fade_tween:
-		music_fade_tween.kill()
+	_kill_all_tweens()
 	
 	var players_to_stop = []
 	
@@ -281,13 +282,14 @@ func stop_all_music(fade_duration: float = 1.0):
 		current_music_type = ""
 		return
 	
-	music_fade_tween = create_tween()
-	music_fade_tween.set_parallel(true)
+	var tween = create_tween()
+	active_tweens.append(tween)
+	tween.set_parallel(true)
 	
 	for player in players_to_stop:
-		music_fade_tween.tween_property(player, "volume_db", -60.0, fade_duration)
+		tween.tween_property(player, "volume_db", -60.0, fade_duration)
 	
-	await music_fade_tween.finished
+	await tween.finished
 	
 	for player in players_to_stop:
 		player.stop()
@@ -298,13 +300,13 @@ func stop_menu_music_for_game(fade_duration: float = 0.8):
 	if current_music_type != "menu":
 		return
 	
-	if music_fade_tween:
-		music_fade_tween.kill()
+	_kill_all_tweens()
 	
-	music_fade_tween = create_tween()
-	music_fade_tween.tween_property(menu_music_player, "volume_db", -60.0, fade_duration)
+	var tween = create_tween()
+	active_tweens.append(tween)
+	tween.tween_property(menu_music_player, "volume_db", -60.0, fade_duration)
 	
-	await music_fade_tween.finished
+	await tween.finished
 	menu_music_player.stop()
 	current_music_type = ""
 
@@ -312,15 +314,21 @@ func stop_challenge_music_for_menu(fade_duration: float = 0.8):
 	if current_music_type != "challenge":
 		return
 	
-	if music_fade_tween:
-		music_fade_tween.kill()
+	_kill_all_tweens()
 	
-	music_fade_tween = create_tween()
-	music_fade_tween.tween_property(challenge_music_player, "volume_db", -60.0, fade_duration)
+	var tween = create_tween()
+	active_tweens.append(tween)
+	tween.tween_property(challenge_music_player, "volume_db", -60.0, fade_duration)
 	
-	await music_fade_tween.finished
+	await tween.finished
 	challenge_music_player.stop()
 	current_music_type = ""
+
+func _kill_all_tweens():
+	for tween in active_tweens:
+		if tween and tween.is_valid():
+			tween.kill()
+	active_tweens.clear()
 
 func is_menu_music_playing() -> bool:
 	return current_music_type == "menu" and menu_music_player and menu_music_player.playing

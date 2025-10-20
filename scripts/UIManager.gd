@@ -1,6 +1,7 @@
 class_name UIManager
 extends Node
 
+var _tree: SceneTree
 var main_scene: Control
 var player_hp_label: Label
 var player_mana_label: Label
@@ -24,7 +25,7 @@ var last_playability_fingerprint: String = ""
 var gamepad_selection_active: bool = false
 
 var pending_update_timer: float = 0.0
-const UPDATE_DELAY: float = 0.016  #1 frame a 60fps
+const UPDATE_DELAY: float = 0.016
 
 var player_turn_color = Color(0.08, 0.13, 0.18, 0.9)
 var ai_turn_color = Color(0.15, 0.08, 0.08, 0.9)
@@ -32,6 +33,7 @@ var ai_turn_color = Color(0.15, 0.08, 0.08, 0.9)
 func setup(main: Control, joker_scene: PackedScene = null):
 	main_scene = main
 	joker_card_scene = joker_scene
+	_tree = main_scene.get_tree()
 	_get_ui_references()
 	original_ui_position = ui_layer.position
 
@@ -120,7 +122,7 @@ func animate_hp_change(hp_label: Label, new_hp: int, old_hp: int):
 		tween.tween_property(hp_label, "scale", Vector2(1.3, 1.3), 0.2)
 		tween.tween_property(hp_label, "modulate", Color(1.5, 0.5, 0.5, 1.0), 0.2)
    	
-		main_scene.get_tree().create_timer(0.2).timeout.connect(func():
+		_tree.create_timer(0.2).timeout.connect(func():
 			var return_tween = main_scene.create_tween()
 			return_tween.set_parallel(true)
 			return_tween.tween_property(hp_label, "scale", Vector2(1.0, 1.0), 0.3)
@@ -132,7 +134,7 @@ func animate_hp_change(hp_label: Label, new_hp: int, old_hp: int):
 		tween.tween_property(hp_label, "scale", Vector2(1.4, 1.4), 0.25)
 		tween.tween_property(hp_label, "modulate", Color(0.5, 1.8, 0.8, 1.0), 0.25)
    	
-		main_scene.get_tree().create_timer(0.25).timeout.connect(func():
+		_tree.create_timer(0.25).timeout.connect(func():
 			var return_tween = main_scene.create_tween()
 			return_tween.set_parallel(true)
 			return_tween.tween_property(hp_label, "scale", Vector2(1.0, 1.0), 0.35)
@@ -294,7 +296,7 @@ func update_hand_display(player: Player, card_scene: PackedScene, hand_container
 			_restore_gamepad_selection_immediate(player)
 		return
    
-	_rebuild_hand_display(player, card_scene, hand_container, true)  # false para no animar
+	_rebuild_hand_display(player, card_scene, hand_container, false)
    
 	selected_card_index = clamp(old_selected_index, 0, max(0, card_instances.size() - 1))
    
@@ -320,7 +322,6 @@ func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_contain
 		
 		if card_data.is_joker and joker_card_scene:
 			card_instance = joker_card_scene.instantiate()
-			print("   Using JokerCard scene for: ", card_data.card_name)
 		else:
 			card_instance = card_scene.instantiate()
 		
@@ -356,7 +357,7 @@ func _animate_card_spawn(card: Control, index: int):
 	
 	var delay = index * 0.05
 	
-	await main_scene.get_tree().create_timer(delay).timeout
+	await _tree.create_timer(delay).timeout
 	
 	if not is_instance_valid(card):
 		return
@@ -536,7 +537,6 @@ func update_card_selection(gamepad_mode: bool, player: Player):
 func _clear_all_gamepad_selection_styles():
 	for card in card_instances:
 		if is_instance_valid(card):
-
 			if card.has_method("remove_gamepad_selection_style"):
 				card.remove_gamepad_selection_style()
 
@@ -550,7 +550,7 @@ func update_hand_display_no_animation(player: Player, card_scene: PackedScene, h
 	var should_preserve_gamepad = gamepad_selection_active and main_scene.is_player_turn
 	var old_selected_index = selected_card_index
 
-	_rebuild_hand_display(player, card_scene, hand_container, true)  # false para no animar
+	_rebuild_hand_display(player, card_scene, hand_container, false)
 	current_hand_fingerprint = _generate_hand_fingerprint(player.hand)
 	
 	selected_card_index = clamp(old_selected_index, 0, max(0, card_instances.size() - 1))

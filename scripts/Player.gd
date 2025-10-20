@@ -9,6 +9,7 @@ signal buff_cleared
 @export var difficulty: String = "normal"
 @export var is_ai: bool = false
 
+var _tree: SceneTree
 var max_hp: int
 var max_mana: int
 var max_hand_size: int
@@ -40,6 +41,7 @@ signal card_drawn(cards_count: int, from_deck: bool)
 signal damage_taken(damage_amount: int)
 
 func _ready():
+	_tree = get_tree()
 	setup_from_difficulty()
 	if is_ai:
 		deck = DeckGenerator.create_difficulty_deck(difficulty, 30)
@@ -55,14 +57,10 @@ func create_player_deck_by_difficulty() -> Array:
 		
 func play_card_without_hand_removal(card: CardData, target: Player = null, audio_helper: AudioHelper = null) -> bool:
 	if not can_play_card(card):
-		print("Cannot play card: ", card.card_name, " | Mana: ", current_mana, "/", card.cost, " | Cards played: ", cards_played_this_turn, "/", get_max_cards_per_turn())
 		return false
 	
 	if cards_played_this_turn >= get_max_cards_per_turn():
-		print("Card limit exceeded! Cards played: ", cards_played_this_turn, "/", get_max_cards_per_turn())
 		return false
-	
-	print("Playing card: ", card.card_name, " (", card.card_type, ") | Cost: ", card.cost, " | Turn: ", turn_number)
 	
 	if not is_ai and StatisticsManagers:
 		StatisticsManagers.card_played(card.card_name, card.card_type, card.cost, card.is_joker)
@@ -81,19 +79,11 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 	if card.is_joker:
 		card.apply_joker_effect(self)
 	
-	print("   DAMAGE CALCULATION DEBUG:")
-	print("   Player type: ", "AI" if is_ai else "Player")
-	print("   Turn number: ", turn_number)
-	print("   Base damage: ", card.damage)
-	print("   Turn bonus: ", bonus_damage)
-	print("   Buff bonus: ", buff_mods.damage_bonus)
-	
 	match card.card_type:
 		"attack":
 			if target:
 				var total_damage = card.damage + bonus_damage + buff_mods.damage_bonus
 				damage_dealt = total_damage
-				print("    FINAL Attack: ", card.damage, " base + ", bonus_damage, " turn bonus + ", buff_mods.damage_bonus, " buff = ", total_damage, " total damage")
 				target.take_damage(total_damage)
 				
 				if not is_ai and UnlockManager:
@@ -104,18 +94,14 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 				
 				if not is_ai and StatisticsManagers:
 					StatisticsManagers.combat_action("damage_dealt", damage_dealt)
-			else:
-				print("Attack card played without target!")
 		
 		"heal":
 			var total_heal = card.heal + int(buff_mods.heal_bonus)
-			print("  Heal: ", card.heal, " base + ", int(buff_mods.heal_bonus), " buff = ", total_heal, " HP")
 			heal(total_heal)
 			if not is_ai and StatisticsManagers:
 				StatisticsManagers.combat_action("healing_done", total_heal)
 		
 		"shield":
-			print("   Shield: ", card.shield, " protection")
 			add_shield(card.shield)
 			if not is_ai and StatisticsManagers:
 				StatisticsManagers.combat_action("shield_gained", card.shield)
@@ -124,11 +110,9 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 				UnlockManagers.track_progress("damage_blocked", card.shield)
 		
 		"hybrid":
-			print("   Hybrid card effects:")
 			if card.damage > 0 and target:
 				var total_damage = card.damage + bonus_damage + buff_mods.damage_bonus
 				damage_dealt = total_damage
-				print("    FINAL Hybrid Attack: ", card.damage, " base + ", bonus_damage, " turn bonus + ", buff_mods.damage_bonus, " buff = ", total_damage, " total damage")
 				target.take_damage(total_damage)
 				
 				if not is_ai and UnlockManagers:
@@ -136,31 +120,21 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 				
 				if not is_ai and StatisticsManagers:
 					StatisticsManagers.combat_action("damage_dealt", damage_dealt)
-			elif card.damage > 0 and not target:
-				print("Hybrid card with damage played without target!")
 			
 			if card.heal > 0:
 				var total_heal = card.heal + int(buff_mods.heal_bonus)
-				print("     Heal: ", card.heal, " base + ", int(buff_mods.heal_bonus), " buff = ", total_heal, " HP")
 				heal(total_heal)
 				if not is_ai and StatisticsManagers:
 					StatisticsManagers.combat_action("healing_done", total_heal)
 			
 			if card.shield > 0:
 				var total_shield = card.shield + buff_mods.shield_bonus
-				print("     Shield: ", card.shield, " base + ", buff_mods.shield_bonus, " buff = ", total_shield, " protection")
 				add_shield(total_shield)
 				if not is_ai and StatisticsManagers:
 					StatisticsManagers.combat_action("shield_gained", total_shield)
 				
 				if not is_ai and UnlockManagers:
 					UnlockManagers.track_progress("damage_blocked", total_shield)
-	
-	print("   Cards played after: ", cards_played_this_turn, "/", get_max_cards_per_turn())
-	print("   Mana after card: ", current_mana)
-	
-	if cards_played_this_turn >= get_max_cards_per_turn():
-		print("CARD LIMIT REACHED - No more cards can be played this turn")
 	
 	return true
 
@@ -241,8 +215,6 @@ func heal(amount: int):
 	current_hp += amount
 	var actual_healing = current_hp - old_hp
 	
-	print("Healing: ", amount, " | Old HP: ", old_hp, " | New HP: ", current_hp, " | Actual healing: ", actual_healing)
-	
 	hp_changed.emit(current_hp)
 
 func add_shield(amount: int):
@@ -252,8 +224,6 @@ func add_shield(amount: int):
 	var old_shield = current_shield
 	current_shield += amount
 	var actual_shield_gain = current_shield - old_shield
-	
-	print("Adding shield: ", amount, " | Old Shield: ", old_shield, " | New Shield: ", current_shield, " | Actual gain: ", actual_shield_gain)
 	
 	shield_changed.emit(current_shield)
 
@@ -265,7 +235,6 @@ func spend_mana(amount: int) -> bool:
 		final_cost = max(0, amount - reduction)
 		active_buffs.erase("cost_reduction")
 		buff_consumed.emit("cost_reduction")
-		print("   Cost reduction applied: ", amount, " - ", reduction, " = ", final_cost, " mana")
 	
 	if current_mana >= final_cost:
 		current_mana -= final_cost
@@ -292,7 +261,6 @@ func start_turn():
 	
 	clear_buffs()
 	
-	#JOKER PROBABILITY FOR THE PLAYER
 	var joker_chance = 0.30 if not is_ai else _get_ai_joker_chance()
 	var refill_result = DeckManager.refill_hand(
 		hand, 
@@ -303,11 +271,11 @@ func start_turn():
 		is_ai
 	)
 
-	if refill_result.deck_reshuffled:
-		print("Deck reshuffled for ", "AI" if is_ai else "Player")
+	if refill_result.deck_reshuffled and OS.is_debug_build():
+		pass
 	
-	if refill_result.joker_added:
-		print("Joker card added to ", "AI" if is_ai else "Player", " hand!")
+	if refill_result.joker_added and OS.is_debug_build():
+		pass
 	
 	mana_changed.emit(current_mana)
 	cards_played_changed.emit(cards_played_this_turn, get_max_cards_per_turn())
@@ -318,23 +286,13 @@ func start_turn():
 	
 func sync_turn_with_opponent(opponent: Player):
 	if abs(turn_number - opponent.turn_number) > 1:
-		print("  TURN DESYNC DETECTED!")
-		print("   ", "AI" if is_ai else "Player", " turn: ", turn_number)
-		print("   ", "AI" if opponent.is_ai else "Player", " turn: ", opponent.turn_number)
-
 		var target_turn = min(turn_number, opponent.turn_number)
 		turn_number = target_turn
 		opponent.turn_number = target_turn
-		print("Synced both to turn: ", target_turn)
 
 func can_play_card(card: CardData) -> bool:
 	var has_mana = current_mana >= card.cost
 	var can_play_more_cards = cards_played_this_turn < get_max_cards_per_turn()
-	
-	if not has_mana:
-		print("Cannot play card: insufficient mana (", current_mana, "/", card.cost, ")")
-	if not can_play_more_cards:
-		print("Cannot play card: card limit reached (", cards_played_this_turn, "/", get_max_cards_per_turn(), ")")
 	
 	return has_mana and can_play_more_cards
 	
@@ -408,10 +366,7 @@ func get_cards_played() -> int:
 	return cards_played_this_turn
 
 func can_play_more_cards() -> bool:
-	var can_play = cards_played_this_turn < get_max_cards_per_turn()
-	if not can_play:
-		print("Card limit reached: ", cards_played_this_turn, "/", get_max_cards_per_turn())
-	return can_play
+	return cards_played_this_turn < get_max_cards_per_turn()
 
 func set_difficulty(new_difficulty: String):
 	difficulty = new_difficulty
@@ -449,10 +404,7 @@ func get_deck_suggestions() -> Array:
 		
 func play_card_with_audio(card: CardData, target: Player = null, audio_helper: AudioHelper = null) -> bool:
 	if not can_play_card(card):
-		print("Cannot play card: ", card.card_name, " | Mana: ", current_mana, "/", card.cost, " | Cards played: ", cards_played_this_turn, "/", get_max_cards_per_turn())
 		return false
-	
-	print("Playing card: ", card.card_name, " (", card.card_type, ") | Cost: ", card.cost, " | Turn: ", turn_number)
 	
 	if audio_helper:
 		if is_ai:
@@ -473,19 +425,12 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 	
 	var damage_dealt = 0
 	var bonus_damage = get_damage_bonus()
-
-	print("   DAMAGE CALCULATION DEBUG:")
-	print("   Player type: ", "AI" if is_ai else "Player")
-	print("   Turn number: ", turn_number)
-	print("   Base damage: ", card.damage)
-	print("   Calculated bonus: ", bonus_damage)
 	
 	match card.card_type:
 		"attack":
 			if target:
 				var total_damage = card.damage + bonus_damage
 				damage_dealt = total_damage
-				print("    FINAL Attack: ", card.damage, " base + ", bonus_damage, " bonus = ", total_damage, " total damage")
 				target.take_damage(total_damage)
 				
 				if not is_ai and UnlockManagers:
@@ -493,17 +438,13 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 				
 				if not is_ai and StatisticsManagers:
 					StatisticsManagers.combat_action("damage_dealt", damage_dealt)
-			else:
-				print("Attack card played without target!")
 		
 		"heal":
-			print("  Heal: ", card.heal, " HP")
 			heal(card.heal)
 			if not is_ai and StatisticsManagers:
 				StatisticsManagers.combat_action("healing_done", card.heal)
 		
 		"shield":
-			print("   Shield: ", card.shield, " protection")
 			add_shield(card.shield)
 			if not is_ai and StatisticsManagers:
 				StatisticsManagers.combat_action("shield_gained", card.shield)
@@ -512,11 +453,9 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 				UnlockManagers.track_progress("damage_blocked", card.shield)
 		
 		"hybrid":
-			print("   Hybrid card effects:")
 			if card.damage > 0 and target:
 				var total_damage = card.damage + bonus_damage
 				damage_dealt = total_damage
-				print("    FINAL Hybrid Attack: ", card.damage, " base + ", bonus_damage, " bonus = ", total_damage, " total damage")
 				target.take_damage(total_damage)
 				
 				if not is_ai and UnlockManagers:
@@ -524,17 +463,13 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 				
 				if not is_ai and StatisticsManagers:
 					StatisticsManagers.combat_action("damage_dealt", damage_dealt)
-			elif card.damage > 0 and not target:
-				print("Hybrid card with damage played without target!")
 			
 			if card.heal > 0:
-				print("     Heal: ", card.heal, " HP")
 				heal(card.heal)
 				if not is_ai and StatisticsManagers:
 					StatisticsManagers.combat_action("healing_done", card.heal)
 			
 			if card.shield > 0:
-				print("     Shield: ", card.shield, " protection")
 				add_shield(card.shield)
 				if not is_ai and StatisticsManagers:
 					StatisticsManagers.combat_action("shield_gained", card.shield)
@@ -542,31 +477,23 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 				if not is_ai and UnlockManagers:
 					UnlockManagers.track_progress("damage_blocked", card.shield)
 	
-	print("   Mana after card: ", current_mana, " | Cards played this turn: ", cards_played_this_turn)
 	return true
 
 func ai_turn(opponent: Player):
 	if not is_ai:
 		return
 	
-	var main_scene = get_tree().get_first_node_in_group("main_scene")
+	var main_scene = _tree.get_first_node_in_group("main_scene")
 	if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
-		print("AI turn cancelled - game already ended")
 		return
 	
 	ai_turn_active = true
 	should_stop_ai_turn = false
 	
-	print("   AI executing turn logic...")
-	print("   AI turn number: ", turn_number)
-	print("   Available mana: ", current_mana)
-	print("   Cards in hand: ", hand.size())
-	
-	await get_tree().create_timer(GameBalance.get_timer_delay("ai_turn_start")).timeout
+	await _tree.create_timer(GameBalance.get_timer_delay("ai_turn_start")).timeout
 	
 	if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
 		ai_turn_active = false
-		print("AI turn cancelled - game ended during delay")
 		return
 	
 	var ai_config = GameBalance.get_ai_config(difficulty)
@@ -576,22 +503,18 @@ func ai_turn(opponent: Player):
 	var audio_helper = null
 	
 	if not main_scene:
-		var root = get_tree().current_scene
+		var root = _tree.current_scene
 		if root and root.has_method("get") and root.get("audio_helper"):
 			audio_helper = root.audio_helper
 			main_scene = root
 	
-	print("AI turn config - Heal threshold: ", heal_threshold, " | Aggression: ", aggression)
-	
 	while can_play_more_cards() and not should_stop_ai_turn:
 		if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
-			print("AI turn stopped - game ended during turn")
 			break
 		
 		var playable_cards = DeckManager.get_playable_cards(hand, current_mana)
 		
 		if playable_cards.size() == 0:
-			print("AI: No playable cards available (mana: ", current_mana, ", hand: ", hand.size(), ")")
 			break
 		
 		var chosen_card: CardData = null
@@ -599,7 +522,6 @@ func ai_turn(opponent: Player):
 		for card in playable_cards:
 			if card.is_joker:
 				chosen_card = card
-				print("AI: Prioritizing Joker card: ", chosen_card.card_name)
 				break
 
 		if not chosen_card and opponent.current_hp <= 12:
@@ -609,7 +531,6 @@ func ai_turn(opponent: Player):
 					finisher_cards.append(card)
 			if finisher_cards.size() > 0:
 				chosen_card = finisher_cards[0]
-				print("AI: Choosing finisher card: ", chosen_card.card_name)
 		
 		if not chosen_card and current_hp < max_hp * heal_threshold:
 			var heal_cards = []
@@ -618,7 +539,6 @@ func ai_turn(opponent: Player):
 					heal_cards.append(card)
 			if heal_cards.size() > 0:
 				chosen_card = heal_cards[0]
-				print("AI: Choosing heal card: ", chosen_card.card_name)
 		
 		if not chosen_card and current_shield == 0 and opponent.current_mana >= 4 and randf() > aggression:
 			var shield_cards = []
@@ -627,7 +547,6 @@ func ai_turn(opponent: Player):
 					shield_cards.append(card)
 			if shield_cards.size() > 0:
 				chosen_card = shield_cards[0]
-				print("AI: Choosing shield card: ", chosen_card.card_name)
 		
 		if not chosen_card:
 			var attack_cards = []
@@ -640,56 +559,36 @@ func ai_turn(opponent: Player):
 					if card.damage > strongest.damage:
 						strongest = card
 				chosen_card = strongest
-				print("AI: Choosing strongest attack: ", chosen_card.card_name)
 
 		if not chosen_card:
 			chosen_card = playable_cards[0]
-			print("AI: Choosing fallback card: ", chosen_card.card_name)
 		
 		if chosen_card and not should_stop_ai_turn:
-			var ai_bonus = get_damage_bonus()
-			print("   AI chosen card details:")
-			print("   Card: ", chosen_card.card_name, " | Type: ", chosen_card.card_type)
-			print("   Is Joker: ", chosen_card.is_joker)
-			print("   Base damage: ", chosen_card.damage, " | AI turn: ", turn_number, " | AI bonus: ", ai_bonus)
-			if chosen_card.card_type == "attack" or (chosen_card.card_type == "hybrid" and chosen_card.damage > 0):
-				var expected_total = chosen_card.damage + ai_bonus
-				print("   Expected total damage: ", expected_total)
-			
 			ai_card_played.emit(chosen_card)
 			
-			await get_tree().create_timer(GameBalance.get_timer_delay("ai_card_notification")).timeout
+			await _tree.create_timer(GameBalance.get_timer_delay("ai_card_notification")).timeout
 			
 			if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
 				ai_turn_active = false
-				print("AI turn stopped - game ended during notification")
 				return
 			
 			if audio_helper:
-				print("AI playing sound for: ", chosen_card.card_type)
 				audio_helper.play_ai_card_play_sound(chosen_card.card_type)
-			else:
-				print("AI: No audio_helper available")
 			
 			match chosen_card.card_type:
 				"attack":
-					print("AI attacking player with: ", chosen_card.card_name)
 					play_card(chosen_card, opponent)
 				"heal", "shield":
-					print("AI using support card: ", chosen_card.card_name)
 					play_card(chosen_card)
 				"hybrid":
-					print("AI using hybrid card: ", chosen_card.card_name)
 					play_card(chosen_card, opponent)
 			
-			await get_tree().create_timer(GameBalance.get_timer_delay("ai_card_play")).timeout
+			await _tree.create_timer(GameBalance.get_timer_delay("ai_card_play")).timeout
 			
 			if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
 				ai_turn_active = false
-				print("AI turn stopped - game ended after playing card")
 				return
 		else:
-			print("AI: No card chosen or turn stopped, breaking turn")
 			break
 	
 	ai_turn_active = false
@@ -703,10 +602,10 @@ func is_ai_turn_active() -> bool:
 	return is_ai and ai_turn_active
 	
 func clear_buffs():
-	if active_buffs.size() > 0:
-		print("   Clearing ", active_buffs.size(), " active buffs for ", "AI" if is_ai else "Player")
-		active_buffs.clear()
-		buff_cleared.emit()
+	if active_buffs.size() > 0 and OS.is_debug_build():
+		pass
+	active_buffs.clear()
+	buff_cleared.emit()
 
 func apply_buff_to_card(card: CardData) -> Dictionary:
 	var modifications = {
@@ -722,13 +621,11 @@ func apply_buff_to_card(card: CardData) -> Dictionary:
 			if active_buffs.has("attack_bonus"):
 				modifications.damage_bonus = int(active_buffs["attack_bonus"])
 				modifications.consumed_buffs.append("attack_bonus")
-				print("   Applying attack buff: +", modifications.damage_bonus, " damage")
 		
 		"heal":
 			if active_buffs.has("heal_bonus"):
 				modifications.heal_bonus = card.heal * active_buffs["heal_bonus"]
 				modifications.consumed_buffs.append("heal_bonus")
-				print("   Applying heal buff: +", modifications.heal_bonus, " healing")
 		
 		"hybrid":
 			if active_buffs.has("hybrid_bonus"):
@@ -740,12 +637,10 @@ func apply_buff_to_card(card: CardData) -> Dictionary:
 				if card.shield > 0:
 					modifications.shield_bonus = int(card.shield * bonus_multiplier)
 				modifications.consumed_buffs.append("hybrid_bonus")
-				print("   Applying hybrid buff: +", int(bonus_multiplier * 100), "%")
 	
 	for buff in modifications.consumed_buffs:
 		active_buffs.erase(buff)
 		buff_consumed.emit(buff)
-		print("   Buff consumed: ", buff)
 	
 	return modifications
 
