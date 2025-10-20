@@ -378,10 +378,6 @@ func _animate_card_spawn(card: Control, index: int):
 	var tween = card.create_tween()
 	tween.tween_interval(delay)
 	tween.tween_property(card, "modulate:a", 1.0, 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	
-	tween.finished.connect(func():
-		print("Card spawn animation finished - Index: ", index)
-	)
 
 func _update_existing_cards_playability(player: Player):
 	var hand_size = min(card_instances.size(), player.hand.size())
