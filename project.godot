@@ -27,6 +27,7 @@ GlobalMusicManager="*res://scripts/GlobalMusicManager.gd"
 UnlockManagers="*res://scripts/UnlockManager.gd"
 GameStateManager="*res://scripts/GameStateManager.gd"
 CursorManager="*res://scripts/CursorManager.gd"
+TexturePool="*res://scripts/TexturePool.gd"
 
 [display]
 

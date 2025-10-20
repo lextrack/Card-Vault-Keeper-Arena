@@ -33,6 +33,8 @@ var gamepad_selected: bool = false
 var current_tween: Tween
 var cached_styles: Dictionary = {}
 
+var _critical_children: Array = []
+
 const HOVER_SCALE = 1.07
 const GAMEPAD_SCALE = 1.07
 const ANIMATION_SPEED = 0.15
@@ -50,17 +52,39 @@ func _ready():
 	original_scale = scale
 	
 	if card_data:
+		_cache_all_styles()
 		update_display()
 
+	_cache_critical_children()
 	_setup_unique_shader_material()
 	disable_shine_effect()
-	animate_cardicon()
 	_setup_signals()
 	_optimize_mouse_filter()
 	
-func animate_cardicon():
-	$AnimationPlayer.seek(randf() * 3.0)
-	$AnimationPlayer.play("cardicon_movement")
+	$AnimationPlayer.stop()
+
+func _cache_critical_children():
+	_critical_children = [
+		card_border, card_inner,
+		name_label, cost_label, description_label,
+		stat_value, joker_label,
+		cost_bg, joker_bg, art_bg
+	]
+
+func _cache_all_styles():
+	var panels = [card_bg, card_border, card_inner, cost_bg, art_bg, joker_bg]
+	
+	for panel in panels:
+		if not panel:
+			continue
+		
+		var cache_key = panel.get_instance_id()
+		var original_style = panel.get_theme_stylebox("panel")
+		
+		if original_style is StyleBoxFlat:
+			var style = original_style.duplicate()
+			cached_styles[cache_key] = style
+			panel.add_theme_stylebox_override("panel", style)
 
 func _setup_unique_shader_material():
 	if not card_icon:
@@ -92,6 +116,10 @@ func disable_shine_effect():
 func _apply_selection_effects():
 	enable_shine_effect()
 	
+	if $AnimationPlayer:
+		$AnimationPlayer.seek(randf() * 3.0)
+		$AnimationPlayer.play("cardicon_movement")
+	
 	_stop_current_tween()
 	current_tween = create_tween()
 	current_tween.set_parallel(true)
@@ -103,6 +131,9 @@ func _apply_selection_effects():
 
 func _remove_selection_effects():
 	disable_shine_effect()
+	
+	if $AnimationPlayer:
+		$AnimationPlayer.stop()
 	
 	_stop_current_tween()
 	current_tween = create_tween()
@@ -116,10 +147,11 @@ func _remove_selection_effects():
 	current_tween.tween_property(self, "modulate", target_modulate, ANIMATION_SPEED)
 
 func _optimize_mouse_filter():
-	_set_mouse_filter_recursive(self, Control.MOUSE_FILTER_PASS)
+	_set_mouse_filter_recursive(self, Control.MOUSE_FILTER_IGNORE)
+	mouse_filter = Control.MOUSE_FILTER_PASS
 
 func _set_mouse_filter_recursive(node: Node, filter: int):
-	if node is Control:
+	if node is Control and node != self:
 		(node as Control).mouse_filter = filter
 	
 	for child in node.get_children():
@@ -232,7 +264,6 @@ func set_playable(playable: bool):
 	if playable:
 		current_tween.tween_property(self, "modulate", Color.WHITE, 0.2)
 		mouse_filter = Control.MOUSE_FILTER_PASS
-		_set_mouse_filter_recursive(self, Control.MOUSE_FILTER_PASS)
 	else:
 		current_tween.tween_property(self, "modulate", Color(0.4, 0.4, 0.4, 0.7), 0.2)
 		if not gamepad_selected:
@@ -250,6 +281,9 @@ func force_reset_visual_state():
 
 	disable_shine_effect()
 	
+	if $AnimationPlayer:
+		$AnimationPlayer.stop()
+	
 	scale = original_scale
 	z_index = 0
 	rotation = 0.0
@@ -260,7 +294,6 @@ func force_reset_visual_state():
 	if is_playable:
 		modulate = Color.WHITE
 		mouse_filter = Control.MOUSE_FILTER_PASS
-		_set_mouse_filter_recursive(self, Control.MOUSE_FILTER_PASS)
 	else:
 		modulate = Color(0.4, 0.4, 0.4, 0.7)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -305,19 +338,11 @@ func _update_panel_color(panel: Panel, color: Color):
 		return
 	
 	var cache_key = panel.get_instance_id()
-	var style: StyleBoxFlat
 	
 	if cached_styles.has(cache_key):
-		style = cached_styles[cache_key]
-	else:
-		var original_style = panel.get_theme_stylebox("panel")
-		if original_style is StyleBoxFlat:
-			style = original_style.duplicate()
-			cached_styles[cache_key] = style
-			panel.add_theme_stylebox_override("panel", style)
-	
-	if style:
-		style.bg_color = color
+		var style = cached_styles[cache_key]
+		if style:
+			style.bg_color = color
 
 func _update_stat_display():
 	var total_power = card_data.damage + card_data.heal + card_data.shield
@@ -326,15 +351,11 @@ func _update_stat_display():
 
 func _load_card_illustration():
 	var random_index = randi() % number_of_images + 1
-	var image_path = card_images_folder + str(random_index) + image_extension
-	
-	var texture = load(image_path)
+	var texture = TexturePool.get_texture(card_images_folder, random_index, image_extension)
 	
 	if card_icon is TextureRect and texture:
 		card_icon.texture = texture
 		card_icon.modulate = Color(1.2, 1.1, 0.8, 1.0)
-	else:
-		push_warning("Texture not found: " + image_path)
 
 func set_card_data(data: CardData):
 	card_data = data
@@ -346,3 +367,4 @@ func _notification(what):
 		is_being_played = true
 		_stop_current_tween()
 		cached_styles.clear()
+		_critical_children.clear()

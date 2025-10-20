@@ -28,6 +28,9 @@ var total_damage_this_game: int = 0
 var ai_turn_active: bool = false
 var should_stop_ai_turn: bool = false
 
+var _cached_playable_cards: Array = []
+var _playable_cache_valid: bool = false
+
 signal hp_changed(new_hp: int)
 signal mana_changed(new_mana: int)
 signal shield_changed(new_shield: int)
@@ -54,6 +57,15 @@ func create_player_deck_by_difficulty() -> Array:
 		return DeckGenerator.create_difficulty_deck(difficulty, 30)
 	else:
 		return DeckGenerator.create_starter_deck()
+
+func get_playable_cards() -> Array:
+	if not _playable_cache_valid:
+		_cached_playable_cards = DeckManager.get_playable_cards(hand, current_mana)
+		_playable_cache_valid = true
+	return _cached_playable_cards
+
+func invalidate_playable_cache():
+	_playable_cache_valid = false
 		
 func play_card_without_hand_removal(card: CardData, target: Player = null, audio_helper: AudioHelper = null) -> bool:
 	if not can_play_card(card):
@@ -140,6 +152,7 @@ func play_card_without_hand_removal(card: CardData, target: Player = null, audio
 
 func remove_card_from_hand(card: CardData):
 	hand.erase(card)
+	invalidate_playable_cache()
 	hand_changed.emit()
 
 func setup_from_difficulty():
@@ -172,6 +185,7 @@ func draw_card() -> bool:
 	
 	if deck.size() > 0 and hand.size() < max_hand_size:
 		hand.append(deck.pop_back())
+		invalidate_playable_cache()
 		hand_changed.emit()
 		if not is_ai:
 			card_drawn.emit(1, true)
@@ -238,6 +252,7 @@ func spend_mana(amount: int) -> bool:
 	
 	if current_mana >= final_cost:
 		current_mana -= final_cost
+		invalidate_playable_cache()
 		mana_changed.emit(current_mana)
 		return true
 	return false
@@ -271,11 +286,7 @@ func start_turn():
 		is_ai
 	)
 
-	if refill_result.deck_reshuffled and OS.is_debug_build():
-		pass
-	
-	if refill_result.joker_added and OS.is_debug_build():
-		pass
+	invalidate_playable_cache()
 	
 	mana_changed.emit(current_mana)
 	cards_played_changed.emit(cards_played_this_turn, get_max_cards_per_turn())
@@ -308,6 +319,7 @@ func play_card(card: CardData, target: Player = null) -> bool:
 	discard_pile.append(card)
 	cards_played_this_turn += 1
 	
+	invalidate_playable_cache()
 	hand_changed.emit()
 	cards_played_changed.emit(cards_played_this_turn, get_max_cards_per_turn())
 	
@@ -387,6 +399,8 @@ func reset_player():
 	deck = create_player_deck_by_difficulty()
 	draw_initial_hand()
 	
+	invalidate_playable_cache()
+	
 	hp_changed.emit(current_hp)
 	mana_changed.emit(current_mana)
 	shield_changed.emit(current_shield)
@@ -420,6 +434,7 @@ func play_card_with_audio(card: CardData, target: Player = null, audio_helper: A
 	discard_pile.append(card)
 	cards_played_this_turn += 1
 	
+	invalidate_playable_cache()
 	hand_changed.emit()
 	cards_played_changed.emit(cards_played_this_turn, get_max_cards_per_turn())
 	
@@ -512,7 +527,7 @@ func ai_turn(opponent: Player):
 		if main_scene and main_scene.game_manager and main_scene.game_manager.is_game_ended():
 			break
 		
-		var playable_cards = DeckManager.get_playable_cards(hand, current_mana)
+		var playable_cards = get_playable_cards()
 		
 		if playable_cards.size() == 0:
 			break

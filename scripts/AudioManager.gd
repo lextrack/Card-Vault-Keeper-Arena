@@ -79,7 +79,7 @@ func _assign_base_players_to_sfx_bus():
 func _create_player_pools():
 	_create_pool("card_play", card_play_player, 4)
 	_create_pool("card_draw", card_draw_player, 5)
-	_create_pool("card_hover", card_hover_player, 2)
+	_create_pool("card_hover", card_hover_player, 6)
 	_create_pool("attack", attack_player, 4)
 	_create_pool("heal", heal_player, 4)
 	_create_pool("shield", shield_player, 4)
@@ -97,10 +97,10 @@ func _create_player_pools():
 	_create_pool("lose", lose_player, 1)
 	_create_pool("bonus", bonus_player, 3)
 	
-	_create_pool("ui_click", ui_click_player, 8)
-	_create_pool("ui_hover", ui_hover_player, 4)
-	_create_pool("button_click", ui_click_player, 5)
-	_create_pool("button_hover", ui_hover_player, 6)
+	_create_pool("ui_click", ui_click_player, 3)
+	_create_pool("ui_hover", ui_hover_player, 3)
+	_create_pool("button_click", ui_click_player, 3)
+	_create_pool("button_hover", ui_hover_player, 3)
 
 func _create_pool(pool_name: String, base_player: AudioStreamPlayer, pool_size: int):
 	if not base_player or not base_player.stream:
@@ -247,7 +247,7 @@ func play_deck_shuffle_sound() -> bool:
 func _play_sound(sound_name: String) -> bool:
 	var player = _get_available_player(sound_name)
 	if player:
-		player.pitch_scale = randf_range(0.95, 1.05)
+		player.pitch_scale = randf_range(0.95, 1.06)
 		player.play()
 		return true
 	return false

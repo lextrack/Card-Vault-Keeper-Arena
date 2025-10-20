@@ -344,26 +344,22 @@ func _rebuild_hand_display(player: Player, card_scene: PackedScene, hand_contain
 		var can_play = main_scene.is_player_turn and player.can_play_card(card_data)
 		card_instance.set_playable(can_play)
 		
-		if animate:
-			_animate_card_spawn(card_instance, card_index)
-		
 		card_index += 1
 		
+		if animate:
+			_animate_card_spawn(card_instance, card_index)
+		else:
+			card_instance.modulate.a = 1.0
+
 func _animate_card_spawn(card: Control, index: int):
 	if not is_instance_valid(card):
 		return
 	
-	card.modulate.a = 0.0
-	
 	var delay = index * 0.05
 	
-	await _tree.create_timer(delay).timeout
-	
-	if not is_instance_valid(card):
-		return
-	
-	var tween = main_scene.create_tween()
-	tween.tween_property(card, "modulate:a", 1.0, 0.2)
+	var tween = create_tween()
+	tween.tween_delay(delay)
+	tween.tween_property(card, "modulate:a", 1.0, 0.4)
 
 func _update_existing_cards_playability(player: Player):
 	var hand_size = min(card_instances.size(), player.hand.size())

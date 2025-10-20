@@ -399,84 +399,104 @@ script = ExtResource("2_vcsgt")
 [node name="CardSounds" type="Node" parent="AudioManager"]
 
 [node name="CardPlayPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
+bus = &"SFX"
 
 [node name="CardDrawPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
+bus = &"SFX"
 
 [node name="CardHoverPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
 stream = ExtResource("3_q8u5g")
-volume_db = -5.0
+volume_db = -8.0
+bus = &"SFX"
 
 [node name="CombatSounds" type="Node" parent="AudioManager"]
 
 [node name="AttackPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("4_c01mt")
 volume_db = 5.0
+bus = &"SFX"
 
 [node name="HealPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("7_lhr70")
 volume_db = -2.0
+bus = &"SFX"
 
 [node name="ShieldPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("8_wp0k4")
 volume_db = -10.0
+bus = &"SFX"
 
 [node name="DamagePlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("9_bjd11")
 volume_db = -4.0
+bus = &"SFX"
 
 [node name="HybridPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("4_wp0k4")
 volume_db = 5.0
+bus = &"SFX"
 
 [node name="JokerPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("9_ft6cd")
 volume_db = 11.0
+bus = &"SFX"
 
 [node name="GameSounds" type="Node" parent="AudioManager"]
 
 [node name="TurnChangePlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
 stream = ExtResource("8_jlsqs")
 volume_db = 7.0
+bus = &"SFX"
 
 [node name="WinPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
 stream = ExtResource("14_mwfav")
+bus = &"SFX"
 
 [node name="LosePlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+bus = &"SFX"
 
 [node name="BonusPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
 stream = ExtResource("11_qmy6f")
 pitch_scale = 1.1
+bus = &"SFX"
 
 [node name="MusicPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
 volume_db = -5.0
 autoplay = true
+bus = &"Music"
 
 [node name="AISounds" type="Node" parent="AudioManager"]
 
 [node name="AIAttackPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
 stream = ExtResource("8_q8u5g")
 volume_db = -9.0
+bus = &"SFX"
 
 [node name="AIHealPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
 stream = ExtResource("7_lhr70")
 volume_db = -2.0
 pitch_scale = 1.15
+bus = &"SFX"
 
 [node name="AIShieldPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
 stream = ExtResource("8_wp0k4")
 volume_db = -10.0
 pitch_scale = 1.15
+bus = &"SFX"
 
 [node name="AICardPlayPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
 volume_db = 5.0
+bus = &"SFX"
 
 [node name="UISounds" type="Node" parent="AudioManager"]
 
 [node name="UIClickPlayer" type="AudioStreamPlayer" parent="AudioManager/UISounds"]
 stream = ExtResource("10_bjd11")
 volume_db = -1.0
+bus = &"SFX"
 
 [node name="UIHoverPlayer" type="AudioStreamPlayer" parent="AudioManager/UISounds"]
+bus = &"SFX"
 
 [node name="BackgroundLayer" type="Control" parent="."]
 layout_mode = 1
