@@ -14,7 +14,7 @@ static func from_template(template: Dictionary) -> CardData:
 	
 	card.is_joker = template.get("is_joker", false)
 	card.joker_effect = template.get("joker_effect", "")
-	
+	card.illustration_index = template.get("illustration_index", -1)
 	card.description = template.get("description", "")
 	
 	return card
@@ -66,6 +66,7 @@ static func clone_card(original: CardData) -> CardData:
 		"shield": original.shield,
 		"type": original.card_type,
 		"is_joker": original.is_joker,
+		"illustration_index": original.illustration_index,
 		"joker_effect": original.joker_effect
 	}
 	return from_template(template)

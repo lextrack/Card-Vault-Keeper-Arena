@@ -103,7 +103,7 @@ func _on_player_buff_applied(buff_type: String, buff_value: Variant):
 	
 	audio_helper.play_joker_sound()
 
-func _on_player_buff_consumed(buff_type: String):
+func _on_player_buff_consumed(_buff_type: String):
 	if joker_buff_label and joker_buff_label.visible:
 		var tween = create_tween()
 		tween.set_parallel(true)
@@ -355,10 +355,10 @@ func _wait_for_actions_to_complete():
 		await _tree.create_timer(check_interval).timeout
 		wait_time += check_interval
 
-func _on_card_unlocked(card_name: String):
+func _on_card_unlocked(_card_name: String):
 	pass
 
-func _on_unlock_progress_updated(bundle_id: String, current: int, required: int):
+func _on_unlock_progress_updated(_bundle_id: String, _current: int, _required: int):
 	pass
 
 func _setup_components():
@@ -506,8 +506,8 @@ func validate_deck_generation():
 	var pool = WeightedCardPool.new()
 	pool.add_templates(CardDatabase.get_all_card_templates())
 	var pool_validation = pool.validate_pool()
-	
-	return violations.size() == 0
+
+	return violations.size() == 0 and pool_validation
 
 func start_player_turn():
 	if is_player_turn or game_manager.is_game_ended():
@@ -972,6 +972,9 @@ func _on_card_clicked(card):
 			"shield_value": card_data.shield
 		}
 		UnlockManagers.track_progress("card_played", 1, extra_data)
+		
+		if StatisticsManagers:
+			StatisticsManagers.card_played(card_name, card_type, card_cost, card_data.is_joker)
 		
 		if card_data.is_joker:
 			UnlockManagers.track_progress("joker_played", 1, {})

@@ -104,7 +104,7 @@ func end_game(player_won: bool, difficulty: String, final_turns: int):
 	print("Game ended - Win: ", player_won, " | Time: ", "%.1f" % game_time, "s | Turns: ", final_turns)
 
 
-func card_played(card_name: String, card_type: String, card_cost: int, is_joker: bool = false, player_won_game: bool = false):
+func card_played(card_name: String, card_type: String, card_cost: int, is_joker: bool = false):
 	cards_played_total += 1
 	
 	if cards_played_by_type.has(card_type):
@@ -120,7 +120,6 @@ func card_played(card_name: String, card_type: String, card_cost: int, is_joker:
 	
 	total_mana_spent += card_cost
 	
-	# Nuevo: Contar Jokers jugados
 	if is_joker:
 		jokers_played += 1
 

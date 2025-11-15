@@ -396,7 +396,7 @@ func _on_card_gamepad_hovered(card):
 	else:
 		handle_card_hover_audio(card, "gamepad_navigation")
 
-func _on_card_gamepad_unhovered(card):
+func _on_card_gamepad_unhovered(_card):
 	pass
 
 func _restore_gamepad_selection_immediate(player: Player):

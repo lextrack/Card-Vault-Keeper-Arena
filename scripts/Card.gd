@@ -418,8 +418,10 @@ func _update_stat_display():
 	stat_value.modulate = base_stat_modulate
 
 func _load_card_illustration():
-	var random_index = randi() % number_of_images + 1
-	var texture = TexturePool.get_texture(card_images_folder, random_index, image_extension)
+	if card_data.illustration_index == -1:
+		card_data.illustration_index = randi() % number_of_images + 1
+	
+	var texture = TexturePool.get_texture(card_images_folder, card_data.illustration_index, image_extension)
 	
 	if card_icon is TextureRect and texture:
 		card_icon.texture = texture

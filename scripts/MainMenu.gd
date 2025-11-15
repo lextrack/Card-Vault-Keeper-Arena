@@ -68,10 +68,8 @@ func _ready():
 	entrance_complete = true
 	
 	_save_original_button_positions()
-	
+
 	await get_tree().process_frame
-	_focus_first_button_safe()
-	
 	_setup_options_menu()
 	
 func _hide_exit_button_on_web():
@@ -203,11 +201,6 @@ func _focus_first_button_safe():
 		current_focus_index = 0
 		if not is_transitioning and not popup_active:
 			focusable_buttons[0].grab_focus()
-
-func _focus_first_button():
-	if focusable_buttons.size() > 0 and focusable_buttons[0]:
-		current_focus_index = 0
-		focusable_buttons[0].grab_focus()
 
 func _detect_input_method(event: InputEvent):
 	if event is InputEventJoypadMotion:

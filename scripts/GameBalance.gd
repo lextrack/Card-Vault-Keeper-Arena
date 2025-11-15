@@ -75,33 +75,33 @@ static func get_ai_config(difficulty: String) -> Dictionary:
 	match difficulty:
 		"normal":
 			return {
-				"hp": 43,
-				"mana": DEFAULT_MANA,
+				"hp": 50,
+				"mana": 11,
 				"cards_per_turn": 2,
-				"hand_size": DEFAULT_HAND_SIZE,
+				"hand_size": 6,
 				"deck_size": STARTER_DECK_SIZE,
-				"aggression": 0.7,
-				"heal_threshold": 0.25
+				"aggression": 0.75,
+				"heal_threshold": 0.30
 			}
 		"hard":
 			return {
-				"hp": 50,
-				"mana": DEFAULT_MANA,
+				"hp": 58,
+				"mana": 11,
 				"cards_per_turn": 2,
-				"hand_size": DEFAULT_HAND_SIZE,
+				"hand_size": 6,
 				"deck_size": STARTER_DECK_SIZE,
-				"aggression": 0.5,
-				"heal_threshold": 0.35
+				"aggression": 0.60,
+				"heal_threshold": 0.40
 			}
 		"expert":
 			return {
-				"hp": 52,
-				"mana": 11, 
+				"hp": 62,
+				"mana": 12,
 				"cards_per_turn": 2,
-				"hand_size": DEFAULT_HAND_SIZE,
+				"hand_size": 6,
 				"deck_size": STARTER_DECK_SIZE,
-				"aggression": 0.65,
-				"heal_threshold": 0.45
+				"aggression": 0.70,
+				"heal_threshold": 0.50
 			}
 		_:
 			return get_ai_config("normal")

@@ -10,6 +10,7 @@ extends Resource
 @export var description: String
 @export var is_joker: bool = false
 @export var joker_effect: String = ""
+@export var illustration_index: int = -1
 
 func _init(name: String = "", c: int = 1, dmg: int = 0, h: int = 0, s: int = 0, type: String = "attack", desc: String = "", joker: bool = false, j_effect: String = ""):
 	card_name = name
@@ -21,6 +22,7 @@ func _init(name: String = "", c: int = 1, dmg: int = 0, h: int = 0, s: int = 0, 
 	description = desc
 	is_joker = joker
 	joker_effect = j_effect
+	illustration_index = -1
 
 func apply_joker_effect(player: Player):
 	if not is_joker or joker_effect == "":
