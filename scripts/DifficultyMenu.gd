@@ -17,6 +17,7 @@ extends Control
 
 @onready var ui_player = $AudioManager/UIPlayer
 @onready var hover_player = $AudioManager/HoverPlayer
+@onready var global_music_manager = get_node("/root/GlobalMusicManager")
 
 var selected_difficulty: String = "normal"
 var is_transitioning: bool = false
@@ -53,6 +54,13 @@ func _ready():
 	setup_cards()
 	setup_buttons()
 	select_difficulty("normal", false)
+	
+
+	var difficulty_music = preload("res://audio/music/difficulty_menu.ogg")
+	if global_music_manager:
+		global_music_manager.set_difficulty_music_stream(difficulty_music)
+		global_music_manager.set_difficulty_volume(-9.0)
+		global_music_manager.start_difficulty_music(1.5)
 	
 	await handle_scene_entrance()
 	normal_card.grab_focus()
@@ -322,6 +330,11 @@ func _on_back_pressed():
 	is_transitioning = true
 	play_ui_sound("button_click")
 	
+	if global_music_manager:
+		global_music_manager.stop_difficulty_music_for_menu(0.8)
+		await get_tree().create_timer(0.5).timeout
+		global_music_manager.start_menu_music(1.0)
+	
 	TransitionManager.fade_to_scene("res://scenes/MainMenu.tscn", 1.0)
 
 func _on_start_pressed():
@@ -338,7 +351,11 @@ func _on_start_pressed():
 	tween.tween_property(start_button, "scale", Vector2(1.0, 1.0), 0.1)
 	
 	await tween.finished
-	TransitionManager.fade_to_scene("res://scenes/Main.tscn", 1.2)
+	
+	if global_music_manager:
+		global_music_manager.stop_all_music(0.5)
+	
+	TransitionManager.fade_to_scene("res://scenes/Main.tscn", 1.0)
 
 func _on_button_hover(button: Button):
 	play_hover_sound()

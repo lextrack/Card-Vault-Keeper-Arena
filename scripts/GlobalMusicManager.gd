@@ -18,6 +18,8 @@ var default_game_volume: float = -4.0
 
 var master_music_volume: float = 1.0
 var music_muted: bool = false
+var difficulty_music_player: AudioStreamPlayer
+var default_difficulty_volume: float = -1.0
 
 func _ready():
 	_tree = get_tree()
@@ -57,6 +59,17 @@ func _create_music_players():
 	game_music_player.bus = "Music"
 	game_music_player.finished.connect(_on_game_music_finished)
 	add_child(game_music_player)
+	
+	difficulty_music_player = AudioStreamPlayer.new()
+	difficulty_music_player.name = "GlobalDifficultyMusicPlayer"
+	difficulty_music_player.volume_db = default_difficulty_volume
+	difficulty_music_player.bus = "Music"
+	difficulty_music_player.finished.connect(_on_difficulty_music_finished)
+	add_child(difficulty_music_player)
+	
+func _on_difficulty_music_finished():
+	if current_music_type == "difficulty" and difficulty_music_player.stream:
+		difficulty_music_player.play()
 
 func _on_menu_music_finished():
 	if current_music_type == "menu" and menu_music_player.stream:
@@ -97,6 +110,9 @@ func _update_all_volumes():
 	
 	if game_music_player:
 		game_music_player.volume_db = _calculate_final_volume(default_game_volume, volume_multiplier)
+	
+	if difficulty_music_player:
+		difficulty_music_player.volume_db = _calculate_final_volume(default_difficulty_volume, volume_multiplier)
 
 func _calculate_final_volume(base_volume: float, multiplier: float) -> float:
 	if multiplier <= 0.0:
@@ -263,6 +279,51 @@ func start_game_music(fade_duration: float = 1.5, force_new_track: bool = false)
 	active_tweens.append(tween)
 	var target_volume = _calculate_final_volume(default_game_volume, master_music_volume if not music_muted else 0.0)
 	tween.tween_property(game_music_player, "volume_db", target_volume, fade_duration)
+	
+func set_difficulty_volume(volume_db: float):
+	default_difficulty_volume = volume_db
+	if difficulty_music_player:
+		difficulty_music_player.volume_db = _calculate_final_volume(default_difficulty_volume, master_music_volume if not music_muted else 0.0)
+
+func set_difficulty_music_stream(stream: AudioStream):
+	if difficulty_music_player:
+		difficulty_music_player.stream = stream
+
+func start_difficulty_music(fade_duration: float = 1.5):
+	if current_music_type == "difficulty" and difficulty_music_player and difficulty_music_player.playing:
+		return
+
+	stop_all_music(0.5)
+	await _tree.create_timer(0.3).timeout
+	
+	if not difficulty_music_player or not difficulty_music_player.stream:
+		return
+	
+	current_music_type = "difficulty"
+	
+	difficulty_music_player.volume_db = -40.0
+	difficulty_music_player.play()
+	
+	_kill_all_tweens()
+	
+	var tween = create_tween()
+	active_tweens.append(tween)
+	var target_volume = _calculate_final_volume(default_difficulty_volume, master_music_volume if not music_muted else 0.0)
+	tween.tween_property(difficulty_music_player, "volume_db", target_volume, fade_duration)
+
+func stop_difficulty_music_for_menu(fade_duration: float = 0.8):
+	if current_music_type != "difficulty":
+		return
+	
+	_kill_all_tweens()
+	
+	var tween = create_tween()
+	active_tweens.append(tween)
+	tween.tween_property(difficulty_music_player, "volume_db", -60.0, fade_duration)
+	
+	await tween.finished
+	difficulty_music_player.stop()
+	current_music_type = ""
 
 func stop_all_music(fade_duration: float = 1.0):
 	_kill_all_tweens()
@@ -277,6 +338,9 @@ func stop_all_music(fade_duration: float = 1.0):
 	
 	if game_music_player and game_music_player.playing:
 		players_to_stop.append(game_music_player)
+	
+	if difficulty_music_player and difficulty_music_player.playing:
+		players_to_stop.append(difficulty_music_player)
 	
 	if players_to_stop.size() == 0:
 		current_music_type = ""
@@ -295,6 +359,9 @@ func stop_all_music(fade_duration: float = 1.0):
 		player.stop()
 	
 	current_music_type = ""
+
+func is_difficulty_music_playing() -> bool:
+	return current_music_type == "difficulty" and difficulty_music_player and difficulty_music_player.playing
 
 func stop_menu_music_for_game(fade_duration: float = 0.8):
 	if current_music_type != "menu":

@@ -372,6 +372,7 @@ horizontal_alignment = 1
 [node name="MenuMusicPlayer" type="AudioStreamPlayer" parent="AudioManager"]
 stream = ExtResource("2_0ykhv")
 volume_db = 3.0
+bus = &"Music"
 
 [node name="UIPlayer" type="AudioStreamPlayer" parent="AudioManager"]
 volume_db = -5.0
