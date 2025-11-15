@@ -68,8 +68,10 @@ func _ready():
 	entrance_complete = true
 	
 	_save_original_button_positions()
-
+	
 	await get_tree().process_frame
+	_focus_first_button_safe()
+	
 	_setup_options_menu()
 	
 func _hide_exit_button_on_web():
@@ -164,7 +166,6 @@ func _setup_options_menu():
 	options_menu.options_closed.connect(_on_options_menu_closed)
 	add_child(options_menu)
 	options_menu.visible = false
-	
 	options_menu.apply_startup_settings()
 
 func _setup_gamepad_navigation():
@@ -197,7 +198,7 @@ func _focus_first_button_safe():
 	if not entrance_complete:
 		return
 	
-	if focusable_buttons.size() > 0 and focusable_buttons[0] and is_instance_valid(focusable_buttons[0]):
+	if focusable_buttons.size() > 0 and focusable_buttons[0] and is_instance_valid(focusable_buttons[0]) and gamepad_mode == true:
 		current_focus_index = 0
 		if not is_transitioning and not popup_active:
 			focusable_buttons[0].grab_focus()

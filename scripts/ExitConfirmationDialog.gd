@@ -14,8 +14,6 @@ var custom_title: String = ""
 var custom_message: String = ""
 var confirm_text: String = "YES, RETURN"
 var cancel_text: String = "CANCEL"
-
-# Input handling node
 var input_blocker: Control
 
 func setup(main: Control, title: String = "", message: String = ""):
@@ -27,7 +25,6 @@ func setup(main: Control, title: String = "", message: String = ""):
 	_create_confirmation_dialog()
 
 func _create_confirmation_dialog():
-	# Crear input blocker como primer hijo (captura input primero)
 	input_blocker = Control.new()
 	input_blocker.name = "InputBlocker"
 	input_blocker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -123,8 +120,6 @@ func _setup_panel_content():
 func _setup_buttons():
 	confirm_button.focus_neighbor_right = cancel_button.get_path()
 	cancel_button.focus_neighbor_left = confirm_button.get_path()
-	
-	# Evitar que el focus escape del diálogo
 	confirm_button.focus_neighbor_left = cancel_button.get_path()
 	cancel_button.focus_neighbor_right = confirm_button.get_path()
 	confirm_button.focus_neighbor_top = confirm_button.get_path()
@@ -135,13 +130,10 @@ func _setup_buttons():
 func _connect_signals():
 	confirm_button.pressed.connect(_on_confirm_exit)
 	cancel_button.pressed.connect(_on_cancel_exit)
-	
 	confirm_button.mouse_entered.connect(_on_button_hover.bind(confirm_button))
 	cancel_button.mouse_entered.connect(_on_button_hover.bind(cancel_button))
 	confirm_button.focus_entered.connect(_on_button_focus.bind(confirm_button))
 	cancel_button.focus_entered.connect(_on_button_focus.bind(cancel_button))
-	
-	# Conectar el input blocker para capturar y procesar input
 	input_blocker.gui_input.connect(_on_input_blocker_input)
 
 func set_options_context():
@@ -161,8 +153,6 @@ func show():
 		return
 	
 	is_showing = true
-	
-	# Activar el bloqueador de input
 	input_blocker.visible = true
 	input_blocker.mouse_filter = Control.MOUSE_FILTER_STOP
 	
@@ -174,7 +164,6 @@ func show():
 	
 	await tween.finished
 	
-	# Dar focus al botón de cancelar
 	cancel_button.grab_focus()
 
 func hide():
@@ -191,18 +180,15 @@ func hide():
 	input_blocker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	is_showing = false
 	
-	# Reactivar input del InputManager
 	if main_scene.has_method("get") and main_scene.get("input_manager"):
 		main_scene.input_manager.enable_input()
 
 func _on_input_blocker_input(event: InputEvent):
 	if not is_showing:
 		return
-	
-	# Procesar el input aquí para que no llegue a otros controles
+
 	handle_input(event)
 	
-	# Marcar el evento como manejado para que no se propague
 	if confirmation_overlay.visible:
 		main_scene.get_viewport().set_input_as_handled()
 

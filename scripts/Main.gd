@@ -643,7 +643,7 @@ func restart_game():
 	
 	await _tree.create_timer(0.8).timeout
 	
-	setup_game_with_new_music()
+	reset_game_state()
 	
 	await _tree.process_frame
 
@@ -676,7 +676,7 @@ func restart_game():
 	is_game_transitioning = false
 	input_manager.enable_input()
 
-func setup_game_with_new_music():
+func reset_game_state():
 	verify_and_startup_deck()
 	
 	if joker_buff_label:

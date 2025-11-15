@@ -259,7 +259,6 @@ func _on_confirmation_canceled():
 	_focus_first_element()
 
 func apply_startup_settings():
-	_apply_audio_settings()
 	_apply_video_settings()
 
 func _on_apply_pressed():
