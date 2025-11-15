@@ -16,7 +16,6 @@ var glow_tween: Tween
 var progress_tween: Tween
 var original_position: Vector2
 
-# Pre-cache de StyleBoxes
 var progress_styles: Dictionary = {}
 
 signal ai_notification_shown(card_name: String)
@@ -64,11 +63,11 @@ func _precache_styles():
 	
 	var card_types = ["attack", "heal", "shield", "hybrid", "default"]
 	var colors = [
-		Color(1.0, 0.3, 0.2, 0.8),   # attack
-		Color(0.3, 0.8, 0.3, 0.8),   # heal
-		Color(0.2, 0.5, 0.9, 0.8),   # shield
-		Color(0.8, 0.6, 0.2, 0.8),   # hybrid
-		Color(0.6, 0.6, 0.6, 0.8)    # default
+		Color(1.0, 0.3, 0.2, 0.8),
+		Color(0.3, 0.8, 0.3, 0.8),
+		Color(0.2, 0.5, 0.9, 0.8),
+		Color(0.8, 0.6, 0.2, 0.8),
+		Color(0.6, 0.6, 0.6, 0.8)
 	]
 	
 	for i in card_types.size():
@@ -169,7 +168,6 @@ func _animate_progress_bar(duration: float, card_type: String):
 	
 	progress_bar.value = 100
 	
-	# Usar StyleBox pre-cacheado
 	var type_key = card_type if card_type in progress_styles else "default"
 	progress_bar.add_theme_stylebox_override("fill", progress_styles[type_key])
 	

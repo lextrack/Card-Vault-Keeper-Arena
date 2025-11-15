@@ -406,7 +406,7 @@ bus = &"SFX"
 
 [node name="CardHoverPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
 stream = ExtResource("3_q8u5g")
-volume_db = -8.0
+volume_db = -10.0
 bus = &"SFX"
 
 [node name="CombatSounds" type="Node" parent="AudioManager"]
@@ -438,7 +438,7 @@ bus = &"SFX"
 
 [node name="JokerPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
 stream = ExtResource("9_ft6cd")
-volume_db = 12.0
+volume_db = 24.0
 bus = &"SFX"
 
 [node name="GameSounds" type="Node" parent="AudioManager"]

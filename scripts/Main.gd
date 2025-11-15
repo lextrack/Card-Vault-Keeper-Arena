@@ -50,7 +50,9 @@ var bundle_celebration_system: BundleCelebration
 var game_music_playlist: Array = [
 	preload("res://audio/music/game_battle_1.ogg"),
 	preload("res://audio/music/game_battle_2.ogg"),
-	preload("res://audio/music/game_battle_3.ogg")
+	preload("res://audio/music/game_battle_3.ogg"),
+	preload("res://audio/music/game_battle_4.ogg"),
+	preload("res://audio/music/game_battle_5.ogg")
 ]
 
 func _ready():

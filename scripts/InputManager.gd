@@ -54,7 +54,6 @@ func is_input_enabled() -> bool:
 	return GameState.can_process_input() and not _is_menu_blocking_input() and not _is_game_transitioning()
 
 func _is_menu_blocking_input() -> bool:
-	# Verificar si el popup de confirmación está abierto
 	if main_scene.has_method("get") and main_scene.get("exit_dialog"):
 		var exit_dialog = main_scene.exit_dialog
 		if exit_dialog and exit_dialog.is_showing:

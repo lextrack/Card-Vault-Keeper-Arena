@@ -79,7 +79,7 @@ func _assign_base_players_to_sfx_bus():
 func _create_player_pools():
 	_create_pool("card_play", card_play_player, 4)
 	_create_pool("card_draw", card_draw_player, 5)
-	_create_pool("card_hover", card_hover_player, 6)
+	_create_pool("card_hover", card_hover_player, 8)
 	_create_pool("attack", attack_player, 4)
 	_create_pool("heal", heal_player, 4)
 	_create_pool("shield", shield_player, 4)

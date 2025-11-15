@@ -280,11 +280,25 @@ theme_override_font_sizes/font_size = 17
 text = "• thehorsevalse - One Synth Challenge"
 horizontal_alignment = 1
 
+[node name="MusicCredit7" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 17
+text = "• thehorsevalse - Quick Probability Triplet Psytrance"
+horizontal_alignment = 1
+
+[node name="MusicCredit8" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 17
+text = "• thehorsevalse - Quick Old School House"
+horizontal_alignment = 1
+
 [node name="MusicCredit2" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
 theme_override_font_sizes/font_size = 17
-text = "• thehorsevalse - PATCH SKETCH 036 - 
+text = "• thehorsevalse - 
 Relaxed Techno "
 horizontal_alignment = 1
 
@@ -302,6 +316,13 @@ theme_override_font_sizes/font_size = 17
 text = "• kjartan_abel - Gonna be gone"
 horizontal_alignment = 1
 
+[node name="MusicCredit6" type="Label" parent="MainContainer/CreditsContainer/RightColumn/MusicSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 17
+text = "• MichaeLydian - Weird Main Menu theme music"
+horizontal_alignment = 1
+
 [node name="SFXSection" type="VBoxContainer" parent="MainContainer/CreditsContainer/RightColumn"]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -312,7 +333,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 1, 0.4, 1)
 theme_override_font_sizes/font_size = 24
-text = "SOUND EFFECTS"
+text = "SOUND EFFECTS (AUTHORS)"
 horizontal_alignment = 1
 
 [node name="SFXCredit1" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
@@ -333,35 +354,42 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
 theme_override_font_sizes/font_size = 17
-text = "Joao_Janz"
+text = "• Joao_Janz"
 horizontal_alignment = 1
 
 [node name="SFXCredit4" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
 theme_override_font_sizes/font_size = 17
-text = "Raclure"
+text = "• Raclure"
 horizontal_alignment = 1
 
 [node name="SFXCredit5" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
 theme_override_font_sizes/font_size = 17
-text = "Diasyl"
+text = "• Diasyl"
 horizontal_alignment = 1
 
 [node name="SFXCredit6" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
 theme_override_font_sizes/font_size = 17
-text = "Loyalty_Freak_Music"
+text = "• Loyalty_Freak_Music"
 horizontal_alignment = 1
 
 [node name="SFXCredit7" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
 theme_override_font_sizes/font_size = 17
-text = "BeezleFM"
+text = "• BeezleFM"
+horizontal_alignment = 1
+
+[node name="SFXCredit8" type="Label" parent="MainContainer/CreditsContainer/RightColumn/SFXSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 17
+text = "• SilverDubloons"
 horizontal_alignment = 1
 
 [node name="FooterContainer" type="VBoxContainer" parent="MainContainer"]

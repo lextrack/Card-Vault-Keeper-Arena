@@ -14,8 +14,8 @@ var is_playlist_mode: bool = false
 
 var default_menu_volume: float = -4.0
 var default_challenge_volume: float = -6.0  
-var default_game_volume: float = -4.0
-var default_difficulty_volume: float = -9.0
+var default_game_volume: float = -5.0
+var default_difficulty_volume: float = -4.0
 
 var master_music_volume: float = 1.0
 var music_muted: bool = false
@@ -116,7 +116,7 @@ func _update_all_volumes():
 
 func _calculate_final_volume(base_volume: float, multiplier: float) -> float:
 	if multiplier <= 0.0:
-		return -80.0
+		return -60.0
 	
 	var volume_adjustment = 20.0 * log(multiplier) / log(10.0)
 	return base_volume + volume_adjustment
@@ -217,7 +217,7 @@ func start_menu_music(fade_duration: float = 1.5):
 	
 	current_music_type = "menu"
 	
-	menu_music_player.volume_db = -40.0
+	menu_music_player.volume_db = -30.0
 	menu_music_player.play()
 	
 	_kill_all_tweens()
@@ -239,7 +239,7 @@ func start_challenge_music(fade_duration: float = 1.5):
 	
 	current_music_type = "challenge"
 	
-	challenge_music_player.volume_db = -40.0
+	challenge_music_player.volume_db = -30.0
 	challenge_music_player.play()
 	
 	_kill_all_tweens()
@@ -270,7 +270,7 @@ func start_game_music(fade_duration: float = 1.5, force_new_track: bool = false)
 	
 	current_music_type = "game"
 	
-	game_music_player.volume_db = -40.0
+	game_music_player.volume_db = -30.0
 	game_music_player.play()
 	
 	_kill_all_tweens()
@@ -301,7 +301,7 @@ func start_difficulty_music(fade_duration: float = 1.5):
 	
 	current_music_type = "difficulty"
 	
-	difficulty_music_player.volume_db = -40.0
+	difficulty_music_player.volume_db = -30.0
 	difficulty_music_player.play()
 	
 	_kill_all_tweens()

@@ -31,17 +31,6 @@ const GAME_NOTIFICATION_BONUS_DURATION: float = 2.0
 const GAME_NOTIFICATION_END_DURATION: float = 2.0
 const GAME_NOTIFICATION_AUTO_TURN_DURATION: float = 1.5
 
-const MIN_HEAL_RATIO: float = 0.10
-const MIN_SHIELD_RATIO: float = 0.08
-const MIN_ATTACK_RATIO: float = 0.60
-const MIN_HYBRID_RATIO: float = 0.07
-
-enum Difficulty {
-	NORMAL,
-	HARD,
-	EXPERT
-}
-
 static func get_player_config(difficulty: String) -> Dictionary:
 	match difficulty:
 		"normal":
