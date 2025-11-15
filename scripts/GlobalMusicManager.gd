@@ -13,13 +13,13 @@ var shuffled_playlist: Array = []
 var is_playlist_mode: bool = false
 
 var default_menu_volume: float = -4.0
-var default_challenge_volume: float = -4.0  
+var default_challenge_volume: float = -6.0  
 var default_game_volume: float = -4.0
+var default_difficulty_volume: float = -9.0
 
 var master_music_volume: float = 1.0
 var music_muted: bool = false
 var difficulty_music_player: AudioStreamPlayer
-var default_difficulty_volume: float = -1.0
 
 func _ready():
 	_tree = get_tree()

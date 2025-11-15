@@ -59,7 +59,6 @@ func _ready():
 	var difficulty_music = preload("res://audio/music/difficulty_menu.ogg")
 	if global_music_manager:
 		global_music_manager.set_difficulty_music_stream(difficulty_music)
-		global_music_manager.set_difficulty_volume(-9.0)
 		global_music_manager.start_difficulty_music(1.5)
 	
 	await handle_scene_entrance()
