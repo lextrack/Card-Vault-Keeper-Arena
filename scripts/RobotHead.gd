@@ -379,3 +379,58 @@ func dramatic_reaction(reaction_type: String):
 	
 	await dramatic_tween.finished
 	reaction_finished.emit()
+	
+func play_emotional_reaction(emotion: String):
+	kill_tween("emotion")
+	tweens.emotion = create_tween()
+	
+	match emotion:
+		"joy":
+			set_mood("happy")
+			tweens.emotion.tween_property(head_container, "position:y", -25, 0.3).set_ease(Tween.EASE_OUT)
+			tweens.emotion.parallel().tween_property(head_container, "rotation", 0.15, 0.3)
+			tweens.emotion.parallel().tween_property(head_container, "scale", Vector2(1.15, 1.15), 0.3)
+			
+			tweens.emotion.tween_property(head_container, "position:y", -15, 0.2)
+			tweens.emotion.parallel().tween_property(head_container, "rotation", -0.15, 0.2)
+			
+			tweens.emotion.tween_property(head_container, "position:y", -20, 0.2)
+			tweens.emotion.parallel().tween_property(head_container, "rotation", 0.1, 0.2)
+			
+			tweens.emotion.tween_property(head_container, "position:y", 0, 0.4).set_ease(Tween.EASE_IN_OUT)
+			tweens.emotion.parallel().tween_property(head_container, "rotation", 0, 0.4)
+			tweens.emotion.parallel().tween_property(head_container, "scale", Vector2.ONE, 0.4)
+			
+			for eye in [left_eye, right_eye]:
+				var eye_tween = create_tween().set_loops(3)
+				eye_tween.tween_property(eye, "scale", Vector2(1.3, 0.6), 0.2)
+				eye_tween.tween_property(eye, "scale", Vector2.ONE, 0.2)
+			
+			flash_neck_lights()
+			
+		"sadness":
+			set_mood("error")
+			tweens.emotion.tween_property(head_container, "position:y", 10, 0.5).set_ease(Tween.EASE_OUT)
+			tweens.emotion.parallel().tween_property(head, "rotation", -0.2, 0.5)
+			tweens.emotion.parallel().tween_property(head_container, "scale", Vector2(0.95, 0.95), 0.5)
+			
+			for eye in [left_eye, right_eye]:
+				var eye_tween = create_tween()
+				eye_tween.tween_property(eye, "scale", Vector2(0.8, 1.2), 0.5)
+				eye_tween.tween_property(eye, "modulate:a", 0.6, 0.3)
+			
+			tweens.emotion.tween_interval(1.0)
+			
+			tweens.emotion.tween_property(head_container, "position:y", 0, 0.5).set_ease(Tween.EASE_IN_OUT)
+			tweens.emotion.parallel().tween_property(head, "rotation", 0, 0.5)
+			tweens.emotion.parallel().tween_property(head_container, "scale", Vector2.ONE, 0.5)
+			
+			for eye in [left_eye, right_eye]:
+				var reset_tween = create_tween()
+				reset_tween.tween_interval(1.5)
+				reset_tween.tween_property(eye, "scale", Vector2.ONE, 0.3)
+				reset_tween.parallel().tween_property(eye, "modulate:a", 1.0, 0.3)
+	
+	await tweens.emotion.finished
+	set_mood("normal")
+	reaction_finished.emit()

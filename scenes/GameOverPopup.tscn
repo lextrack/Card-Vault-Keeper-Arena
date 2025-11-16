@@ -1,0 +1,296 @@
+[gd_scene load_steps=11 format=3 uid="uid://c5y8ya02a1b3c"]
+
+[ext_resource type="Script" uid="uid://dx8fw6tycwiub" path="res://scripts/GameOverPopup.gd" id="1_popup"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_victory"]
+bg_color = Color(0.1, 0.1, 0.15, 0.95)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.2, 1, 0.2, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_defeat"]
+bg_color = Color(0.1, 0.1, 0.15, 0.95)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(1, 0.3, 0.3, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dialogue"]
+bg_color = Color(1, 1, 1, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_isuky"]
+bg_color = Color(0.15, 0.25, 0.15, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.6, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_go73p"]
+bg_color = Color(0.12, 0.2, 0.12, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.5, 0.35, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ayjtk"]
+bg_color = Color(0.2, 0.35, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.7, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1yrii"]
+bg_color = Color(0.2, 0.1, 0.15, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.45, 0.3, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6q46r"]
+bg_color = Color(0.17, 0.08, 0.12, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.25, 0.35, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nx8v4"]
+bg_color = Color(0.28, 0.15, 0.22, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.4, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[node name="GameOverPopup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_popup")
+
+[node name="Overlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7254902)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PopupPanel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(1000, 600)
+layout_mode = 2
+
+[node name="BorderPanel" type="Panel" parent="CenterContainer/PopupPanel"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_victory")
+metadata/_victory_style = SubResource("StyleBoxFlat_victory")
+metadata/_defeat_style = SubResource("StyleBoxFlat_defeat")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PopupPanel/BorderPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxMainContainer" type="VBoxContainer" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 48
+text = "VICTORY!"
+horizontal_alignment = 1
+
+[node name="ContentHBox" type="HBoxContainer" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 60
+alignment = 1
+
+[node name="RobotContainer" type="CenterContainer" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox"]
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="RobotVBox" type="VBoxContainer" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox/RobotContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="DialogueBox" type="PanelContainer" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox/RobotContainer/RobotVBox"]
+custom_minimum_size = Vector2(280, 80)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dialogue")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox/RobotContainer/RobotVBox/DialogueBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 10
+
+[node name="DialogueLabel" type="Label" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox/RobotContainer/RobotVBox/DialogueBox/MarginContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.1, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 20
+text = "Dialogue"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="RobotSlot" type="CenterContainer" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox/RobotContainer/RobotVBox"]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+use_top_left = true
+
+[node name="StatsVBox" type="VBoxContainer" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 20
+
+[node name="StatsTitle" type="Label" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox/StatsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8992584, 0.89925843, 0.89925826, 1)
+theme_override_colors/font_shadow_color = Color(0.103743516, 0.10374353, 0.103743516, 0)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 4
+theme_override_constants/shadow_offset_y = 4
+theme_override_constants/outline_size = 4
+theme_override_constants/shadow_outline_size = 4
+theme_override_font_sizes/font_size = 26
+text = "Match Statistics"
+horizontal_alignment = 1
+
+[node name="TurnsLabel" type="Label" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox/StatsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "Turns played: 0"
+horizontal_alignment = 1
+
+[node name="PlayerCardsLabel" type="Label" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox/StatsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "Cards played: 0"
+horizontal_alignment = 1
+
+[node name="DamageDealtLabel" type="Label" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox/StatsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "Damage dealt: 0"
+horizontal_alignment = 1
+
+[node name="DamageReceivedLabel" type="Label" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ContentHBox/StatsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "Damage taken: 0"
+horizontal_alignment = 1
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="NewGameButton" type="Button" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(200, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_isuky")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_go73p")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ayjtk")
+text = "New Game"
+
+[node name="MainMenuButton" type="Button" parent="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_1yrii")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6q46r")
+theme_override_styles/hover = SubResource("StyleBoxFlat_nx8v4")
+text = "Main Menu"
+
+[connection signal="pressed" from="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ButtonsContainer/NewGameButton" to="." method="_on_new_game_button_pressed"]
+[connection signal="pressed" from="CenterContainer/PopupPanel/BorderPanel/MarginContainer/VBoxMainContainer/ButtonsContainer/MainMenuButton" to="." method="_on_main_menu_button_pressed"]

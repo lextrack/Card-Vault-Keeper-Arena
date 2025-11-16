@@ -43,6 +43,7 @@ var card_scene = preload("res://scenes/Card.tscn")
 var ai_notification_scene = preload("res://scenes/AICardNotification.tscn")
 var game_notification_scene = preload("res://scenes/GameNotification.tscn")
 var bundle_celebration_system: BundleCelebration
+var game_over_popup_scene = preload("res://scenes/GameOverPopup.tscn")
 
 @export var controls_panel_scene: PackedScene = preload("res://scenes/ControlsPanel.tscn")
 @export var options_menu_scene: PackedScene = preload("res://scenes/OptionsMenu.tscn")
@@ -822,20 +823,13 @@ func _on_player_died():
 		
 	GameState.add_game_result(false)
 	
-	game_notification.show_game_end_notification("Defeat", "hp_zero")
-	
-	await _tree.create_timer(1.5).timeout
-	
-	game_over_label.text = "YOU LOST! Restarting..."
-	game_over_label.visible = true
-	
 	if end_turn_button:
 		end_turn_button.disabled = true
 	
-	await _tree.create_timer(2.0).timeout
-	is_game_transitioning = false
+	await _tree.create_timer(1.0).timeout
 	
-	restart_game()
+	_show_game_over_popup(false)
+
 	
 func _on_ai_card_played(card: CardData):
 	ai_notification.show_card_notification(card, "AI")
@@ -868,20 +862,75 @@ func _on_ai_died():
 	
 	GameState.add_game_result(true)
 	
-	game_notification.show_game_end_notification("Victory!", "hp_zero")
-	
-	await _tree.create_timer(1.5).timeout
-	
-	game_over_label.text = "YOU WON! Restarting..."
-	game_over_label.visible = true
-	
 	if end_turn_button:
 		end_turn_button.disabled = true
 	
-	await _tree.create_timer(2.0).timeout
+	await _tree.create_timer(1.0).timeout
 
+	_show_game_over_popup(true)
+
+func _show_game_over_popup(won: bool):
+	# Desactivar el InputManager y limpiar selección de carta con gamepad
+	if input_manager:
+		input_manager.disable_input()
+	
+	# Deseleccionar la carta actualmente seleccionada
+	if ui_manager and ui_manager.card_instances.size() > 0:
+		var selected_index = ui_manager.selected_card_index
+		if selected_index < ui_manager.card_instances.size():
+			var selected_card = ui_manager.card_instances[selected_index]
+			if is_instance_valid(selected_card):
+				if selected_card.has_method("remove_gamepad_selection_style"):
+					selected_card.remove_gamepad_selection_style()
+				if selected_card.has_method("force_reset_visual_state"):
+					selected_card.force_reset_visual_state()
+	
+	var popup = game_over_popup_scene.instantiate()
+	
+	# Agregar el popup al ui_layer para que esté por encima de todo
+	ui_layer.add_child(popup)
+	
+	var player_cards = 0
+	var damage_dealt = 0
+	var damage_received = 0
+	
+	# Usar estadísticas de la partida actual, no globales
+	if StatisticsManagers:
+		player_cards = StatisticsManagers.current_game_cards_played
+		damage_dealt = StatisticsManagers.current_game_damage_dealt
+		damage_received = StatisticsManagers.current_game_damage_taken
+	
+	var stats = {
+		"turns": player.turn_number if player else 0,
+		"player_cards": player_cards,
+		"damage_dealt": damage_dealt,
+		"damage_received": damage_received
+	}
+	
+	popup.show_game_over(won, stats)
+	popup.new_game_requested.connect(_on_new_game_requested)
+	popup.main_menu_requested.connect(_on_main_menu_requested)
+
+func _on_new_game_requested():
+	for child in ui_layer.get_children():
+		if child.name == "GameOverPopup":
+			child.queue_free()
+	
+	if StatisticsManagers:
+		StatisticsManagers.start_game(difficulty)
+	
 	is_game_transitioning = false
 	restart_game()
+
+func _on_main_menu_requested():
+	for child in ui_layer.get_children():
+		if child.name == "GameOverPopup":
+			child.queue_free()
+	
+	cleanup_notifications()
+	stop_game_music(0.8)
+	await _tree.create_timer(0.3).timeout
+	_tree.change_scene_to_file("res://scenes/MainMenu.tscn")
 
 func _track_game_end(player_won: bool):
 	if not UnlockManagers:
@@ -974,9 +1023,6 @@ func _on_card_clicked(card):
 			"shield_value": card_data.shield
 		}
 		UnlockManagers.track_progress("card_played", 1, extra_data)
-		
-		if StatisticsManagers:
-			StatisticsManagers.card_played(card_name, card_type, card_cost, card_data.is_joker)
 		
 		if card_data.is_joker:
 			UnlockManagers.track_progress("joker_played", 1, {})

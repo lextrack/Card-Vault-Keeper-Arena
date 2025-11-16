@@ -11,12 +11,13 @@ config_version=5
 [application]
 
 config/name="Card Vault Keeper: Arena"
-config/version="1.0.1.3"
+config/version="1.0.1.4"
 run/main_scene="uid://cxw6tc65b0iwr"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/image="uid://c5xv5kjqf42h8"
 config/icon="uid://c0eo1r0efpeih"
+boot_splash/minimum_display_time=2000
 
 [autoload]
 

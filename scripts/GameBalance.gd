@@ -84,7 +84,7 @@ static func get_ai_config(difficulty: String) -> Dictionary:
 			}
 		"expert":
 			return {
-				"hp": 62,
+				"hp": 65,
 				"mana": 12,
 				"cards_per_turn": 2,
 				"hand_size": 6,

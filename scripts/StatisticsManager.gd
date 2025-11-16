@@ -49,6 +49,13 @@ var session_start_time: float = 0.0
 var session_games_played: int = 0
 var session_games_won: int = 0
 
+# Estadísticas de la partida actual (se resetean al iniciar cada partida)
+var current_game_cards_played: int = 0
+var current_game_damage_dealt: int = 0
+var current_game_damage_taken: int = 0
+var current_game_healing_done: int = 0
+var current_game_shield_gained: int = 0
+
 var save_file_path: String = "user://statistics.save"
 
 func _ready():
@@ -62,6 +69,13 @@ func _ready():
 func start_game(difficulty: String):
 	game_start_time = Time.get_ticks_msec() / 1000.0
 	current_game_turns = 0
+	
+	# Resetear estadísticas de la partida actual
+	current_game_cards_played = 0
+	current_game_damage_dealt = 0
+	current_game_damage_taken = 0
+	current_game_healing_done = 0
+	current_game_shield_gained = 0
 	
 	games_played += 1
 	session_games_played += 1
@@ -105,7 +119,11 @@ func end_game(player_won: bool, difficulty: String, final_turns: int):
 
 
 func card_played(card_name: String, card_type: String, card_cost: int, is_joker: bool = false):
+	# Estadísticas globales
 	cards_played_total += 1
+	
+	# Estadísticas de partida actual
+	current_game_cards_played += 1
 	
 	if cards_played_by_type.has(card_type):
 		cards_played_by_type[card_type] += 1
@@ -133,12 +151,16 @@ func combat_action(action_type: String, amount: int):
 	match action_type:
 		"damage_dealt":
 			total_damage_dealt += amount
+			current_game_damage_dealt += amount
 		"damage_taken":
 			total_damage_taken += amount
+			current_game_damage_taken += amount
 		"healing_done":
 			total_healing_done += amount
+			current_game_healing_done += amount
 		"shield_gained":
 			total_shield_gained += amount
+			current_game_shield_gained += amount
 
 func turn_completed():
 	current_game_turns += 1
