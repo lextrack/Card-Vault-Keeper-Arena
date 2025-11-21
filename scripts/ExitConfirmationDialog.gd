@@ -269,3 +269,20 @@ func _on_button_focus(button: Button):
 func _on_button_unfocus(button: Button):
 	var tween = main_scene.create_tween()
 	tween.tween_property(button, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.1)
+
+func cleanup():
+	is_showing = false
+	
+	if is_instance_valid(input_blocker):
+		input_blocker.queue_free()
+	
+	if is_instance_valid(confirmation_overlay):
+		confirmation_overlay.queue_free()
+	
+	input_blocker = null
+	confirmation_overlay = null
+	confirmation_background = null
+	confirmation_panel = null
+	confirmation_label = null
+	confirm_button = null
+	cancel_button = null

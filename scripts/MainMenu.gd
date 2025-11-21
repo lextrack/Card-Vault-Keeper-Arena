@@ -1,6 +1,7 @@
 extends Control
 
 @onready var play_button = $MenuContainer/ButtonsContainer/PlayButton
+@onready var run_mode_button = $MenuContainer/ButtonsContainer/RunModeButton
 @onready var options_button = $MenuContainer/ButtonsContainer/OptionsButton
 @onready var help_button = $MenuContainer/ButtonsContainer/HelpButton
 @onready var credits_button = $MenuContainer/ButtonsContainer/CreditsButton
@@ -68,6 +69,7 @@ func _ready():
 	entrance_complete = true
 	
 	_save_original_button_positions()
+	
 	
 	await get_tree().process_frame
 	_focus_first_button_safe()
@@ -171,6 +173,7 @@ func _setup_options_menu():
 func _setup_gamepad_navigation():
 	focusable_buttons = [
 		play_button,
+		run_mode_button,
 		options_button,
 		help_button,
 		challenge_button,
@@ -277,8 +280,8 @@ func handle_scene_entrance():
 	await get_tree().process_frame
 	
 	if TransitionManager and TransitionManager.current_overlay:
-		if (TransitionManager.current_overlay.has_method("is_ready") and 
-			TransitionManager.current_overlay.is_ready() and 
+		if (TransitionManager.current_overlay.has_method("is_ready") and
+			TransitionManager.current_overlay.is_ready() and
 			TransitionManager.current_overlay.has_method("is_covering") and
 			TransitionManager.current_overlay.is_covering()):
 
@@ -310,12 +313,26 @@ func setup_buttons():
 	stats_button.pressed.connect(_on_statistics_pressed)
 	exit_button.pressed.connect(_on_exit_pressed)
 	
-	var buttons = [play_button, options_button, help_button, challenge_button, credits_button, stats_button, exit_button]
+	if run_mode_button:
+		run_mode_button.pressed.connect(_on_run_mode_pressed)
+	
+	var buttons = [
+		play_button,
+		run_mode_button,
+		options_button,
+		help_button,
+		challenge_button,
+		credits_button,
+		stats_button,
+		exit_button
+	]
+	
 	for button in buttons:
-		button.mouse_entered.connect(_on_button_hover.bind(button))
-		button.focus_entered.connect(_on_button_focus.bind(button))
-		button.focus_exited.connect(_on_button_unfocus.bind(button))
-		button.mouse_exited.connect(_on_button_unhover.bind(button))
+		if button and is_instance_valid(button):
+			button.mouse_entered.connect(_on_button_hover.bind(button))
+			button.focus_entered.connect(_on_button_focus.bind(button))
+			button.focus_exited.connect(_on_button_unfocus.bind(button))
+			button.mouse_exited.connect(_on_button_unhover.bind(button))
 		
 func _on_statistics_pressed():
 	if is_transitioning or popup_active:
@@ -478,6 +495,10 @@ func _on_credits_pressed():
 	
 	TransitionManager.fade_to_scene("res://scenes/CreditsScene.tscn", 1.0)
 
+func _on_run_mode_pressed():
+	play_ui_sound("button_click")
+	TransitionManager.fade_to_scene("res://scenes/RunManager.tscn", 1.0)
+	
 func _on_exit_pressed():
 	if is_transitioning or popup_active:
 		return

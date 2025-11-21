@@ -17,7 +17,7 @@ extends Control
 const GAMEPAD_SELECTION_COLOR: Color = Color(1.3, 1.276, 1.153, 1.0)
 const GAMEPAD_SELECTION_SCALE: float = 1.02
 const GAMEPAD_NAVIGATION_COOLDOWN: float = 0.15
-const GAMEPAD_SCROLL_MARGIN: float = 80
+const GAMEPAD_SCROLL_MARGIN: float = 100
 const GAMEPAD_SCROLL_DURATION: float = 0.2
 
 var challenge_music_stream = preload("res://audio/music/challenge_hub_theme.ogg")
@@ -33,7 +33,7 @@ var debug_mode_unlock = true
 var gamepad_mode: bool = false
 var selected_bundle_index: int = 0
 var last_input_was_gamepad: bool = false
-var scroll_speed: float = 200.0
+var scroll_speed: float = 150.0
 var input_cooldown: float = 0.0
 var input_cooldown_time: float = GAMEPAD_NAVIGATION_COOLDOWN
 
@@ -66,12 +66,12 @@ var casual_dialogs = [
 	"Some warriors study their cards for hours. Others dive in recklessly. Which type are you?",
 	"I've seen players unlock every card and still lose. Power without strategy is just noise.",
 	"That defensive bundle over there? Saved my processors in more battles than I can count.",
-	"Every card whispers secrets of past victories... and crushing defeats.",
-	"The ancient ones who designed these cards understood something: balance is temporary, chaos is eternal.",
+	"In Run mode, I'm not fighting you; it's my brothers who are there. Yes, a robot can have brothers.",
 	"Power calls to those who dare to earn it... and those foolish enough to think earning is enough.",
 	"Take your time browsing. These cards have waited decades in my vault. They can wait a bit longer.",
 	"You eye the harder challenges? Good. Weak warriors don't deserve legendary cards.",
 	"I assign your life, mana, and starting hand. Some call it unfair. I call it... efficient.",
+	"In Run Mode, all cards are unlocked, but you will have a small random deck when you start. How lucky that out of nowhere you get a very powerful card!",
 	"Unlock more bundles so we have more cards to play with. I do enjoy variety in crushing you.",
 	"A single card can turn the tide of battle... if you know when to play it. Check your mana first, though.",
 	"Besides dueling you and hoarding these bundles, I also meticulously track every statistic of yours.",
@@ -93,7 +93,6 @@ var mysterious_dialogs = [
 ]
 
 var struggling_dialogs = [
-	"I've noticed you've attempted this challenge multiple times...",
 	"Perhaps a different strategy would serve you better?",
 	"Every defeat teaches a lesson... if you're willing to learn it.",
 	"Persistence is admirable. But blind repetition? That's just stubbornness.",

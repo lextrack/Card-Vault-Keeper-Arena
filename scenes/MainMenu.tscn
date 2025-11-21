@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://cxw6tc65b0iwr"]
+[gd_scene load_steps=19 format=3 uid="uid://cxw6tc65b0iwr"]
 
 [ext_resource type="Script" uid="uid://cgqsikv5uk8v4" path="res://scripts/MainMenu.gd" id="1_main_menu"]
 [ext_resource type="AudioStream" uid="uid://bi56v68uk67c8" path="res://audio/music/MainMenuMusic.ogg" id="2_0ykhv"]
@@ -33,6 +33,48 @@ shadow_size = 2
 shadow_offset = Vector2(0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_start_hover"]
+bg_color = Color(0.2, 0.35, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.7, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2wh52"]
+bg_color = Color(0.15, 0.25, 0.15, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.6, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ow34m"]
+bg_color = Color(0.12, 0.2, 0.12, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.5, 0.35, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l72w3"]
 bg_color = Color(0.2, 0.35, 0.2, 0.9)
 border_width_left = 1
 border_width_top = 1
@@ -279,11 +321,21 @@ alignment = 1
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_start_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_start_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_start_hover")
-text = "START GAME"
+text = "GUARDIAN'S CHALLENGE"
+
+[node name="RunModeButton" type="Button" parent="MenuContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(300, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_2wh52")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ow34m")
+theme_override_styles/hover = SubResource("StyleBoxFlat_l72w3")
+text = "RUN MODE"
 
 [node name="OptionsButton" type="Button" parent="MenuContainer/ButtonsContainer"]
 custom_minimum_size = Vector2(300, 50)
@@ -313,7 +365,7 @@ theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_challenge_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_challenge_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_challenge_hover")
-text = "CHALLENGE HUB"
+text = "GUARDIAN'S VAULT"
 
 [node name="CreditsButton" type="Button" parent="MenuContainer/ButtonsContainer"]
 custom_minimum_size = Vector2(300, 50)
@@ -364,7 +416,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
 theme_override_font_sizes/font_size = 15
-text = "Version 1.0.1.4"
+text = "Version 1.0.1.5"
 horizontal_alignment = 1
 
 [node name="AudioManager" type="Node" parent="."]

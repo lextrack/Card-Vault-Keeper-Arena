@@ -39,6 +39,7 @@ var cached_styles: Dictionary = {}
 var base_stat_modulate: Color = Color.WHITE
 
 var _critical_children: Array = []
+var _modified_cost: int = -1
 
 const HOVER_SCALE = 1.07
 const GAMEPAD_SCALE = 1.07
@@ -131,6 +132,39 @@ func _cache_card_colors():
 
 func get_card_data() -> CardData:
 	return card_data
+
+func set_modified_cost(modified_cost: int):
+	_modified_cost = modified_cost
+	if cost_label:
+		cost_label.text = str(modified_cost)
+		cost_label.modulate = Color(1.5, 0.8, 0.8, 1.0)
+
+func reset_cost_display():
+	_modified_cost = -1
+	if cost_label and card_data:
+		cost_label.text = str(card_data.cost)
+		cost_label.modulate = Color.WHITE
+
+func get_effective_cost() -> int:
+	if _modified_cost >= 0:
+		return _modified_cost
+	return card_data.cost if card_data else 0
+
+func set_blocked_by_effect(blocked: bool):
+	if blocked:
+		is_playable = false
+		modulate = Color(0.6, 0.3, 0.3, 0.8)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		
+		if card_border:
+			card_border.modulate = Color(1.0, 0.4, 0.4, 1.0)
+	else:
+		is_playable = true
+		modulate = Color.WHITE
+		mouse_filter = Control.MOUSE_FILTER_PASS
+		
+		if card_border:
+			card_border.modulate = Color.WHITE
 
 func animate_mana_insufficient():
 	if is_being_played or not is_instance_valid(self):

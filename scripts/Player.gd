@@ -517,7 +517,9 @@ func ai_turn(opponent: Player):
 	
 	var audio_helper = null
 	
-	if not main_scene:
+	if main_scene and main_scene.has_method("get") and "audio_helper" in main_scene:
+		audio_helper = main_scene.audio_helper
+	elif not main_scene:
 		var root = _tree.current_scene
 		if root and root.has_method("get") and root.get("audio_helper"):
 			audio_helper = root.audio_helper

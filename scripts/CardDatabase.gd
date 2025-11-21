@@ -404,6 +404,88 @@ static func get_joker_templates() -> Array[Dictionary]:
 			"description": "3 damage + 3 heal + next hybrid +50% (this turn)"
 		}
 	]
+	
+static func get_card_by_name(card_name: String) -> Dictionary:
+	_ensure_cache_initialized()
+	
+	if _cards_by_name_cache.has(card_name):
+		return _cards_by_name_cache[card_name].duplicate()
+	
+	return {}
+
+static func get_random_run_starter_deck() -> Array[CardData]:
+	_ensure_cache_initialized()
+	
+	var starter_deck: Array[CardData] = []
+	var all_templates = _all_cards_cache.duplicate()
+	all_templates.shuffle()
+	
+	var attack_cards: Array[Dictionary] = []
+	var heal_cards: Array[Dictionary] = []
+	var shield_cards: Array[Dictionary] = []
+	var hybrid_cards: Array[Dictionary] = []
+	
+	for template in all_templates:
+		match template.get("type", ""):
+			"attack":
+				attack_cards.append(template)
+			"heal":
+				heal_cards.append(template)
+			"shield":
+				shield_cards.append(template)
+			"hybrid":
+				hybrid_cards.append(template)
+	
+	if attack_cards.size() > 0:
+		var card = CardBuilder.from_template(attack_cards[0])
+		if card:
+			starter_deck.append(card)
+	
+	if heal_cards.size() > 0:
+		var card = CardBuilder.from_template(heal_cards[0])
+		if card:
+			starter_deck.append(card)
+	
+	if shield_cards.size() > 0:
+		var card = CardBuilder.from_template(shield_cards[0])
+		if card:
+			starter_deck.append(card)
+	
+	if hybrid_cards.size() > 0:
+		var card = CardBuilder.from_template(hybrid_cards[0])
+		if card:
+			starter_deck.append(card)
+	
+	all_templates.shuffle()
+	
+	while starter_deck.size() < 10 and all_templates.size() > 0:
+		var template = all_templates.pop_back()
+		var card = CardBuilder.from_template(template)
+		if card:
+			starter_deck.append(card)
+	
+	starter_deck.shuffle()
+	
+	return starter_deck
+
+static func get_random_reward_cards(count: int) -> Array[CardData]:
+	_ensure_cache_initialized()
+	
+	var reward_cards: Array[CardData] = []
+	var available_templates = _all_cards_cache.duplicate()
+	available_templates.shuffle()
+	
+	var added = 0
+	for template in available_templates:
+		if added >= count:
+			break
+		
+		var card = CardBuilder.from_template(template)
+		if card:
+			reward_cards.append(card)
+			added += 1
+	
+	return reward_cards
 
 static func clear_cache():
 	_all_cards_cache.clear()

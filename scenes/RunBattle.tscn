@@ -1,0 +1,663 @@
+[gd_scene load_steps=29 format=3 uid="uid://ce08ql6ofvbqx"]
+
+[ext_resource type="Script" uid="uid://p8wsrrocw2ol" path="res://scripts/RunBattle.gd" id="1_r2to0"]
+[ext_resource type="Script" uid="uid://c4bcluymhr1ap" path="res://scripts/AudioManager.gd" id="2_e48ey"]
+[ext_resource type="Shader" uid="uid://bbofxwrdejekp" path="res://shaders/RunBattle.gdshader" id="2_nmnuk"]
+[ext_resource type="AudioStream" uid="uid://cfpivtf0scv5x" path="res://audio/sfx/CardHover.wav" id="3_cb8pq"]
+[ext_resource type="AudioStream" uid="uid://ckxka8g2wos1g" path="res://audio/sfx/AttackSound.wav" id="4_xv0yw"]
+[ext_resource type="AudioStream" uid="uid://cnsi1ofavhclr" path="res://audio/sfx/HealPlayer.wav" id="5_nmnuk"]
+[ext_resource type="AudioStream" uid="uid://d171x6u7t5m8" path="res://audio/sfx/ShieldPlayer.wav" id="6_87mie"]
+[ext_resource type="AudioStream" uid="uid://dhgmauy3jabs2" path="res://audio/sfx/DamagePlayer.wav" id="7_b3eik"]
+[ext_resource type="AudioStream" uid="uid://ctylue5xst8k8" path="res://audio/sfx/HybridCard.wav" id="8_g4up8"]
+[ext_resource type="AudioStream" uid="uid://dtadw5qx2yj2x" path="res://audio/sfx/joker_selected.wav" id="9_vrxln"]
+[ext_resource type="AudioStream" uid="uid://bto1wej75tun2" path="res://audio/sfx/TurnChange.wav" id="10_etxb1"]
+[ext_resource type="AudioStream" uid="uid://dp42l3ltdf36v" path="res://audio/sfx/CardSound1.wav" id="11_peoyc"]
+[ext_resource type="AudioStream" uid="uid://b3ch0pe3scns8" path="res://audio/sfx/Bonus.wav" id="12_82irk"]
+[ext_resource type="AudioStream" uid="uid://djgi8tn5xmkh" path="res://audio/sfx/IAttack.wav" id="13_7r4a0"]
+[ext_resource type="AudioStream" uid="uid://b53xy34r812au" path="res://audio/ui/button_click.wav" id="14_1pphj"]
+[ext_resource type="Shader" uid="uid://cd68um5040ipp" path="res://shaders/PlayerStats.gdshader" id="16_shader2"]
+[ext_resource type="Shader" uid="uid://1owioofjfjmh" path="res://shaders/AIStats.gdshader" id="17_shader3"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_87mie"]
+shader = ExtResource("2_nmnuk")
+shader_parameter/color1 = Color(0, 0.18, 0.28, 0.65)
+shader_parameter/color2 = Color(0, 0.42, 0.52, 0.75)
+shader_parameter/color3 = Color(0.15, 0.65, 0.75, 0.82)
+shader_parameter/speed = 0.1
+shader_parameter/scale = 5.0
+shader_parameter/distortion = 0.5
+shader_parameter/glow_intensity = 0.5
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_player"]
+shader = ExtResource("16_shader2")
+shader_parameter/base_color = Color(0.1, 0.1, 0.5, 1)
+shader_parameter/glow_color = Color(0.1, 0.2, 1, 1)
+shader_parameter/speed = 0.3
+shader_parameter/frequency = 15.0
+shader_parameter/glow_strength = 0.5
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ai"]
+shader = ExtResource("17_shader3")
+shader_parameter/base_color = Color(0.4, 0.05, 0.05, 1)
+shader_parameter/glow_color = Color(1, 0.2, 0.2, 1)
+shader_parameter/speed = 0.3
+shader_parameter/frequency = 15.0
+shader_parameter/glow_strength = 0.5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_endturn_normal"]
+bg_color = Color(0.2, 0.3, 0.15, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.7, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_endturn_pressed"]
+bg_color = Color(0.15, 0.25, 0.1, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.6, 0.3, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_endturn_hover"]
+bg_color = Color(0.25, 0.4, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.8, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_endturn_disabled"]
+bg_color = Color(0.15, 0.15, 0.15, 0.5)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.25, 0.25, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 1
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_normal"]
+bg_color = Color(0.2, 0.1, 0.1, 0.75)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.25, 0.25, 0.5)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 3
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_pressed"]
+bg_color = Color(0.17, 0.08, 0.08, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.2, 0.2, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 1
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_hover"]
+bg_color = Color(0.3, 0.15, 0.15, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.3, 0.3, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nmnuk"]
+bg_color = Color(0.15, 0.15, 0.15, 0.5)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.25, 0.25, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 1
+shadow_offset = Vector2(0, 1)
+
+[node name="RunBattle" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_r2to0")
+
+[node name="Background" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_87mie")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.12, 0.15, 1)
+
+[node name="UILayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopPanel" type="Panel" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 160.0
+grow_horizontal = 2
+
+[node name="TopPanelBG" type="ColorRect" parent="UILayer/TopPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -7.0
+offset_top = -11.0
+offset_right = 7.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.078431375, 0.12941177, 0.18039216, 0.9019608)
+
+[node name="MainContainer" type="VBoxContainer" parent="UILayer/TopPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="StatsRow" type="HBoxContainer" parent="UILayer/TopPanel/MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="PlayerStatsPanel" type="PanelContainer" parent="UILayer/TopPanel/MainContainer/StatsRow"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerStatsBG" type="ColorRect" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel"]
+material = SubResource("ShaderMaterial_player")
+layout_mode = 2
+color = Color(0.2, 0.2, 0.6, 0.7)
+
+[node name="PlayerStatsContainer" type="HBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HPStat" type="VBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="HPLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer/HPStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "50"
+horizontal_alignment = 1
+
+[node name="HPTitle" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer/HPStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "HP"
+horizontal_alignment = 1
+
+[node name="ManaStat" type="VBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ManaLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer/ManaStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 26
+text = "10"
+horizontal_alignment = 1
+
+[node name="ManaTitle" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer/ManaStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "MANA"
+horizontal_alignment = 1
+
+[node name="ShieldStat" type="VBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ShieldLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer/ShieldStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 26
+text = "0"
+horizontal_alignment = 1
+
+[node name="ShieldTitle" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer/ShieldStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "SHIELD"
+horizontal_alignment = 1
+
+[node name="CenterInfoPanel" type="PanelContainer" parent="UILayer/TopPanel/MainContainer/StatsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.8
+
+[node name="CenterBG" type="ColorRect" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel"]
+layout_mode = 2
+color = Color(0.101960786, 0.14901961, 0.2509804, 0.9019608)
+
+[node name="CenterInfo" type="VBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel"]
+layout_mode = 2
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="TopRow" type="HBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="TurnLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo/TopRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.7, 1)
+theme_override_font_sizes/font_size = 22
+text = "Turn 1"
+horizontal_alignment = 1
+
+[node name="Separator1" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo/TopRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 22
+text = "|"
+
+[node name="GameInfoLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo/TopRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Round 3/3 - Boss"
+horizontal_alignment = 1
+
+[node name="BottomRow" type="HBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo"]
+layout_mode = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="RunInfoLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo/BottomRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Deck: 12 cards"
+horizontal_alignment = 1
+
+[node name="Separator2" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo/BottomRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = "|"
+
+[node name="EnemyLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo/BottomRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Enemy: Time Warden"
+horizontal_alignment = 1
+
+[node name="TimeLimitLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 20
+text = "0:27.86"
+horizontal_alignment = 1
+
+[node name="AIStatsPanel" type="PanelContainer" parent="UILayer/TopPanel/MainContainer/StatsRow"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AIStatsBG" type="ColorRect" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel"]
+material = SubResource("ShaderMaterial_ai")
+layout_mode = 2
+color = Color(0.501961, 0.2, 0.301961, 0.784314)
+
+[node name="AIStatsContainer" type="HBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HPStat" type="VBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="HPLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer/HPStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "50"
+horizontal_alignment = 1
+
+[node name="HPTitle" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer/HPStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "AI HP"
+horizontal_alignment = 1
+
+[node name="ManaStat" type="VBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ManaLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer/ManaStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.6, 1, 1)
+theme_override_font_sizes/font_size = 26
+text = "11"
+horizontal_alignment = 1
+
+[node name="ManaTitle" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer/ManaStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "AI MANA"
+horizontal_alignment = 1
+
+[node name="ShieldStat" type="VBoxContainer" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ShieldLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer/ShieldStat"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 26
+text = "0"
+horizontal_alignment = 1
+
+[node name="ShieldTitle" type="Label" parent="UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer/ShieldStat"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "AI SHIELD"
+horizontal_alignment = 1
+
+[node name="StatusRow" type="HBoxContainer" parent="UILayer/TopPanel/MainContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="NegativeEffectLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatusRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="DamageBonusLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatusRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="JokerBuffLabel" type="Label" parent="UILayer/TopPanel/MainContainer/StatusRow"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+text = "Buff coringa"
+horizontal_alignment = 1
+
+[node name="CenterArea" type="Control" parent="UILayer"]
+layout_mode = 1
+anchor_top = 0.185
+anchor_right = 1.0
+anchor_bottom = 0.93
+offset_top = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HandContainer" type="HBoxContainer" parent="UILayer/CenterArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="BottomPanel" type="Panel" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -55.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="BottomPanelBG" type="ColorRect" parent="UILayer/BottomPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -9.0
+offset_right = 9.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.101960786, 0.14901961, 0.2509804, 0.9019608)
+
+[node name="TurnButtonsContainer" type="HBoxContainer" parent="UILayer/BottomPanel"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -22.0
+offset_right = -20.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="EndTurnButton" type="Button" parent="UILayer/BottomPanel/TurnButtonsContainer"]
+custom_minimum_size = Vector2(150, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 1, 0.8, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9, 0.6, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.4, 0.4, 0.7)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_endturn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_endturn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_endturn_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_endturn_disabled")
+text = "End Turn"
+
+[node name="ExitButton" type="Button" parent="UILayer/BottomPanel/TurnButtonsContainer"]
+custom_minimum_size = Vector2(100, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 0.7, 0.7, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.5, 0.5, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.4, 0.4, 0.7)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_exit_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_exit_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_exit_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_nmnuk")
+text = "Exit"
+
+[node name="GameOverLabel" type="Label" parent="UILayer"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -60.0
+offset_right = 250.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 56
+text = "VICTORY!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AudioManager" type="Node" parent="."]
+script = ExtResource("2_e48ey")
+
+[node name="CardSounds" type="Node" parent="AudioManager"]
+
+[node name="CardPlayPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
+bus = &"SFX"
+
+[node name="CardDrawPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
+bus = &"SFX"
+
+[node name="CardHoverPlayer" type="AudioStreamPlayer" parent="AudioManager/CardSounds"]
+stream = ExtResource("3_cb8pq")
+volume_db = -10.0
+bus = &"SFX"
+
+[node name="CombatSounds" type="Node" parent="AudioManager"]
+
+[node name="AttackPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
+stream = ExtResource("4_xv0yw")
+volume_db = 5.0
+bus = &"SFX"
+
+[node name="HealPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
+stream = ExtResource("5_nmnuk")
+volume_db = -2.0
+bus = &"SFX"
+
+[node name="ShieldPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
+stream = ExtResource("6_87mie")
+volume_db = -10.0
+bus = &"SFX"
+
+[node name="DamagePlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
+stream = ExtResource("7_b3eik")
+volume_db = -4.0
+bus = &"SFX"
+
+[node name="HybridPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
+stream = ExtResource("8_g4up8")
+volume_db = 5.0
+bus = &"SFX"
+
+[node name="JokerPlayer" type="AudioStreamPlayer" parent="AudioManager/CombatSounds"]
+stream = ExtResource("9_vrxln")
+volume_db = 24.0
+bus = &"SFX"
+
+[node name="GameSounds" type="Node" parent="AudioManager"]
+
+[node name="TurnChangePlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+stream = ExtResource("10_etxb1")
+volume_db = 7.0
+bus = &"SFX"
+
+[node name="WinPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+stream = ExtResource("11_peoyc")
+bus = &"SFX"
+
+[node name="LosePlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+bus = &"SFX"
+
+[node name="BonusPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+stream = ExtResource("12_82irk")
+pitch_scale = 1.1
+bus = &"SFX"
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="AudioManager/GameSounds"]
+volume_db = -5.0
+autoplay = true
+bus = &"Music"
+
+[node name="AISounds" type="Node" parent="AudioManager"]
+
+[node name="AIAttackPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
+stream = ExtResource("13_7r4a0")
+volume_db = -9.0
+bus = &"SFX"
+
+[node name="AIHealPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
+stream = ExtResource("5_nmnuk")
+volume_db = -2.0
+pitch_scale = 1.15
+bus = &"SFX"
+
+[node name="AIShieldPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
+stream = ExtResource("6_87mie")
+volume_db = -10.0
+pitch_scale = 1.15
+bus = &"SFX"
+
+[node name="AICardPlayPlayer" type="AudioStreamPlayer" parent="AudioManager/AISounds"]
+volume_db = 5.0
+bus = &"SFX"
+
+[node name="UISounds" type="Node" parent="AudioManager"]
+
+[node name="UIClickPlayer" type="AudioStreamPlayer" parent="AudioManager/UISounds"]
+stream = ExtResource("14_1pphj")
+volume_db = -1.0
+bus = &"SFX"
+
+[node name="UIHoverPlayer" type="AudioStreamPlayer" parent="AudioManager/UISounds"]
+bus = &"SFX"

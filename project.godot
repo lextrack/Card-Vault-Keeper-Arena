@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Card Vault Keeper: Arena"
-config/version="1.0.1.4"
+config/version="1.0.1.5"
 run/main_scene="uid://cxw6tc65b0iwr"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 boot_splash/bg_color=Color(0, 0, 0, 1)
@@ -29,6 +29,7 @@ UnlockManagers="*res://scripts/UnlockManager.gd"
 GameStateManager="*res://scripts/GameStateManager.gd"
 CursorManager="*res://scripts/CursorManager.gd"
 TexturePool="*res://scripts/TexturePool.gd"
+EnemyDatabase="*res://scripts/EnemyDatabase.gd"
 
 [display]
 
@@ -127,3 +128,4 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 textures/default_filters/anisotropic_filtering_level=3
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)

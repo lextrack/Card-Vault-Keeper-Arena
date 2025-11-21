@@ -38,17 +38,74 @@ func setup(main: Control, joker_scene: PackedScene = null):
 	original_ui_position = ui_layer.position
 
 func _get_ui_references():
-	player_hp_label = main_scene.player_hp_label
-	player_mana_label = main_scene.player_mana_label
-	player_shield_label = main_scene.player_shield_label
-	ai_hp_label = main_scene.ai_hp_label
-	ai_mana_label = main_scene.ai_mana_label
-	ai_shield_label = main_scene.ai_shield_label
-	turn_label = main_scene.turn_label
-	game_info_label = main_scene.game_info_label
-	game_over_label = main_scene.game_over_label
-	top_panel_bg = main_scene.top_panel_bg
-	ui_layer = main_scene.ui_layer
+	var paths = {
+		"player_hp_label": [
+			"player_hp_label",
+			"UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer/HPStat/HPLabel",
+			"UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/HPStat/HPLabel"
+		],
+		"player_mana_label": [
+			"player_mana_label",
+			"UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer/ManaStat/ManaLabel",
+			"UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/ManaStat/ManaLabel"
+		],
+		"player_shield_label": [
+			"player_shield_label",
+			"UILayer/TopPanel/MainContainer/StatsRow/PlayerStatsPanel/PlayerStatsContainer/ShieldStat/ShieldLabel",
+			"UILayer/TopPanel/StatsContainer/PlayerStatsPanel/PlayerStatsContainer/ShieldStat/ShieldLabel"
+		],
+		"ai_hp_label": [
+			"ai_hp_label",
+			"UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer/HPStat/HPLabel",
+			"UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/HPStat/HPLabel"
+		],
+		"ai_mana_label": [
+			"ai_mana_label",
+			"UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer/ManaStat/ManaLabel",
+			"UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/ManaStat/ManaLabel"
+		],
+		"ai_shield_label": [
+			"ai_shield_label",
+			"UILayer/TopPanel/MainContainer/StatsRow/AIStatsPanel/AIStatsContainer/ShieldStat/ShieldLabel",
+			"UILayer/TopPanel/StatsContainer/AIStatsPanel/AIStatsContainer/ShieldStat/ShieldLabel"
+		],
+		"turn_label": [
+			"turn_label",
+			"UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo/TopRow/TurnLabel",
+			"UILayer/TopPanel/StatsContainer/CenterInfo/TurnLabel"
+		],
+		"game_info_label": [
+			"game_info_label",
+			"UILayer/TopPanel/MainContainer/StatsRow/CenterInfoPanel/CenterInfo/TopRow/GameInfoLabel",
+			"UILayer/TopPanel/StatsContainer/CenterInfo/GameInfoLabel"
+		],
+		"game_over_label": [
+			"game_over_label",
+			"UILayer/GameOverLabel"
+		],
+		"top_panel_bg": [
+			"top_panel_bg",
+			"UILayer/TopPanel/TopPanelBG"
+		],
+		"ui_layer": [
+			"ui_layer",
+			"UILayer"
+		]
+	}
+	
+	for ref_name in paths.keys():
+		var found_node = _find_node_in_paths(paths[ref_name])
+		set(ref_name, found_node)
+		
+		if not found_node and ref_name != "game_over_label":
+			push_warning("UIManager: No se pudo encontrar %s" % ref_name)
+
+func _find_node_in_paths(paths: Array) -> Node:
+	for path in paths:
+		var node = main_scene.get_node_or_null(path)
+		if node:
+			return node
+	return null
 
 func _generate_hand_fingerprint(hand: Array) -> String:
 	if not hand or hand.size() == 0:
@@ -159,18 +216,24 @@ func _get_hp_color(hp: int) -> Color:
 		return Color(0.4, 1.0, 0.6, 1.0)
 
 func update_player_hp(new_hp: int):
+	if not is_instance_valid(player_hp_label):
+		return
 	var old_hp = int(player_hp_label.text) if player_hp_label.text.is_valid_int() else new_hp
 	player_hp_label.text = str(new_hp)
 	if new_hp != old_hp:
 		animate_hp_change(player_hp_label, new_hp, old_hp)
 
 func update_ai_hp(new_hp: int):
+	if not is_instance_valid(ai_hp_label):
+		return
 	var old_hp = int(ai_hp_label.text) if ai_hp_label.text.is_valid_int() else new_hp
 	ai_hp_label.text = str(new_hp)
 	if new_hp != old_hp:
 		animate_hp_change(ai_hp_label, new_hp, old_hp)
 
 func update_player_mana(new_mana: int):
+	if not is_instance_valid(player_mana_label):
+		return
 	var old_text = player_mana_label.text
 	var old_mana = int(old_text) if old_text.is_valid_int() else new_mana
 	player_mana_label.text = str(new_mana)
@@ -185,6 +248,8 @@ func update_player_mana(new_mana: int):
 		tween.tween_property(player_mana_label, "modulate", Color(0.8, 0.9, 1.0, 1.0), 0.5)
 
 func update_ai_mana(new_mana: int):
+	if not is_instance_valid(ai_mana_label):
+		return
 	var old_text = ai_mana_label.text
 	var old_mana = int(old_text) if old_text.is_valid_int() else new_mana
 	ai_mana_label.text = str(new_mana)
@@ -199,6 +264,8 @@ func update_ai_mana(new_mana: int):
 		tween.tween_property(ai_mana_label, "modulate", Color(0.8, 0.9, 1.0, 1.0), 0.5)
 
 func update_player_shield(new_shield: int):
+	if not is_instance_valid(player_shield_label):
+		return
 	var old_text = player_shield_label.text
 	var old_shield = int(old_text) if old_text.is_valid_int() else new_shield
 	player_shield_label.text = str(new_shield)
@@ -215,18 +282,22 @@ func update_player_shield(new_shield: int):
 		tween.tween_property(player_shield_label, "modulate", Color(0.4, 1.0, 0.6, 1.0), 0.3)
 
 func update_ai_shield(new_shield: int):
+	if not is_instance_valid(ai_shield_label):
+		return
 	ai_shield_label.text = str(new_shield)
 
 func start_player_turn(player: Player, difficulty: String):
 	animate_turn_transition(true)
 
-	var tween = main_scene.create_tween()
-	tween.tween_property(top_panel_bg, "color", player_turn_color, 0.4)
+	if is_instance_valid(top_panel_bg):
+		var tween = main_scene.create_tween()
+		tween.tween_property(top_panel_bg, "color", player_turn_color, 0.4)
 
-	var max_cards = player.get_max_cards_per_turn()
-	var cards_played = player.get_cards_played()
-	var difficulty_name = difficulty.to_upper()
-	game_info_label.text = "Cards: %d/%d | %s" % [cards_played, max_cards, difficulty_name]
+	if is_instance_valid(game_info_label):
+		var max_cards = player.get_max_cards_per_turn()
+		var cards_played = player.get_cards_played()
+		var difficulty_name = difficulty.to_upper()
+		game_info_label.text = "Cards: %d/%d | %s" % [cards_played, max_cards, difficulty_name]
 
 	var end_turn_button = main_scene.end_turn_button
 	if end_turn_button:
@@ -241,9 +312,12 @@ func start_ai_turn(ai: Player):
 	gamepad_selection_active = false
 	_ensure_clear_all_gamepad_effects()
    
-	var tween = main_scene.create_tween()
-	tween.tween_property(top_panel_bg, "color", ai_turn_color, 0.4)
-	game_info_label.text = "AI is playing..."
+	if is_instance_valid(top_panel_bg):
+		var tween = main_scene.create_tween()
+		tween.tween_property(top_panel_bg, "color", ai_turn_color, 0.4)
+	
+	if is_instance_valid(game_info_label):
+		game_info_label.text = "AI is playing..."
    
 	var end_turn_button = main_scene.end_turn_button
 	if end_turn_button:
@@ -479,10 +553,14 @@ func reset_damage_bonus_indicator(damage_bonus_label: Label):
 		damage_bonus_label.text = ""
 
 func show_damage_bonus_info(turn_num: int, damage_bonus: int):
+	if not is_instance_valid(turn_label) or not is_instance_valid(game_info_label):
+		return
 	turn_label.text = "Turn %d" % turn_num
 	game_info_label.text = "Damage bonus: +%d!" % damage_bonus
 
 func show_reshuffle_info(player_name: String):
+	if not is_instance_valid(turn_label) or not is_instance_valid(game_info_label):
+		return
 	turn_label.text = "%s reshuffled" % player_name
 	game_info_label.text = "Cards returned to the deck" if player_name == "Player" else "Some cards returned to their deck"
 

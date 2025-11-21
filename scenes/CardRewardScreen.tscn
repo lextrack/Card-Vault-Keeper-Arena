@@ -1,0 +1,398 @@
+[gd_scene load_steps=16 format=3 uid="uid://b863a60sggrx3"]
+
+[ext_resource type="Script" uid="uid://b2kcm8ly06h2v" path="res://scripts/CardRewardScreen.gd" id="1_p8q37"]
+[ext_resource type="Shader" uid="uid://dp2okkth76y5h" path="res://shaders/Main.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bg"]
+shader = ExtResource("2_shader")
+shader_parameter/color1 = Color(0.1, 0.05, 0.15, 0.9)
+shader_parameter/color2 = Color(0.05, 0.1, 0.2, 0.9)
+shader_parameter/color3 = Color(0.15, 0.1, 0.05, 0.9)
+shader_parameter/speed = 0.1
+shader_parameter/scale = 6.0
+shader_parameter/distortion = 0.3
+shader_parameter/glow_intensity = 0.2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fs0qe"]
+bg_color = Color(0.54901963, 0.27450982, 0.14901961, 0.8509804)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.7, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_31ocx"]
+bg_color = Color(0.15, 0.25, 0.1, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.6, 0.3, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2a107"]
+bg_color = Color(0.25, 0.4, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.8, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q30lj"]
+bg_color = Color(0.15, 0.15, 0.15, 0.5)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.25, 0.25, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 1
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ljlia"]
+bg_color = Color(0.54901963, 0.27450982, 0.14901961, 0.8509804)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.7, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5ce0p"]
+bg_color = Color(0.15, 0.25, 0.1, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.6, 0.3, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4q8e1"]
+bg_color = Color(0.25, 0.4, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.8, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dhe6b"]
+bg_color = Color(0.15, 0.15, 0.15, 0.5)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.25, 0.25, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 1
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_matoo"]
+bg_color = Color(0.54901963, 0.27450982, 0.14901961, 0.8509804)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.7, 0.4, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fa67j"]
+bg_color = Color(0.15, 0.25, 0.1, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.6, 0.3, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_863ca"]
+bg_color = Color(0.25, 0.4, 0.2, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6, 0.8, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c1484"]
+bg_color = Color(0.15, 0.15, 0.15, 0.5)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.25, 0.25, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 1
+shadow_offset = Vector2(0, 1)
+
+[node name="CardRewardScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_p8q37")
+
+[node name="Background" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_bg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.9)
+
+[node name="VignetteOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.39215687)
+
+[node name="MainContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="HeaderContainer" type="VBoxContainer" parent="MainContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="MainContainer/VBoxContainer/HeaderContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 46
+text = "Reward Room"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="MainContainer/VBoxContainer/HeaderContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Choose Your Reward"
+horizontal_alignment = 1
+
+[node name="InstructionLabel" type="Label" parent="MainContainer/VBoxContainer/HeaderContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 18
+text = "Select 1 card to add to your deck"
+horizontal_alignment = 1
+
+[node name="CardsScrollContainer" type="ScrollContainer" parent="MainContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="CardsContainer" type="HBoxContainer" parent="MainContainer/VBoxContainer/CardsScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+theme_override_constants/separation = 25
+alignment = 1
+
+[node name="Card1Container" type="VBoxContainer" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 45
+
+[node name="CardPanel" type="PanelContainer" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card1Container"]
+custom_minimum_size = Vector2(180, 260)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CardPanelBG" type="ColorRect" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card1Container/CardPanel"]
+layout_mode = 2
+color = Color(0.15, 0.15, 0.2, 0.6)
+
+[node name="MarginContainer" type="MarginContainer" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card1Container/CardPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="CardPlaceholder1" type="Control" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card1Container/CardPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="SelectButton1" type="Button" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card1Container"]
+custom_minimum_size = Vector2(250, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 1, 0.9764706, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9, 0.6, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.4, 0.4, 0.7)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_fs0qe")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_31ocx")
+theme_override_styles/hover = SubResource("StyleBoxFlat_2a107")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_q30lj")
+text = "Select"
+
+[node name="Card2Container" type="VBoxContainer" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 45
+
+[node name="CardPanel" type="PanelContainer" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card2Container"]
+custom_minimum_size = Vector2(180, 260)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CardPanelBG" type="ColorRect" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card2Container/CardPanel"]
+layout_mode = 2
+color = Color(0.15, 0.15, 0.2, 0.6)
+
+[node name="MarginContainer" type="MarginContainer" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card2Container/CardPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="CardPlaceholder2" type="Control" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card2Container/CardPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="SelectButton2" type="Button" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card2Container"]
+custom_minimum_size = Vector2(250, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 1, 0.9764706, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9, 0.6, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.4, 0.4, 0.7)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_ljlia")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_5ce0p")
+theme_override_styles/hover = SubResource("StyleBoxFlat_4q8e1")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_dhe6b")
+text = "Select"
+
+[node name="Card3Container" type="VBoxContainer" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 45
+
+[node name="CardPanel" type="PanelContainer" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card3Container"]
+custom_minimum_size = Vector2(180, 260)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CardPanelBG" type="ColorRect" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card3Container/CardPanel"]
+layout_mode = 2
+color = Color(0.15, 0.15, 0.2, 0.6)
+
+[node name="MarginContainer" type="MarginContainer" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card3Container/CardPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="CardPlaceholder3" type="Control" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card3Container/CardPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="SelectButton3" type="Button" parent="MainContainer/VBoxContainer/CardsScrollContainer/CardsContainer/Card3Container"]
+custom_minimum_size = Vector2(250, 38)
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 1, 0.9764706, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.9, 0.6, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.4, 0.4, 0.7)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_matoo")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fa67j")
+theme_override_styles/hover = SubResource("StyleBoxFlat_863ca")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_c1484")
+text = "Select"
+
+[node name="BottomInfoContainer" type="VBoxContainer" parent="MainContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="DeckInfoLabel" type="Label" parent="MainContainer/VBoxContainer/BottomInfoContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "Current Deck Size: 0 cards"
+horizontal_alignment = 1

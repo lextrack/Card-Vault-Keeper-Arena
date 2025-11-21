@@ -211,6 +211,11 @@ func _on_options_menu_closed():
 		controls_panel.update_player_turn(true)
 		controls_panel.update_cards_available(player.hand.size() > 0)
 		
+func show_exit_confirmation():
+	if is_game_transitioning:
+		return
+	confirmation_dialog.show()
+		
 func show_options_menu():
 	if not options_menu or is_game_transitioning:
 		return
@@ -1062,6 +1067,8 @@ func _on_end_turn_pressed():
 	set_bottom_buttons_enabled(false)
 	
 	start_ai_turn()
+	
+
 
 func _input(event):
 	if is_game_transitioning:
@@ -1100,11 +1107,6 @@ func open_challengehub():
 	
 	await _tree.create_timer(0.3).timeout
 	TransitionManager.fade_to_scene("res://scenes/ChallengeHub.tscn", 1.0)
-
-func show_exit_confirmation():
-	if is_game_transitioning:
-		return
-	confirmation_dialog.show()
 
 func return_to_menu():
 	if is_game_transitioning:
