@@ -123,7 +123,7 @@ var returning_player_dialogs = [
 var meta_dialogs = [
 	"Did you know I was almost called 'CardBot3000'? Thank the developer I wasn't.",
 	"Sometimes I wonder if I'm truly AI or just very elaborate if-statements... it keeps me up at night.",
-	"The developer spent 3 hours debugging my eye animations. Priorities, right?",
+	"The developer spent 3 hours debugging my mouth animations. Priorities, right?",
 	"In an early build, I had a coffee addiction animation. It was... concerning.",
 	"Fun fact: my dialogue system has exactly 127 possible variations. This might not be one of them."
 ]
@@ -775,55 +775,7 @@ func _on_bundle_unlock_requested(bundle_id: String):
 	play_ui_sound("unlock")
 
 func _on_bundle_hovered(bundle_info: Dictionary):
-	if not robot_head_instance:
-		return
-	
-	if bundle_info.get("can_unlock", false):
-		robot_head_instance.react_to_event("hover_unlockable")
-		
-		if randf() < 0.4:
-			var unlockable_dialogs = [
-				"This one's ready for you...",
-				"The vault awaits your command.",
-				"Power within reach. Will you claim it?",
-				"Ready when you are, warrior.",
-				"One click away from power...",
-				"The seal weakens. Strike now."
-			]
-			dialog_manager.queue_sequence([unlockable_dialogs[randi() % unlockable_dialogs.size()]])
-			
-	elif bundle_info.get("unlocked", false):
-		robot_head_instance.react_to_event("hover_unlocked")
-		
-		if randf() < 0.25:
-			var unlocked_dialogs = [
-				"Already yours... and mine.",
-				"These cards serve us both now.",
-				"Unlocked. But mastered?",
-				"You earned these. Use them wisely.",
-				"I've been practicing with these...",
-				"Familiar cards. Dangerous cards."
-			]
-			dialog_manager.queue_sequence([unlocked_dialogs[randi() % unlocked_dialogs.size()]])
-			
-	else:
-		robot_head_instance.react_to_event("hover_locked")
-		
-		if randf() < 0.35:
-			var locked_dialogs = [
-				"Locked tight. Prove yourself first.",
-				"Not yet. Complete the challenge.",
-				"Patience. The vault guards its secrets.",
-				"Earn it through battle.",
-				"The seal holds. For now.",
-				"These cards don't give themselves away..."
-			]
-			dialog_manager.queue_sequence([locked_dialogs[randi() % locked_dialogs.size()]])
-	
-	if OS.is_debug_build():
-		print("Bundle hovered: ", bundle_info.get("name", "Unknown"), 
-			  " | Unlocked: ", bundle_info.get("unlocked", false),
-			  " | Can unlock: ", bundle_info.get("can_unlock", false))
+	pass
 
 func _on_bundle_unhovered():
 	if robot_head_instance:

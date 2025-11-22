@@ -64,7 +64,7 @@ static func get_ai_config(difficulty: String) -> Dictionary:
 	match difficulty:
 		"normal":
 			return {
-				"hp": 50,
+				"hp": 52,
 				"mana": 11,
 				"cards_per_turn": 2,
 				"hand_size": 6,

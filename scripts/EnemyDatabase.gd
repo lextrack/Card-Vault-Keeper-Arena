@@ -60,7 +60,7 @@ var _boss_pool: Array[Dictionary] = [
 		"name": "Necromancer King",
 		"difficulty": "expert",
 		"effect": "time_limit",
-		"description": "Defeat the boss in 75 seconds or lose"
+		"description": "Defeat the boss before time runs out."
 	}
 ]
 
@@ -132,7 +132,7 @@ func get_time_limit_for_boss(boss_name: String) -> float:
 	for boss in _boss_pool:
 		if boss.name == boss_name and boss.effect == "time_limit":
 			if boss.difficulty == "hard":
-				return 90.0
+				return 115.0
 			elif boss.difficulty == "expert":
-				return 75.0
-	return 90.0
+				return 95.0
+	return 115.0
